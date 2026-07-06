@@ -540,3 +540,131 @@ export const PROPERTIES: Property[] = [
 export function roomsByProperty(propertyName: string): Room[] {
   return ROOMS.filter((r) => r.building === propertyName);
 }
+
+// ---------- TENANTS ----------
+export type TenantStatus = "ACTIVE" | "INACTIVE";
+
+export type Tenant = {
+  id: number;
+  tenantCode: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  lineId: string;
+  idCardOrPassport: string;
+  nationality: string;
+  address: string;
+  note: string;
+  blacklist: boolean;
+  status: TenantStatus;
+};
+
+// fullName MUST match RENTAL_ROWS[].tenant exactly — rentalsByTenant() filters on it.
+export const TENANTS: Tenant[] = [
+  {
+    id: 1,
+    tenantCode: "TNT-0001",
+    fullName: "คุณกิตติพงษ์ ใจดี",
+    phone: "081-234-5678",
+    email: "kitti@email.com",
+    lineId: "kitti_jaidee",
+    idCardOrPassport: "1-2345-67890-12-3",
+    nationality: "ไทย",
+    address: "A-1105 เดอะ เครสท์",
+    note: "",
+    blacklist: false,
+    status: "ACTIVE",
+  },
+  {
+    id: 2,
+    tenantCode: "TNT-0002",
+    fullName: "คุณศิริพร มงคล",
+    phone: "082-345-6789",
+    email: "siriporn@email.com",
+    lineId: "siriporn_m",
+    idCardOrPassport: "1-3456-78901-23-4",
+    nationality: "ไทย",
+    address: "A-1204 เดอะ เครสท์",
+    note: "",
+    blacklist: false,
+    status: "ACTIVE",
+  },
+  {
+    id: 3,
+    tenantCode: "TNT-0003",
+    fullName: "คุณมณีรัตน์ ทองดี",
+    phone: "083-456-7890",
+    email: "maneerat@email.com",
+    lineId: "maneerat_t",
+    idCardOrPassport: "1-4567-89012-34-5",
+    nationality: "ไทย",
+    address: "A-902 เดอะ เครสท์",
+    note: "ค้างชำระเดือน ก.ค.",
+    blacklist: false,
+    status: "ACTIVE",
+  },
+  {
+    id: 4,
+    tenantCode: "TNT-0004",
+    fullName: "คุณสุดา แสงทอง",
+    phone: "084-567-8901",
+    email: "suda@email.com",
+    lineId: "suda_s",
+    idCardOrPassport: "1-5678-90123-45-6",
+    nationality: "ไทย",
+    address: "C-305 แฟลตรุ่งเรือง",
+    note: "ค้างชำระเกิน 15 วัน",
+    blacklist: true,
+    status: "ACTIVE",
+  },
+  {
+    id: 5,
+    tenantCode: "TNT-0005",
+    fullName: "คุณธนา รุ่งเรือง",
+    phone: "085-678-9012",
+    email: "thana@email.com",
+    lineId: "thana_r",
+    idCardOrPassport: "1-6789-01234-56-7",
+    nationality: "ไทย",
+    address: "B-802 บ้านสวน พัทยา",
+    note: "",
+    blacklist: false,
+    status: "ACTIVE",
+  },
+  {
+    id: 6,
+    tenantCode: "TNT-0006",
+    fullName: "คุณสมพงษ์ เจริญสุข",
+    phone: "086-789-0123",
+    email: "sompong@email.com",
+    lineId: "sompong_c",
+    idCardOrPassport: "1-7890-12345-67-8",
+    nationality: "ไทย",
+    address: "B-1105 บ้านสวน พัทยา",
+    note: "",
+    blacklist: false,
+    status: "ACTIVE",
+  },
+  {
+    id: 7,
+    tenantCode: "TNT-0007",
+    fullName: "คุณกาญจนา ศรีสุข",
+    phone: "087-890-1234",
+    email: "kanjana@email.com",
+    lineId: "kanjana_s",
+    idCardOrPassport: "1-8901-23456-78-9",
+    nationality: "ไทย",
+    address: "C-208 แฟลตรุ่งเรือง",
+    note: "",
+    blacklist: false,
+    status: "ACTIVE",
+  },
+];
+
+export function rentalsByTenant(tenantName: string): RentalRow[] {
+  return RENTAL_ROWS.filter((r) => r.tenant === tenantName);
+}
+
+export function latestRentalByTenant(tenantName: string): RentalRow | undefined {
+  return rentalsByTenant(tenantName)[0];
+}
