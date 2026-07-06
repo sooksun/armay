@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans Thai', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #7DD3FC; text-decoration: none; }
+  a:hover { color: #BAE6FD; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 20px; border: 2px solid transparent; background-clip: padding-box; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  @keyframes cl-glow { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+  @keyframes cl-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  [data-shell-bottomnav] { display: none; }
+  @media (max-width: 980px) {
+    [data-shell-sidebar] { display: none !important; }
+    [data-shell-bottomnav] { display: flex !important; }
+    [data-shell-main] { padding-bottom: 92px !important; }
+    [data-quickadd-label] { display: none !important; }
+    [data-topsearch] { display: none !important; }
+  }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;color:#EAF2FF;position:relative;overflow:hidden;background:radial-gradient(circle at 12% 8%, rgba(94,234,212,0.20), transparent 34%),radial-gradient(circle at 88% 4%, rgba(168,85,247,0.22), transparent 38%),radial-gradient(circle at 78% 96%, rgba(56,189,248,0.16), transparent 42%),linear-gradient(135deg,#07111F 0%,#0B1020 46%,#06251F 100%);">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside data-shell-sidebar style="width:266px;flex-shrink:0;height:100vh;position:sticky;top:0;padding:22px 16px;display:flex;flex-direction:column;gap:18px;background:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03));backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border-right:1px solid rgba(255,255,255,0.12);box-shadow:inset -1px 0 0 rgba(255,255,255,0.06);">
+    <div style="display:flex;align-items:center;gap:12px;padding:6px 8px 4px;">
+      <div style="width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:conic-gradient(from 210deg,#5EEAD4,#38BDF8,#A855F7,#5EEAD4);box-shadow:0 8px 22px rgba(56,189,248,0.45),inset 0 1px 0 rgba(255,255,255,0.5);">
+        <div style="width:16px;height:16px;transform:rotate(45deg);background:rgba(7,17,31,0.55);border:1.5px solid rgba(255,255,255,0.8);border-radius:3px;"></div>
+      </div>
+      <div style="line-height:1.05;">
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:16px;letter-spacing:.2px;">Crystal Ledger</div>
+        <div style="font-size:11px;color:rgba(234,242,255,0.55);margin-top:2px;">ระบบควบคุมรายรับ–รายจ่าย</div>
+      </div>
+    </div>
+
+    <nav style="flex:1;display:flex;flex-direction:column;gap:3px;overflow-y:auto;margin:0 -4px;padding:2px 4px;">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="15">
+        <button onClick="{{ item.onClick }}" style="{{ item.style }}">
+          <span style="{{ item.iconWrap }}">{{ item.icon }}</span>
+          <span style="flex:1;text-align:left;">{{ item.label }}</span>
+          <sc-if value="{{ item.badge }}" hint-placeholder-val="">
+            <span style="font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:20px;background:rgba(251,113,133,0.22);color:#FDA4AF;border:1px solid rgba(251,113,133,0.4);">{{ item.badge }}</span>
+          </sc-if>
+        </button>
+      </sc-for>
+    </nav>
+
+    <div style="padding:13px;border-radius:18px;background:linear-gradient(135deg,rgba(94,234,212,0.14),rgba(168,85,247,0.14));border:1px solid rgba(255,255,255,0.14);">
+      <div style="font-size:12px;color:rgba(234,242,255,0.62);">ยอดสุทธินายหน้า · ก.ค. 2568</div>
+      <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:22px;margin-top:3px;color:#7FF0D9;">฿862,300</div>
+      <div style="font-size:11px;color:rgba(234,242,255,0.5);margin-top:2px;">หลังหักจ่ายเจ้าของและค่าใช้จ่าย</div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN COLUMN ============ -->
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:hidden;">
+
+    <!-- TOP BAR -->
+    <header style="flex-shrink:0;padding:16px 26px;display:flex;align-items:center;gap:18px;border-bottom:1px solid rgba(255,255,255,0.09);background:rgba(11,16,32,0.35);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);z-index:20;">
+      <div style="min-width:0;">
+        <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:22px;line-height:1.1;">{{ pageTitle }}</div>
+        <div style="font-size:12.5px;color:rgba(234,242,255,0.55);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ pageSubtitle }}</div>
+      </div>
+
+      <div data-topsearch style="margin-left:auto;position:relative;width:280px;max-width:32vw;">
+        <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:rgba(234,242,255,0.45);pointer-events:none;">{{ iconSearch }}</span>
+        <input placeholder="ค้นหา ห้อง ผู้เช่า เจ้าของ รายการ…" style="width:100%;padding:10px 12px 10px 40px;border-radius:13px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.06);color:#EAF2FF;font-family:inherit;font-size:13.5px;outline:none;" />
+      </div>
+
+      <button data-quickadd onClick="{{ openIncome }}" style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:13px;border:1px solid rgba(255,255,255,0.28);cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;color:#04121A;background:linear-gradient(135deg,#5EEAD4,#38BDF8);box-shadow:0 8px 22px rgba(56,189,248,0.4),inset 0 1px 0 rgba(255,255,255,0.55);">
+        <span style="display:flex;">{{ iconPlus }}</span><span data-quickadd-label>รับเงิน</span>
+      </button>
+
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.06);color:#EAF2FF;cursor:pointer;position:relative;">{{ iconBell }}<span style="position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:#FB7185;box-shadow:0 0 0 2px rgba(11,16,32,0.9);"></span></button>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 10px 5px 6px;border-radius:13px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);">
+          <div style="width:31px;height:31px;border-radius:9px;background:linear-gradient(135deg,#A855F7,#38BDF8);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;">น</div>
+          <div style="line-height:1.15;">
+            <div style="font-size:12.5px;font-weight:600;">นายหน้า แอดมิน</div>
+            <div style="font-size:10.5px;color:rgba(234,242,255,0.5);">Admin</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main data-shell-main style="flex:1;overflow-y:auto;padding:24px 26px 40px;">
+
+      <!-- ===== DASHBOARD ===== -->
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:20px;">
+
+        <!-- filter bar -->
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,0.055);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 12px 30px rgba(0,0,0,0.28);">
+          <span style="font-size:12.5px;color:rgba(234,242,255,0.6);margin-right:2px;">ตัวกรอง</span>
+          <sc-for list="{{ dashFilters }}" as="f" hint-placeholder-count="5">
+            <button style="display:flex;align-items:center;gap:7px;padding:8px 13px;border-radius:11px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);color:#EAF2FF;font-family:inherit;font-size:12.5px;cursor:pointer;">{{ f.label }}<span style="color:rgba(234,242,255,0.5);">{{ f.value }}</span><span style="color:rgba(234,242,255,0.4);">{{ chevDown }}</span></button>
+          </sc-for>
+          <div style="margin-left:auto;display:flex;gap:9px;">
+            <button style="display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:11px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.05);color:#EAF2FF;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;">{{ iconExport }}ส่งออก Excel</button>
+            <button style="display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:11px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.05);color:#EAF2FF;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;">{{ iconRefresh }}รีเฟรช</button>
+          </div>
+        </div>
+
+        <!-- KPI cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:16px;">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="8">
+            <div style="position:relative;overflow:hidden;padding:18px;border-radius:22px;background:rgba(255,255,255,0.06);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.13);box-shadow:0 18px 44px rgba(0,0,0,0.32),inset 0 1px 0 rgba(255,255,255,0.16);">
+              <div style="{{ k.glow }}"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;position:relative;">
+                <div style="{{ k.iconWrap }}">{{ k.icon }}</div>
+                <div style="{{ k.deltaStyle }}">{{ k.deltaArrow }} {{ k.delta }}</div>
+              </div>
+              <div style="font-size:12.5px;color:rgba(234,242,255,0.62);margin-top:14px;">{{ k.label }}</div>
+              <div style="display:flex;align-items:baseline;gap:5px;margin-top:3px;">
+                <span style="font-size:14px;color:rgba(234,242,255,0.55);">{{ k.prefix }}</span>
+                <span style="font-family:'Sora',sans-serif;font-weight:700;font-size:26px;letter-spacing:.3px;{{ k.valueColor }}">{{ k.value }}</span>
+                <span style="font-size:12.5px;color:rgba(234,242,255,0.5);">{{ k.suffix }}</span>
+              </div>
+              <div style="font-size:11.5px;color:rgba(234,242,255,0.45);margin-top:5px;">{{ k.hint }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- charts row 1 -->
+        <div style="display:grid;grid-template-columns:1.65fr 1fr;gap:16px;">
+          <div style="padding:20px 22px;border-radius:22px;background:rgba(255,255,255,0.055);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 18px 44px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.14);min-width:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <div><div style="font-weight:600;font-size:15.5px;">รายรับ–รายจ่ายรายเดือน</div><div style="font-size:12px;color:rgba(234,242,255,0.5);margin-top:2px;">ปี 2568 · หน่วยล้านบาท</div></div>
+              <div style="display:flex;gap:14px;font-size:12px;">
+                <span style="display:flex;align-items:center;gap:6px;"><span style="width:11px;height:11px;border-radius:3px;background:#38BDF8;"></span>รายรับ</span>
+                <span style="display:flex;align-items:center;gap:6px;"><span style="width:11px;height:11px;border-radius:3px;background:#FB7185;"></span>รายจ่าย</span>
+              </div>
+            </div>
+            {{ lineChart }}
+          </div>
+          <div style="padding:20px 22px;border-radius:22px;background:rgba(255,255,255,0.055);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 18px 44px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.14);min-width:0;">
+            <div style="font-weight:600;font-size:15.5px;">สัดส่วนรายจ่าย</div>
+            <div style="font-size:12px;color:rgba(234,242,255,0.5);margin-top:2px;margin-bottom:6px;">เดือนนี้ · ฿386,200</div>
+            {{ donutChart }}
+          </div>
+        </div>
+
+        <!-- charts row 2 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="padding:20px 22px;border-radius:22px;background:rgba(255,255,255,0.055);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 18px 44px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.14);min-width:0;">
+            <div style="font-weight:600;font-size:15.5px;">รายรับแยกตามอาคาร</div>
+            <div style="font-size:12px;color:rgba(234,242,255,0.5);margin-top:2px;margin-bottom:10px;">เดือนนี้ · หน่วยพันบาท</div>
+            {{ barChart }}
+          </div>
+          <div style="padding:20px 22px;border-radius:22px;background:rgba(255,255,255,0.055);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 18px 44px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.14);min-width:0;">
+            <div style="font-weight:600;font-size:15.5px;">ห้องที่ทำรายรับสูงสุด</div>
+            <div style="font-size:12px;color:rgba(234,242,255,0.5);margin-top:2px;margin-bottom:12px;">Top 5 · เดือนนี้</div>
+            {{ hbarChart }}
+          </div>
+        </div>
+
+        <!-- urgent tasks -->
+        <div style="padding:20px 22px;border-radius:22px;background:rgba(255,255,255,0.055);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 18px 44px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.14);">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px;">
+            <span style="color:#FDA4AF;">{{ iconAlert }}</span>
+            <div style="font-weight:600;font-size:15.5px;">รายการที่ต้องรีบตรวจสอบ</div>
+            <span style="font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:20px;background:rgba(251,113,133,0.2);color:#FDA4AF;border:1px solid rgba(251,113,133,0.4);">5 รายการ</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ urgentTasks }}" as="t" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-left:3px solid {{ t.color }};">
+                <div style="{{ t.dot }}">{{ t.icon }}</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:13.5px;font-weight:600;">{{ t.title }}</div>
+                  <div style="font-size:12px;color:rgba(234,242,255,0.52);margin-top:1px;">{{ t.sub }}</div>
+                </div>
+                <div style="font-family:'Sora',sans-serif;font-weight:600;font-size:14px;{{ t.amountColor }}">{{ t.amount }}</div>
+                <button style="padding:7px 13px;border-radius:10px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:#EAF2FF;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">ตรวจสอบ</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+      </div>
+      </sc-if>
+
+      <!-- ===== INCOME (รายรับ) ===== -->
+      <sc-if value="{{ isIncome }}" hint-placeholder-val="">
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+          <sc-for list="{{ incomeKpis }}" as="k" hint-placeholder-count="5">
+            <div style="padding:16px 18px;border-radius:20px;background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 14px 34px rgba(0,0,0,0.3);">
+              <div style="display:flex;align-items:center;gap:9px;"><span style="{{ k.iconWrap }}">{{ k.icon }}</span><span style="font-size:12.5px;color:rgba(234,242,255,0.6);">{{ k.label }}</span></div>
+              <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:22px;margin-top:10px;{{ k.valueColor }}">{{ k.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="border-radius:22px;overflow:hidden;background:rgba(255,255,255,0.05);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 18px 44px rgba(0,0,0,0.3);">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <div style="font-weight:600;font-size:14.5px;">รายการรับเงิน</div>
+            <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;">
+              <button style="display:flex;align-items:center;gap:7px;padding:8px 13px;border-radius:11px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);color:#EAF2FF;font-family:inherit;font-size:12.5px;cursor:pointer;">{{ iconFilter }}กรองข้อมูล</button>
+              <button style="display:flex;align-items:center;gap:7px;padding:8px 13px;border-radius:11px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.05);color:#EAF2FF;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;">{{ iconExport }}Export</button>
+              <button onClick="{{ openIncome }}" style="display:flex;align-items:center;gap:7px;padding:8px 15px;border-radius:11px;border:1px solid rgba(255,255,255,0.28);color:#04121A;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#5EEAD4,#38BDF8);box-shadow:0 6px 16px rgba(56,189,248,0.4);">{{ iconPlus }}บันทึกรับเงิน</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:920px;">
+              <thead><tr style="background:rgba(255,255,255,0.04);">
+                <th style="text-align:left;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">วันที่รับเงิน</th>
+                <th style="text-align:left;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">ผู้เช่า / ห้อง</th>
+                <th style="text-align:left;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">ประเภท</th>
+                <th style="text-align:right;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">จำนวนเงิน</th>
+                <th style="text-align:left;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">ช่องทาง</th>
+                <th style="text-align:center;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">สลิป</th>
+                <th style="text-align:left;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">สถานะ</th>
+                <th style="padding:12px 16px;"></th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ incomeRows }}" as="r" hint-placeholder-count="8">
+                  <tr style="{{ r.rowStyle }}">
+                    <td style="padding:13px 16px;white-space:nowrap;color:rgba(234,242,255,0.85);">{{ r.date }}</td>
+                    <td style="padding:13px 16px;"><div style="font-weight:600;">{{ r.tenant }}</div><div style="font-size:11.5px;color:rgba(234,242,255,0.5);">{{ r.room }} · {{ r.building }}</div></td>
+                    <td style="padding:13px 16px;color:rgba(234,242,255,0.8);">{{ r.type }}</td>
+                    <td style="padding:13px 16px;text-align:right;font-family:'Sora',sans-serif;font-weight:600;color:#7FF0D9;white-space:nowrap;">{{ r.amount }}</td>
+                    <td style="padding:13px 16px;color:rgba(234,242,255,0.75);white-space:nowrap;">{{ r.channel }}</td>
+                    <td style="padding:13px 16px;text-align:center;">{{ r.slip }}</td>
+                    <td style="padding:13px 16px;"><span style="{{ r.badgeStyle }}">{{ r.status }}</span></td>
+                    <td style="padding:13px 16px;text-align:right;"><button style="padding:6px 12px;border-radius:9px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:#EAF2FF;font-family:inherit;font-size:11.5px;cursor:pointer;white-space:nowrap;">รายละเอียด</button></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===== ROOMS (ห้อง/ยูนิต) ===== -->
+      <sc-if value="{{ isRooms }}" hint-placeholder-val="">
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
+          <sc-for list="{{ roomFilters }}" as="f" hint-placeholder-count="4">
+            <button style="display:flex;align-items:center;gap:7px;padding:8px 13px;border-radius:11px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);color:#EAF2FF;font-family:inherit;font-size:12.5px;cursor:pointer;">{{ f.label }}<span style="color:rgba(234,242,255,0.5);">{{ f.value }}</span><span style="color:rgba(234,242,255,0.4);">{{ chevDown }}</span></button>
+          </sc-for>
+          <button style="margin-left:auto;display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:11px;border:1px solid rgba(255,255,255,0.28);color:#04121A;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#5EEAD4,#38BDF8);box-shadow:0 6px 16px rgba(56,189,248,0.4);">{{ iconPlus }}เพิ่มห้อง</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+          <sc-for list="{{ rooms }}" as="rm" hint-placeholder-count="9">
+            <div onClick="{{ rm.onClick }}" style="cursor:pointer;overflow:hidden;border-radius:22px;background:rgba(255,255,255,0.055);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 16px 40px rgba(0,0,0,0.3);border-top:3px solid {{ rm.statusColor }};">
+              <div style="height:104px;position:relative;background:{{ rm.photoBg }};display:flex;align-items:flex-end;justify-content:space-between;padding:12px;">
+                <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,0.05) 0 8px,transparent 8px 16px);"></div>
+                <span style="position:relative;font-family:monospace;font-size:10.5px;color:rgba(234,242,255,0.5);">room photo</span>
+                <span style="{{ rm.statusBadge }}">{{ rm.status }}</span>
+              </div>
+              <div style="padding:15px 16px 17px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:17px;">{{ rm.no }}</div>
+                  <div style="font-size:11.5px;color:rgba(234,242,255,0.5);">{{ rm.building }}</div>
+                </div>
+                <div style="font-size:12px;color:rgba(234,242,255,0.55);margin-top:3px;">เจ้าของ: {{ rm.owner }}</div>
+                <div style="display:flex;gap:8px;margin-top:13px;">
+                  <div style="flex:1;padding:9px 11px;border-radius:12px;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);">
+                    <div style="font-size:10.5px;color:rgba(234,242,255,0.55);">รายรับเดือนนี้</div>
+                    <div style="font-family:'Sora',sans-serif;font-weight:600;font-size:14.5px;color:#7DD3FC;margin-top:2px;">{{ rm.income }}</div>
+                  </div>
+                  <div style="flex:1;padding:9px 11px;border-radius:12px;background:rgba(251,113,133,0.08);border:1px solid rgba(251,113,133,0.16);">
+                    <div style="font-size:10.5px;color:rgba(234,242,255,0.55);">ค่าใช้จ่าย</div>
+                    <div style="font-family:'Sora',sans-serif;font-weight:600;font-size:14.5px;color:#FDA4AF;margin-top:2px;">{{ rm.expense }}</div>
+                  </div>
+                </div>
+                <div style="font-size:12px;color:rgba(234,242,255,0.6);margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,0.08);">{{ rm.tenantLine }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===== RENTALS (รายการเช่า) ===== -->
+      <sc-if value="{{ isRentals }}" hint-placeholder-val="">
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <sc-if value="{{ rentalCreateClosed }}" hint-placeholder-val="{{ true }}">
+        <div style="border-radius:22px;overflow:hidden;background:rgba(255,255,255,0.05);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 18px 44px rgba(0,0,0,0.3);">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <div style="font-weight:600;font-size:14.5px;">รายการเช่าทั้งหมด</div>
+            <div style="display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;">
+              <button style="display:flex;align-items:center;gap:7px;padding:8px 13px;border-radius:11px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);color:#EAF2FF;font-family:inherit;font-size:12.5px;cursor:pointer;">{{ iconFilter }}กรองข้อมูล</button>
+              <button onClick="{{ openRentalCreate }}" style="display:flex;align-items:center;gap:7px;padding:8px 15px;border-radius:11px;border:1px solid rgba(255,255,255,0.28);color:#04121A;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#A855F7,#38BDF8);box-shadow:0 6px 16px rgba(168,85,247,0.4);">{{ iconPlus }}สร้างรายการเช่า</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:980px;">
+              <thead><tr style="background:rgba(255,255,255,0.04);">
+                <th style="text-align:left;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">รหัส</th>
+                <th style="text-align:left;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">ผู้เช่า / ห้อง</th>
+                <th style="text-align:left;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">เจ้าของ</th>
+                <th style="text-align:left;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">ช่วงเวลา</th>
+                <th style="text-align:right;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">ยอดรวม</th>
+                <th style="text-align:right;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">ค้างชำระ</th>
+                <th style="text-align:left;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;white-space:nowrap;">สถานะจ่าย</th>
+                <th style="padding:12px 16px;"></th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ rentalRows }}" as="r" hint-placeholder-count="7">
+                  <tr style="{{ r.rowStyle }}">
+                    <td style="padding:13px 16px;font-family:monospace;font-size:12px;color:rgba(234,242,255,0.7);white-space:nowrap;">{{ r.code }}</td>
+                    <td style="padding:13px 16px;"><div style="font-weight:600;">{{ r.tenant }}</div><div style="font-size:11.5px;color:rgba(234,242,255,0.5);">{{ r.room }} · {{ r.building }}</div></td>
+                    <td style="padding:13px 16px;color:rgba(234,242,255,0.8);">{{ r.owner }}</td>
+                    <td style="padding:13px 16px;color:rgba(234,242,255,0.75);white-space:nowrap;font-size:12px;">{{ r.period }}</td>
+                    <td style="padding:13px 16px;text-align:right;font-family:'Sora',sans-serif;font-weight:600;white-space:nowrap;">{{ r.total }}</td>
+                    <td style="padding:13px 16px;text-align:right;font-family:'Sora',sans-serif;font-weight:600;{{ r.dueColor }};white-space:nowrap;">{{ r.due }}</td>
+                    <td style="padding:13px 16px;"><span style="{{ r.badgeStyle }}">{{ r.status }}</span></td>
+                    <td style="padding:13px 16px;text-align:right;"><button style="padding:6px 12px;border-radius:9px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:#EAF2FF;font-family:inherit;font-size:11.5px;cursor:pointer;white-space:nowrap;">รายละเอียด</button></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- create rental step flow -->
+        <sc-if value="{{ rentalCreateOpen }}" hint-placeholder-val="">
+        <div style="border-radius:24px;background:rgba(255,255,255,0.055);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.14);box-shadow:0 22px 54px rgba(0,0,0,0.36);overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:17px;">สร้างรายการเช่าใหม่</div>
+            <button onClick="{{ closeRentalCreate }}" style="margin-left:auto;padding:8px 14px;border-radius:11px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.05);color:#EAF2FF;font-family:inherit;font-size:12.5px;cursor:pointer;">ยกเลิก</button>
+          </div>
+          <div style="display:flex;gap:8px;padding:18px 22px 4px;flex-wrap:wrap;">
+            <sc-for list="{{ rentalSteps }}" as="s" hint-placeholder-count="4">
+              <button onClick="{{ s.onClick }}" style="{{ s.style }}"><span style="{{ s.numStyle }}">{{ s.num }}</span>{{ s.label }}</button>
+            </sc-for>
+          </div>
+          <div style="padding:14px 22px 26px;">
+            <div style="padding:20px;border-radius:18px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);">
+              <div style="font-weight:600;font-size:14.5px;margin-bottom:4px;">{{ rentalStepTitle }}</div>
+              <div style="font-size:12.5px;color:rgba(234,242,255,0.55);margin-bottom:18px;">{{ rentalStepDesc }}</div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
+                <sc-for list="{{ rentalStepFields }}" as="fld" hint-placeholder-count="4">
+                  <div>
+                    <div style="font-size:12px;color:rgba(234,242,255,0.6);margin-bottom:6px;">{{ fld.label }}</div>
+                    <div style="padding:11px 13px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);font-size:13.5px;color:{{ fld.color }};display:flex;align-items:center;justify-content:space-between;">{{ fld.value }}<span style="color:rgba(234,242,255,0.4);">{{ fld.icon }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
+              <button style="padding:11px 18px;border-radius:12px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.05);color:#EAF2FF;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">ย้อนกลับ</button>
+              <button style="padding:11px 22px;border-radius:12px;border:1px solid rgba(255,255,255,0.28);color:#04121A;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#5EEAD4,#38BDF8);box-shadow:0 6px 16px rgba(56,189,248,0.4);">{{ rentalNextLabel }}</button>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <!-- ===== OWNER PAYOUT (จ่ายเงินเจ้าของ) ===== -->
+      <sc-if value="{{ isPayout }}" hint-placeholder-val="">
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+          <sc-for list="{{ payoutKpis }}" as="k" hint-placeholder-count="4">
+            <div style="padding:16px 18px;border-radius:20px;background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 14px 34px rgba(0,0,0,0.3);">
+              <div style="display:flex;align-items:center;gap:9px;"><span style="{{ k.iconWrap }}">{{ k.icon }}</span><span style="font-size:12.5px;color:rgba(234,242,255,0.6);">{{ k.label }}</span></div>
+              <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:22px;margin-top:10px;{{ k.valueColor }}">{{ k.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- payout step flow -->
+        <div style="border-radius:24px;background:rgba(255,255,255,0.055);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.14);box-shadow:0 22px 54px rgba(0,0,0,0.34);overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.08);">
+            <span style="width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(168,85,247,0.3),rgba(56,189,248,0.3));border:1px solid rgba(255,255,255,0.2);color:#DDD6FE;">{{ iconPayout }}</span>
+            <div><div style="font-family:'Sora',sans-serif;font-weight:700;font-size:16px;">สร้างรายการจ่ายเจ้าของ</div><div style="font-size:12px;color:rgba(234,242,255,0.5);">เจ้าของ: คุณสมชาย วัฒนโสภณ · เดอะ เครสท์ สุขุมวิท</div></div>
+          </div>
+          <div style="display:flex;gap:8px;padding:18px 22px 4px;flex-wrap:wrap;">
+            <sc-for list="{{ payoutSteps }}" as="s" hint-placeholder-count="5">
+              <button onClick="{{ s.onClick }}" style="{{ s.style }}"><span style="{{ s.numStyle }}">{{ s.num }}</span>{{ s.label }}</button>
+            </sc-for>
+          </div>
+          <div style="padding:14px 22px 26px;">
+            <div style="padding:22px;border-radius:18px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);">
+              <div style="font-weight:600;font-size:14.5px;margin-bottom:4px;">{{ payoutStepTitle }}</div>
+              <div style="font-size:12.5px;color:rgba(234,242,255,0.55);margin-bottom:18px;">{{ payoutStepDesc }}</div>
+
+              <!-- deduction / calc table shown for step 3 & 4 -->
+              <sc-if value="{{ payoutShowCalc }}" hint-placeholder-val="">
+              <div style="border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);">
+                <sc-for list="{{ payoutCalcRows }}" as="c" hint-placeholder-count="6">
+                  <div style="{{ c.style }}">
+                    <span style="color:{{ c.labelColor }};">{{ c.label }}</span>
+                    <span style="font-family:'Sora',sans-serif;font-weight:600;color:{{ c.amountColor }};">{{ c.amount }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              </sc-if>
+
+              <!-- generic fields for other steps -->
+              <sc-if value="{{ payoutShowFields }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
+                <sc-for list="{{ payoutStepFields }}" as="fld" hint-placeholder-count="4">
+                  <div>
+                    <div style="font-size:12px;color:rgba(234,242,255,0.6);margin-bottom:6px;">{{ fld.label }}</div>
+                    <div style="padding:11px 13px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);font-size:13.5px;color:{{ fld.color }};display:flex;align-items:center;justify-content:space-between;">{{ fld.value }}<span style="color:rgba(234,242,255,0.4);">{{ fld.icon }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+              </sc-if>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
+              <button style="padding:11px 18px;border-radius:12px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.05);color:#EAF2FF;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">ย้อนกลับ</button>
+              <button style="padding:11px 22px;border-radius:12px;border:1px solid rgba(255,255,255,0.28);color:#04121A;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#5EEAD4,#38BDF8);box-shadow:0 6px 16px rgba(56,189,248,0.4);">{{ payoutNextLabel }}</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="border-radius:22px;overflow:hidden;background:rgba(255,255,255,0.05);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 18px 44px rgba(0,0,0,0.3);">
+          <div style="padding:15px 18px;border-bottom:1px solid rgba(255,255,255,0.08);font-weight:600;font-size:14.5px;">รายการจ่ายเจ้าของล่าสุด</div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:820px;">
+              <thead><tr style="background:rgba(255,255,255,0.04);">
+                <th style="text-align:left;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;">เจ้าของ / ห้อง</th>
+                <th style="text-align:right;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;">รายรับรวม</th>
+                <th style="text-align:right;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;">รายการหัก</th>
+                <th style="text-align:right;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;">ยอดสุทธิ</th>
+                <th style="text-align:left;padding:12px 16px;font-weight:600;color:rgba(234,242,255,0.6);font-size:12px;">สถานะ</th>
+                <th style="padding:12px 16px;"></th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ payoutRows }}" as="r" hint-placeholder-count="5">
+                  <tr style="{{ r.rowStyle }}">
+                    <td style="padding:13px 16px;"><div style="font-weight:600;">{{ r.owner }}</div><div style="font-size:11.5px;color:rgba(234,242,255,0.5);">{{ r.room }}</div></td>
+                    <td style="padding:13px 16px;text-align:right;font-family:'Sora',sans-serif;font-weight:600;">{{ r.income }}</td>
+                    <td style="padding:13px 16px;text-align:right;font-family:'Sora',sans-serif;color:#FDA4AF;">{{ r.deduct }}</td>
+                    <td style="padding:13px 16px;text-align:right;font-family:'Sora',sans-serif;font-weight:700;color:#7FF0D9;">{{ r.net }}</td>
+                    <td style="padding:13px 16px;"><span style="{{ r.badgeStyle }}">{{ r.status }}</span></td>
+                    <td style="padding:13px 16px;text-align:right;"><button style="padding:6px 12px;border-radius:9px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:#EAF2FF;font-family:inherit;font-size:11.5px;cursor:pointer;white-space:nowrap;">รายละเอียด</button></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===== SERVICES (งานแม่บ้าน/งานซ่อม) — KANBAN ===== -->
+      <sc-if value="{{ isServices }}" hint-placeholder-val="">
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
+          <div style="font-size:13px;color:rgba(234,242,255,0.6);">ลากการ์ดเพื่อเปลี่ยนสถานะงาน (mockup) · ผูกกับห้องและค่าใช้จ่ายเสมอ</div>
+          <button style="margin-left:auto;display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:11px;border:1px solid rgba(255,255,255,0.28);color:#04121A;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#FBBF24,#F59E0B);box-shadow:0 6px 16px rgba(251,191,36,0.35);">{{ iconPlus }}สร้างงานใหม่</button>
+        </div>
+        <div style="display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;">
+          <sc-for list="{{ kanbanColumns }}" as="col" hint-placeholder-count="6">
+            <div style="flex:0 0 268px;width:268px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);padding:14px;display:flex;flex-direction:column;gap:11px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="width:9px;height:9px;border-radius:50%;background:{{ col.color }};box-shadow:0 0 10px {{ col.color }};"></span>
+                <span style="font-weight:600;font-size:13.5px;">{{ col.title }}</span>
+                <span style="margin-left:auto;font-size:11.5px;color:rgba(234,242,255,0.5);background:rgba(255,255,255,0.06);padding:1px 8px;border-radius:20px;">{{ col.count }}</span>
+              </div>
+              <sc-for list="{{ col.tasks }}" as="tk" hint-placeholder-count="2">
+                <div style="padding:13px;border-radius:15px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.11);border-left:3px solid {{ tk.color }};box-shadow:0 8px 20px rgba(0,0,0,0.22);cursor:grab;">
+                  <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
+                    <span style="{{ tk.typeBadge }}">{{ tk.type }}</span>
+                    <sc-if value="{{ tk.hasPhotos }}" hint-placeholder-val="">
+                      <span style="margin-left:auto;font-size:10.5px;color:rgba(234,242,255,0.5);display:flex;align-items:center;gap:3px;">{{ iconImage }}ก่อน/หลัง</span>
+                    </sc-if>
+                  </div>
+                  <div style="font-size:13px;font-weight:600;">{{ tk.title }}</div>
+                  <div style="font-size:11.5px;color:rgba(234,242,255,0.55);margin-top:3px;">{{ tk.room }} · {{ tk.building }}</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:11px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
+                    <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:rgba(234,242,255,0.6);"><span style="width:20px;height:20px;border-radius:6px;background:linear-gradient(135deg,#A855F7,#38BDF8);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">{{ tk.initial }}</span>{{ tk.assignee }}</div>
+                    <div style="font-family:'Sora',sans-serif;font-weight:600;font-size:12.5px;color:#FDA4AF;">{{ tk.cost }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ===== PLACEHOLDER (unbuilt sections) ===== -->
+      <sc-if value="{{ isPlaceholder }}" hint-placeholder-val="">
+      <div style="display:flex;align-items:center;justify-content:center;min-height:60vh;">
+        <div style="text-align:center;padding:44px 48px;border-radius:26px;background:rgba(255,255,255,0.05);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 20px 50px rgba(0,0,0,0.32);max-width:440px;">
+          <div style="width:64px;height:64px;margin:0 auto 18px;border-radius:20px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(94,234,212,0.25),rgba(168,85,247,0.25));border:1px solid rgba(255,255,255,0.2);color:#A7F3E4;">{{ placeholderIcon }}</div>
+          <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;">{{ pageTitle }}</div>
+          <div style="font-size:13.5px;color:rgba(234,242,255,0.55);margin-top:8px;line-height:1.6;">หน้านี้อยู่ในโครงร่างของระบบ Crystal Ledger<br/>รอการออกแบบละเอียดในเฟสถัดไป ตามสเปกเดียวกับหน้าที่ทำแล้ว</div>
+          <button onClick="{{ goDashboard }}" style="margin-top:20px;padding:11px 22px;border-radius:13px;border:1px solid rgba(255,255,255,0.28);color:#04121A;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#5EEAD4,#38BDF8);box-shadow:0 6px 16px rgba(56,189,248,0.4);">กลับสู่ Dashboard</button>
+        </div>
+      </div>
+      </sc-if>
+
+    </main>
+  </div>
+
+  <!-- ============ BOTTOM NAV (mobile) ============ -->
+  <nav data-shell-bottomnav style="position:fixed;bottom:0;left:0;right:0;z-index:40;padding:10px 8px calc(10px + env(safe-area-inset-bottom));justify-content:space-around;align-items:center;background:rgba(11,16,32,0.82);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,0.12);">
+    <sc-for list="{{ bottomNav }}" as="b" hint-placeholder-count="5">
+      <button onClick="{{ b.onClick }}" style="{{ b.style }}"><span style="display:flex;">{{ b.icon }}</span><span style="font-size:10px;">{{ b.label }}</span></button>
+    </sc-for>
+  </nav>
+
+  <!-- ============ ADD INCOME MODAL ============ -->
+  <sc-if value="{{ incomeModalOpen }}" hint-placeholder-val="">
+  <div style="position:fixed;inset:0;z-index:60;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;background:rgba(4,8,16,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);">
+    <div style="width:100%;max-width:560px;border-radius:26px;background:linear-gradient(180deg,rgba(20,28,48,0.96),rgba(12,18,34,0.96));backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,0.16);box-shadow:0 30px 70px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.2);overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:12px;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.1);">
+        <span style="width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#5EEAD4,#38BDF8);color:#04121A;">{{ iconIncome }}</span>
+        <div><div style="font-family:'Sora',sans-serif;font-weight:700;font-size:17px;">บันทึกรับเงิน</div><div style="font-size:12px;color:rgba(234,242,255,0.5);">แนบสลิปเพื่อยืนยันการโอน</div></div>
+        <button onClick="{{ closeIncome }}" style="margin-left:auto;width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);color:#EAF2FF;cursor:pointer;font-size:16px;">✕</button>
+      </div>
+      <div style="padding:22px 24px;display:flex;flex-direction:column;gap:15px;">
+        <div style="padding:12px 14px;border-radius:13px;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.25);display:flex;align-items:center;justify-content:space-between;">
+          <div><div style="font-size:11.5px;color:rgba(234,242,255,0.6);">ยอดค้างของรายการเช่าที่เลือก</div><div style="font-size:12.5px;font-weight:600;margin-top:1px;">RN-2568-0142 · คุณกิตติพงษ์ · A-1105</div></div>
+          <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:18px;color:#FDA4AF;">฿12,500</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px;">
+          <div><div style="font-size:12px;color:rgba(234,242,255,0.6);margin-bottom:6px;">รายการเช่า</div><div style="padding:11px 13px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);font-size:13px;display:flex;justify-content:space-between;">RN-2568-0142<span style="color:rgba(234,242,255,0.4);">{{ chevDown }}</span></div></div>
+          <div><div style="font-size:12px;color:rgba(234,242,255,0.6);margin-bottom:6px;">ประเภทรายรับ</div><div style="padding:11px 13px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);font-size:13px;display:flex;justify-content:space-between;">ค่าเช่ารายเดือน<span style="color:rgba(234,242,255,0.4);">{{ chevDown }}</span></div></div>
+          <div><div style="font-size:12px;color:rgba(234,242,255,0.6);margin-bottom:6px;">จำนวนเงิน</div><div style="padding:11px 13px;border-radius:12px;border:1px solid rgba(94,234,212,0.4);background:rgba(94,234,212,0.08);font-size:15px;font-family:'Sora',sans-serif;font-weight:700;color:#7FF0D9;">฿12,500</div></div>
+          <div><div style="font-size:12px;color:rgba(234,242,255,0.6);margin-bottom:6px;">วันที่รับเงิน</div><div style="padding:11px 13px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);font-size:13px;display:flex;justify-content:space-between;">6 ก.ค. 2568<span style="color:rgba(234,242,255,0.4);">{{ iconCal }}</span></div></div>
+          <div><div style="font-size:12px;color:rgba(234,242,255,0.6);margin-bottom:6px;">ช่องทางรับเงิน</div><div style="padding:11px 13px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);font-size:13px;display:flex;justify-content:space-between;">โอนผ่าน PromptPay<span style="color:rgba(234,242,255,0.4);">{{ chevDown }}</span></div></div>
+          <div><div style="font-size:12px;color:rgba(234,242,255,0.6);margin-bottom:6px;">บัญชีที่รับเงิน</div><div style="padding:11px 13px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);font-size:13px;display:flex;justify-content:space-between;">KBank · 123-4-56789<span style="color:rgba(234,242,255,0.4);">{{ chevDown }}</span></div></div>
+        </div>
+        <div><div style="font-size:12px;color:rgba(234,242,255,0.6);margin-bottom:6px;">แนบสลิปการโอน</div>
+          <div style="padding:22px;border-radius:14px;border:1.5px dashed rgba(94,234,212,0.4);background:rgba(94,234,212,0.05);text-align:center;cursor:pointer;">
+            <div style="color:#7FF0D9;display:flex;justify-content:center;margin-bottom:8px;">{{ iconUpload }}</div>
+            <div style="font-size:13px;font-weight:600;">ลากสลิปมาวาง หรือถ่ายจากกล้อง</div>
+            <div style="font-size:11.5px;color:rgba(234,242,255,0.5);margin-top:3px;">รองรับ JPG, PNG, PDF · ระบบ preview สลิปทันที</div>
+          </div>
+        </div>
+        <div style="padding:11px 13px;border-radius:12px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);font-size:12.5px;color:#FDE68A;display:flex;align-items:center;gap:9px;">{{ iconAlert }}หากไม่มีสลิป ระบบจะตั้งสถานะเป็น “ต้องตรวจสอบ” โดยอัตโนมัติ</div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:11px;padding:16px 24px;border-top:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.02);">
+        <button onClick="{{ closeIncome }}" style="padding:11px 20px;border-radius:12px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.05);color:#EAF2FF;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">ยกเลิก</button>
+        <button onClick="{{ closeIncome }}" style="padding:11px 24px;border-radius:12px;border:1px solid rgba(255,255,255,0.28);color:#04121A;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#5EEAD4,#38BDF8);box-shadow:0 8px 20px rgba(56,189,248,0.42);">ยืนยันการบันทึก</button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ ROOM DETAIL DRAWER ============ -->
+  <sc-if value="{{ roomDrawerOpen }}" hint-placeholder-val="">
+  <div onClick="{{ closeRoom }}" style="position:fixed;inset:0;z-index:55;background:rgba(4,8,16,0.55);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);"></div>
+  <aside style="position:fixed;top:0;right:0;bottom:0;z-index:56;width:min(460px,94vw);display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(20,28,48,0.97),rgba(12,18,34,0.97));backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-left:1px solid rgba(255,255,255,0.16);box-shadow:-30px 0 70px rgba(0,0,0,0.5);">
+    <div style="padding:20px 22px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:flex-start;gap:12px;">
+      <div><div style="font-size:11.5px;color:rgba(234,242,255,0.5);">{{ drawerRoom.building }}</div><div style="font-family:'Sora',sans-serif;font-weight:700;font-size:22px;">ห้อง {{ drawerRoom.no }}</div><span style="{{ drawerRoom.statusBadge }}">{{ drawerRoom.status }}</span></div>
+      <button onClick="{{ closeRoom }}" style="margin-left:auto;width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);color:#EAF2FF;cursor:pointer;font-size:16px;">✕</button>
+    </div>
+    <div style="display:flex;gap:6px;padding:12px 22px 0;overflow-x:auto;">
+      <sc-for list="{{ drawerTabs }}" as="t" hint-placeholder-count="5">
+        <span style="{{ t.style }}">{{ t.label }}</span>
+      </sc-for>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:18px 22px 30px;display:flex;flex-direction:column;gap:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="padding:14px;border-radius:14px;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.22);"><div style="font-size:11.5px;color:rgba(234,242,255,0.55);">รายรับเดือนนี้</div><div style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;color:#7DD3FC;margin-top:3px;">{{ drawerRoom.income }}</div></div>
+        <div style="padding:14px;border-radius:14px;background:rgba(251,113,133,0.08);border:1px solid rgba(251,113,133,0.18);"><div style="font-size:11.5px;color:rgba(234,242,255,0.55);">ค่าใช้จ่าย</div><div style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;color:#FDA4AF;margin-top:3px;">{{ drawerRoom.expense }}</div></div>
+        <div style="padding:14px;border-radius:14px;background:rgba(94,234,212,0.09);border:1px solid rgba(94,234,212,0.2);"><div style="font-size:11.5px;color:rgba(234,242,255,0.55);">กำไรสุทธิของห้อง</div><div style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;color:#7FF0D9;margin-top:3px;">{{ drawerRoom.net }}</div></div>
+        <div style="padding:14px;border-radius:14px;background:rgba(168,85,247,0.09);border:1px solid rgba(168,85,247,0.2);"><div style="font-size:11.5px;color:rgba(234,242,255,0.55);">ค่าเช่า / เดือน</div><div style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;color:#DDD6FE;margin-top:3px;">{{ drawerRoom.rent }}</div></div>
+      </div>
+      <div style="padding:16px;border-radius:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px;">ข้อมูลห้อง</div>
+        <sc-for list="{{ drawerRoom.info }}" as="row" hint-placeholder-count="5">
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;"><span style="color:rgba(234,242,255,0.55);">{{ row.k }}</span><span style="font-weight:600;">{{ row.v }}</span></div>
+        </sc-for>
+      </div>
+      <div style="padding:16px;border-radius:16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px;">Timeline เหตุการณ์ล่าสุด</div>
+        <sc-for list="{{ drawerRoom.timeline }}" as="ev" hint-placeholder-count="4">
+          <div style="display:flex;gap:12px;padding-bottom:14px;position:relative;">
+            <div style="display:flex;flex-direction:column;align-items:center;"><span style="width:11px;height:11px;border-radius:50%;background:{{ ev.color }};box-shadow:0 0 8px {{ ev.color }};margin-top:3px;"></span><span style="flex:1;width:1.5px;background:rgba(255,255,255,0.1);margin-top:3px;"></span></div>
+            <div style="flex:1;"><div style="font-size:12.5px;font-weight:600;">{{ ev.title }}</div><div style="font-size:11.5px;color:rgba(234,242,255,0.5);margin-top:1px;">{{ ev.time }}</div></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button style="flex:1;padding:12px;border-radius:13px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.05);color:#EAF2FF;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">แนบหลักฐาน</button>
+        <button style="flex:1;padding:12px;border-radius:13px;border:1px solid rgba(255,255,255,0.28);color:#04121A;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#5EEAD4,#38BDF8);box-shadow:0 6px 16px rgba(56,189,248,0.4);">บันทึกรับเงิน</button>
+      </div>
+    </div>
+  </aside>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:940}}">
+class Component extends DCLogic {
+  state = { view: 'dashboard', payoutStep: 4, rentalCreateOpen: false, rentalStep: 3, incomeModalOpen: false, roomId: null };
+
+  // ---------- icon factory (React-safe inline SVG built from primitives) ----------
+  icon(name, size, sw) {
+    const R = React.createElement;
+    const s = size || 20, w = sw || 1.7;
+    const base = { fill: 'none', stroke: 'currentColor', strokeWidth: w, strokeLinecap: 'round', strokeLinejoin: 'round' };
+    const P = (d) => R('path', { d, ...base });
+    const C = (cx, cy, r) => R('circle', { cx, cy, r, ...base });
+    const L = (x1, y1, x2, y2) => R('line', { x1, y1, x2, y2, ...base });
+    const Rc = (x, y, ww, hh, rx) => R('rect', { x, y, width: ww, height: hh, rx: rx == null ? 2 : rx, ...base });
+    const sets = {
+      dashboard: [Rc(3,3,7,7),Rc(14,3,7,7),Rc(14,14,7,7),Rc(3,14,7,7)],
+      owners: [C(9,7,3.2),P('M2.5 20a6.5 6.5 0 0 1 13 0'),P('M16 3.6a3.2 3.2 0 0 1 0 6.2'),P('M18 20a6.5 6.5 0 0 0-4-6')],
+      building: [Rc(4,3,10,18),Rc(14,8,6,13),L(7,7,7,7.01),L(11,7,11,7.01),L(7,11,7,11.01),L(11,11,11,11.01),L(7,15,7,15.01),L(11,15,11,15.01),L(17,12,17,12.01),L(17,16,17,16.01)],
+      room: [Rc(5,3,14,18),C(15,12,1)],
+      tenant: [C(12,8,4),P('M4 20a8 8 0 0 1 16 0')],
+      rental: [P('M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2'),Rc(8,2,8,4,1.5),L(8,10,16,10),L(8,14,16,14),L(8,18,13,18)],
+      income: [C(12,12,9),P('M12 8v8'),P('M8.5 12.5 12 16l3.5-3.5')],
+      expense: [C(12,12,9),P('M12 16V8'),P('M8.5 11.5 12 8l3.5 3.5')],
+      payout: [C(8,9,4),C(16,15,4),P('M12 9h4'),P('M8 13v2')],
+      service: [P('M14.5 5.5a3.5 3.5 0 0 0-4.8 4.5L4 15.7 6.3 18l5.7-5.7a3.5 3.5 0 0 0 4.5-4.8l-2.2 2.2-2-2 2.2-2.2z')],
+      report: [L(4,20,20,20),Rc(5,11,3,7,1),Rc(10.5,6,3,12,1),Rc(16,13,3,5,1)],
+      account: [Rc(3,6,18,13,3),P('M3 10h18'),L(7,15,11,15)],
+      users: [P('M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z'),P('M9 12l2 2 4-4')],
+      settings: [C(12,12,3),P('M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1')],
+      audit: [C(12,12,9),P('M12 7v5l3 2')],
+      search: [C(11,11,7),L(20,20,16.5,16.5)],
+      plus: [L(12,6,12,18),L(6,12,18,12)],
+      bell: [P('M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6'),P('M10 20a2 2 0 0 0 4 0')],
+      export: [P('M12 15V4'),P('M8 8l4-4 4 4'),P('M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3')],
+      refresh: [P('M3.5 12a8.5 8.5 0 0 1 14.5-6M20.5 12a8.5 8.5 0 0 1-14.5 6'),P('M18 3v4h-4'),P('M6 21v-4h4')],
+      filter: [P('M3 5h18l-7 8v6l-4-2v-4z')],
+      alert: [P('M12 3 2 20h20z'),L(12,10,12,14),L(12,17,12,17.01)],
+      cal: [Rc(3,5,18,16,3),L(3,9,21,9),L(8,3,8,6),L(16,3,16,6)],
+      upload: [P('M12 15V4'),P('M8 8l4-4 4 4'),P('M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3')],
+      image: [Rc(3,4,18,16,3),C(8.5,9.5,1.8),P('M3 17l5-4 4 3 3-2 6 5')],
+      chevDown: [P('M6 9l6 6 6-6')],
+      clock: [C(12,12,9),P('M12 7v5l3 2')]
+    };
+    return R('svg', { viewBox: '0 0 24 24', width: s, height: s, style: { display: 'block', flexShrink: 0 } }, ...(sets[name] || sets.dashboard));
+  }
+
+  fmt(n) { return '฿' + n.toLocaleString('en-US'); }
+
+  // ---------- charts ----------
+  lineChart() {
+    const R = React.createElement;
+    const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    const inc = [.82,.91,.88,1.02,.97,1.12,1.08,1.18,1.15,1.21,1.18,1.25];
+    const exp = [.31,.34,.30,.36,.33,.38,.35,.40,.37,.41,.39,.386];
+    const W = 720, H = 250, mL = 34, mR = 14, mT = 14, mB = 30, maxV = 1.4;
+    const px = i => mL + i * ((W - mL - mR) / (months.length - 1));
+    const py = v => mT + (1 - v / maxV) * (H - mT - mB);
+    const path = arr => arr.map((v, i) => (i ? 'L' : 'M') + px(i).toFixed(1) + ' ' + py(v).toFixed(1)).join(' ');
+    const area = arr => path(arr) + ' L' + px(arr.length - 1).toFixed(1) + ' ' + (H - mB) + ' L' + px(0).toFixed(1) + ' ' + (H - mB) + ' Z';
+    const grid = [0, .35, .7, 1.05, 1.4];
+    return R('svg', { viewBox: `0 0 ${W} ${H}`, style: { width: '100%', height: 'auto', display: 'block' } },
+      R('defs', {},
+        R('linearGradient', { id: 'clInc', x1: 0, y1: 0, x2: 0, y2: 1 }, R('stop', { offset: '0%', stopColor: '#38BDF8', stopOpacity: .35 }), R('stop', { offset: '100%', stopColor: '#38BDF8', stopOpacity: 0 })),
+        R('linearGradient', { id: 'clExp', x1: 0, y1: 0, x2: 0, y2: 1 }, R('stop', { offset: '0%', stopColor: '#FB7185', stopOpacity: .22 }), R('stop', { offset: '100%', stopColor: '#FB7185', stopOpacity: 0 }))
+      ),
+      ...grid.map(g => R('line', { key: 'g' + g, x1: mL, y1: py(g), x2: W - mR, y2: py(g), stroke: 'rgba(255,255,255,0.08)', strokeWidth: 1 })),
+      ...grid.map(g => R('text', { key: 't' + g, x: mL - 7, y: py(g) + 3.5, textAnchor: 'end', fontSize: 9.5, fill: 'rgba(234,242,255,0.4)' }, g.toFixed(1))),
+      R('path', { d: area(inc), fill: 'url(#clInc)' }),
+      R('path', { d: area(exp), fill: 'url(#clExp)' }),
+      R('path', { d: path(exp), fill: 'none', stroke: '#FB7185', strokeWidth: 2.4, strokeLinecap: 'round', strokeLinejoin: 'round' }),
+      R('path', { d: path(inc), fill: 'none', stroke: '#38BDF8', strokeWidth: 2.8, strokeLinecap: 'round', strokeLinejoin: 'round' }),
+      ...inc.map((v, i) => R('circle', { key: 'd' + i, cx: px(i), cy: py(v), r: i === inc.length - 1 ? 4 : 2.6, fill: '#0B1020', stroke: '#38BDF8', strokeWidth: 2 })),
+      ...months.map((m, i) => R('text', { key: 'm' + i, x: px(i), y: H - 9, textAnchor: 'middle', fontSize: 9.5, fill: 'rgba(234,242,255,0.45)' }, m))
+    );
+  }
+
+  donutChart() {
+    const R = React.createElement;
+    const data = [
+      { l: 'ค่านายหน้า (หัก)', v: 38, c: '#A855F7' },
+      { l: 'ค่าซ่อมแซม', v: 22, c: '#FB7185' },
+      { l: 'ค่าแม่บ้าน', v: 18, c: '#FBBF24' },
+      { l: 'ค่าส่วนกลาง', v: 14, c: '#38BDF8' },
+      { l: 'ค่าอื่น ๆ', v: 8, c: '#5EEAD4' }
+    ];
+    const r = 52, cx = 70, cy = 70, circ = 2 * Math.PI * r;
+    let off = 0;
+    const segs = data.map((d, i) => {
+      const len = d.v / 100 * circ;
+      const el = R('circle', { key: i, cx, cy, r, fill: 'none', stroke: d.c, strokeWidth: 18, strokeDasharray: `${len} ${circ - len}`, strokeDashoffset: -off, transform: `rotate(-90 ${cx} ${cy})`, strokeLinecap: 'butt' });
+      off += len;
+      return el;
+    });
+    return R('div', { style: { display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' } },
+      R('svg', { viewBox: '0 0 140 140', style: { width: 140, height: 140, flexShrink: 0 } },
+        R('circle', { cx, cy, r, fill: 'none', stroke: 'rgba(255,255,255,0.06)', strokeWidth: 18 }),
+        ...segs,
+        R('text', { x: cx, y: cy - 3, textAnchor: 'middle', fontSize: 15, fontWeight: 700, fill: '#EAF2FF', style: { fontFamily: 'Sora, sans-serif' } }, '฿386K'),
+        R('text', { x: cx, y: cy + 14, textAnchor: 'middle', fontSize: 9.5, fill: 'rgba(234,242,255,0.5)' }, 'รวมรายจ่าย')
+      ),
+      R('div', { style: { display: 'flex', flexDirection: 'column', gap: 8, flex: 1, minWidth: 120 } },
+        ...data.map((d, i) => R('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 } },
+          R('span', { style: { width: 10, height: 10, borderRadius: 3, background: d.c, flexShrink: 0 } }),
+          R('span', { style: { color: 'rgba(234,242,255,0.75)', flex: 1 } }, d.l),
+          R('span', { style: { fontWeight: 600, fontFamily: 'Sora, sans-serif' } }, d.v + '%')
+        ))
+      )
+    );
+  }
+
+  barChart() {
+    const R = React.createElement;
+    const data = [
+      { l: 'เดอะ เครสท์', v: 468, c: '#38BDF8' },
+      { l: 'บ้านสวน พัทยา', v: 352, c: '#5EEAD4' },
+      { l: 'แฟลตรุ่งเรือง', v: 246, c: '#A855F7' },
+      { l: 'ศุภาลัย เรส', v: 182, c: '#FBBF24' }
+    ];
+    const W = 340, H = 200, mB = 34, mT = 10, maxV = 500, bw = 42;
+    const gap = (W - data.length * bw) / (data.length + 1);
+    const by = v => mT + (1 - v / maxV) * (H - mT - mB);
+    return R('svg', { viewBox: `0 0 ${W} ${H}`, style: { width: '100%', height: 'auto', display: 'block' } },
+      ...[0, .5, 1].map(g => R('line', { key: g, x1: 0, y1: by(maxV * g), x2: W, y2: by(maxV * g), stroke: 'rgba(255,255,255,0.07)', strokeWidth: 1 })),
+      ...data.map((d, i) => {
+        const x = gap + i * (bw + gap), y = by(d.v), h = (H - mB) - y;
+        return R('g', { key: i },
+          R('rect', { x, y, width: bw, height: h, rx: 8, fill: d.c, opacity: .85 }),
+          R('rect', { x, y, width: bw, height: Math.min(h, 10), rx: 8, fill: '#fff', opacity: .25 }),
+          R('text', { x: x + bw / 2, y: y - 6, textAnchor: 'middle', fontSize: 11, fontWeight: 700, fill: '#EAF2FF', style: { fontFamily: 'Sora, sans-serif' } }, d.v),
+          R('text', { x: x + bw / 2, y: H - 12, textAnchor: 'middle', fontSize: 9, fill: 'rgba(234,242,255,0.55)' }, d.l)
+        );
+      })
+    );
+  }
+
+  hbarChart() {
+    const R = React.createElement;
+    const data = [
+      { l: 'A-1105 · เดอะ เครสท์', v: 38500, c: '#38BDF8' },
+      { l: 'B-802 · บ้านสวน พัทยา', v: 32000, c: '#5EEAD4' },
+      { l: 'A-1204 · เดอะ เครสท์', v: 29500, c: '#A855F7' },
+      { l: 'C-305 · แฟลตรุ่งเรือง', v: 24000, c: '#FBBF24' },
+      { l: 'B-410 · ศุภาลัย เรส', v: 19800, c: '#7FF0D9' }
+    ];
+    const max = 40000;
+    return R('div', { style: { display: 'flex', flexDirection: 'column', gap: 13 } },
+      ...data.map((d, i) => R('div', { key: i },
+        R('div', { style: { display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 5 } },
+          R('span', { style: { color: 'rgba(234,242,255,0.8)' } }, d.l),
+          R('span', { style: { fontWeight: 600, fontFamily: 'Sora, sans-serif', color: d.c } }, '฿' + d.v.toLocaleString())
+        ),
+        R('div', { style: { height: 9, borderRadius: 20, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' } },
+          R('div', { style: { width: (d.v / max * 100) + '%', height: '100%', borderRadius: 20, background: `linear-gradient(90deg, ${d.c}, ${d.c}cc)`, boxShadow: `0 0 12px ${d.c}66` } })
+        )
+      ))
+    );
+  }
+
+  // ---------- style helpers ----------
+  badge(kind) {
+    const m = {
+      green: ['rgba(52,211,153,0.16)', '#6EE7B7', 'rgba(52,211,153,0.4)'],
+      gold: ['rgba(251,191,36,0.16)', '#FDE68A', 'rgba(251,191,36,0.42)'],
+      red: ['rgba(251,113,133,0.16)', '#FDA4AF', 'rgba(251,113,133,0.42)'],
+      blue: ['rgba(56,189,248,0.16)', '#7DD3FC', 'rgba(56,189,248,0.42)'],
+      purple: ['rgba(168,85,247,0.18)', '#DDD6FE', 'rgba(168,85,247,0.42)'],
+      gray: ['rgba(148,163,184,0.16)', '#CBD5E1', 'rgba(148,163,184,0.4)'],
+      orange: ['rgba(251,146,60,0.16)', '#FDBA74', 'rgba(251,146,60,0.42)']
+    }[kind] || ['rgba(148,163,184,0.16)', '#CBD5E1', 'rgba(148,163,184,0.4)'];
+    return `display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;background:${m[0]};color:${m[1]};border:1px solid ${m[2]};`;
+  }
+  iconChip(c) { return `width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:${c};background:${c}1f;border:1px solid ${c}44;`; }
+
+  setView(v) { return () => this.setState({ view: v, rentalCreateOpen: false }); }
+
+  renderVals() {
+    const st = this.state;
+    const V = st.view;
+    const titles = {
+      dashboard: ['Dashboard การเงิน', 'ภาพรวมรายรับ รายจ่าย ยอดค้าง และรายการที่ต้องตรวจสอบ · ก.ค. 2568'],
+      income: ['รายรับ', 'บันทึกเงินเข้า ตรวจสอบสลิป และติดตามยอดค้าง'],
+      rooms: ['ห้อง/ยูนิต', 'ติดตามสถานะห้อง รายรับ รายจ่าย ผู้เช่า และประวัติการดูแล'],
+      rentals: ['รายการเช่า', 'จัดการการจอง สัญญาเช่า และสถานะการชำระเงิน'],
+      payout: ['จ่ายเงินเจ้าของ', 'คำนวณยอดสุทธิและตรวจสอบการโอนเงินให้เจ้าของทรัพย์สิน'],
+      services: ['งานแม่บ้าน/งานซ่อม', 'ติดตามงานบริการห้อง ค่าใช้จ่าย รูปก่อน–หลัง และผู้รับผิดชอบ'],
+      owners: ['เจ้าของทรัพย์สิน', 'จัดการข้อมูลเจ้าของ ห้องในความดูแล และยอดเงินที่ต้องจ่าย'],
+      properties: ['อาคาร/โครงการ', 'จัดกลุ่มทรัพย์สินตามสถานที่และประเภทอาคาร'],
+      tenants: ['ผู้เช่า', 'ค้นหา ติดตาม และตรวจสอบประวัติผู้เช่า'],
+      expenses: ['รายจ่าย', 'ควบคุมค่าใช้จ่ายที่เกี่ยวข้องกับห้อง อาคาร และรายการเช่า'],
+      reports: ['รายงาน', 'วิเคราะห์รายรับ รายจ่าย ยอดค้าง และผลประกอบการ'],
+      accounts: ['บัญชีรับ–จ่าย', 'จัดการช่องทางรับเงินและจ่ายเงินทั้งหมด'],
+      permissions: ['ผู้ใช้งานและสิทธิ์', 'จัดการบทบาทและสิทธิ์การเข้าถึง'],
+      settings: ['ตั้งค่าระบบ', 'ประเภทข้อมูล สูตรคำนวณ และการแจ้งเตือน'],
+      audit: ['Audit Log', 'ตรวจสอบประวัติการเปลี่ยนแปลงข้อมูลสำคัญ']
+    };
+    const builtViews = ['dashboard','income','rooms','rentals','payout','services'];
+
+    // nav
+    const navDef = [
+      ['dashboard', 'Dashboard', 'dashboard', ''],
+      ['owners', 'เจ้าของทรัพย์สิน', 'owners', ''],
+      ['properties', 'อาคาร/โครงการ', 'building', ''],
+      ['rooms', 'ห้อง/ยูนิต', 'room', ''],
+      ['tenants', 'ผู้เช่า', 'tenant', ''],
+      ['rentals', 'รายการเช่า', 'rental', ''],
+      ['income', 'รายรับ', 'income', ''],
+      ['expenses', 'รายจ่าย', 'expense', ''],
+      ['payout', 'จ่ายเงินเจ้าของ', 'payout', '3'],
+      ['services', 'งานแม่บ้าน/งานซ่อม', 'service', ''],
+      ['reports', 'รายงาน', 'report', ''],
+      ['accounts', 'บัญชีรับ–จ่าย', 'account', ''],
+      ['permissions', 'ผู้ใช้งานและสิทธิ์', 'users', ''],
+      ['settings', 'ตั้งค่าระบบ', 'settings', ''],
+      ['audit', 'Audit Log', 'audit', '']
+    ];
+    const navItems = navDef.map(([id, label, ic, badge]) => {
+      const active = V === id;
+      return {
+        label, badge, icon: this.icon(ic, 18),
+        onClick: this.setView(id),
+        style: `display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:13px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:${active ? 600 : 400};text-align:left;transition:all .15s;border:1px solid ${active ? 'rgba(94,234,212,0.35)' : 'transparent'};color:${active ? '#EAF2FF' : 'rgba(234,242,255,0.66)'};background:${active ? 'linear-gradient(135deg,rgba(94,234,212,0.18),rgba(56,189,248,0.14))' : 'transparent'};box-shadow:${active ? '0 6px 18px rgba(56,189,248,0.18),inset 0 1px 0 rgba(255,255,255,0.14)' : 'none'};`,
+        iconWrap: `display:flex;color:${active ? '#7FF0D9' : 'rgba(234,242,255,0.6)'};`
+      };
+    });
+
+    // bottom nav
+    const bnDef = [['dashboard','หน้าหลัก','dashboard'],['rooms','ห้อง','room'],['income','รายรับ','income'],['payout','จ่ายเจ้าของ','payout'],['services','งานซ่อม','service']];
+    const bottomNav = bnDef.map(([id, label, ic]) => {
+      const active = V === id;
+      return { label, icon: this.icon(ic, 21), onClick: this.setView(id),
+        style: `display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 8px;border:none;background:none;cursor:pointer;font-family:inherit;color:${active ? '#7FF0D9' : 'rgba(234,242,255,0.55)'};` };
+    });
+
+    // ---------- KPI ----------
+    const kpiDef = [
+      ['รายรับเดือนนี้', 'income', '#5EEAD4', '', '1,248,500', '', '+12.4%', true, 'เทียบเดือนก่อน'],
+      ['รายจ่ายเดือนนี้', 'expense', '#FB7185', '', '386,200', '', '+5.1%', false, 'เทียบเดือนก่อน'],
+      ['ยอดสุทธิเบื้องต้น', 'payout', '#38BDF8', '', '862,300', '', '+18.2%', true, 'รายรับ − รายจ่าย'],
+      ['ผู้เช่าค้างชำระ', 'alert', '#FBBF24', '', '184,000', '', '7 ราย', false, 'ต้องติดตาม'],
+      ['ต้องจ่ายเจ้าของ', 'payout', '#A855F7', '', '542,800', '', '14 ราย', false, 'รอโอน'],
+      ['จ่ายเจ้าของแล้ว', 'payout', '#5EEAD4', '', '318,500', '', 'เดือนนี้', true, 'ตรวจสอบแล้ว'],
+      ['ค่าแม่บ้าน/ค่าซ่อม', 'service', '#FBBF24', '', '94,600', '', '23 งาน', false, 'รวมทุกอาคาร'],
+      ['รายการรอตรวจสอบ', 'audit', '#FB7185', '', '12', ' รายการ', 'ด่วน', false, 'ไม่มีสลิป/ซ้ำ']
+    ];
+    const kpis = kpiDef.map(([label, ic, c, prefix, value, suffix, delta, up, hint]) => ({
+      label, prefix: value.match(/[,\d]{3,}/) && !suffix ? '฿' : prefix, value, suffix, delta, hint,
+      icon: this.icon(ic, 18), iconWrap: this.iconChip(c),
+      deltaArrow: up ? '▲' : '▼',
+      deltaStyle: `font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:${up ? 'rgba(52,211,153,0.16)' : 'rgba(251,113,133,0.16)'};color:${up ? '#6EE7B7' : '#FDA4AF'};border:1px solid ${up ? 'rgba(52,211,153,0.35)' : 'rgba(251,113,133,0.35)'};`,
+      valueColor: `color:${c === '#FB7185' ? '#FDA4AF' : c === '#38BDF8' ? '#7FF0D9' : '#EAF2FF'};`,
+      glow: `position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,${c}33,transparent 70%);pointer-events:none;`
+    }));
+
+    const dashFilters = [
+      { label: 'เดือน', value: 'ก.ค.' }, { label: 'ปี', value: '2568' },
+      { label: 'อาคาร', value: 'ทั้งหมด' }, { label: 'เจ้าของ', value: 'ทั้งหมด' }, { label: 'สถานะจ่าย', value: 'ทั้งหมด' }
+    ];
+
+    const urgentDef = [
+      ['red','alert','ผู้เช่าค้างชำระเกินกำหนด 15 วัน','คุณสุดา แสงทอง · C-305 · แฟลตรุ่งเรือง','−18,500','#FB7185'],
+      ['gold','payout','เจ้าของยังไม่ได้รับเงิน 3 รายการ','คุณสมชาย วัฒนโสภณ · เดอะ เครสท์','142,000','#FBBF24'],
+      ['red','audit','รายรับไม่มีสลิปแนบ','RN-2568-0138 · B-410 · ศุภาลัย','9,800','#FB7185'],
+      ['purple','audit','รายการซ้ำที่น่าสงสัย','จำนวนเงิน+วันที่+เลขอ้างอิงตรงกัน','12,500','#A855F7'],
+      ['gold','rental','สัญญาเช่าใกล้หมดใน 7 วัน','คุณกิตติพงษ์ ใจดี · A-1105','—','#FBBF24']
+    ];
+    const urgentTasks = urgentDef.map(([kind, ic, title, sub, amount, color]) => ({
+      title, sub, amount, color,
+      icon: this.icon(ic, 15), dot: this.iconChip(color).replace('38px', '30px').replace('38px', '30px'),
+      amountColor: `color:${amount.indexOf('−') === 0 ? '#FDA4AF' : amount === '—' ? 'rgba(234,242,255,0.4)' : '#EAF2FF'};`
+    }));
+
+    // ---------- INCOME ----------
+    const incomeKpis = [
+      ['รายรับวันนี้', 'income', '#5EEAD4', '฿86,500'],
+      ['รายรับเดือนนี้', 'income', '#38BDF8', '฿1,248,500'],
+      ['รอตรวจสอบ', 'audit', '#FBBF24', '฿48,200'],
+      ['ไม่มีสลิป', 'alert', '#FB7185', '฿19,600'],
+      ['อาจซ้ำ', 'alert', '#A855F7', '2 รายการ']
+    ].map(([label, ic, c, value]) => ({ label, value, icon: this.icon(ic, 16), iconWrap: this.iconChip(c).replace('38px','30px').replace('38px','30px'), valueColor: `color:${c === '#5EEAD4' || c === '#38BDF8' ? '#7FF0D9' : '#EAF2FF'};` }));
+
+    const slipOk = `<span></span>`;
+    const chk = (ok) => ok
+      ? React.createElement('span', { style: { color: '#6EE7B7' } }, this.icon('income', 16))
+      : React.createElement('span', { style: { color: '#FDA4AF' } }, this.icon('alert', 16));
+    const rowBase = (flag) => `border-top:1px solid rgba(255,255,255,0.06);${flag ? 'background:rgba(251,113,133,0.06);' : ''}`;
+    const incomeDef = [
+      ['6 ก.ค. 2568','คุณกิตติพงษ์ ใจดี','A-1105','เดอะ เครสท์','ค่าเช่ารายเดือน','฿12,500','PromptPay',true,'ตรวจสอบแล้ว','green',false],
+      ['6 ก.ค. 2568','คุณศิริพร มงคล','A-1204','เดอะ เครสท์','ค่าเช่ารายเดือน','฿14,000','โอนธนาคาร',true,'ตรวจสอบแล้ว','green',false],
+      ['5 ก.ค. 2568','คุณธนา รุ่งเรือง','B-802','บ้านสวน พัทยา','เงินประกัน','฿24,000','เงินสด',false,'ต้องตรวจสอบ','gold',true],
+      ['5 ก.ค. 2568','คุณวิภา สายชล','B-410','ศุภาลัย เรส','ค่าเช่ารายเดือน','฿9,800','PromptPay',false,'ไม่มีสลิป','red',true],
+      ['4 ก.ค. 2568','คุณอนุชา พงษ์ไพร','C-305','แฟลตรุ่งเรือง','ค่าน้ำ/ค่าไฟ','฿1,850','PromptPay',true,'ตรวจสอบแล้ว','green',false],
+      ['4 ก.ค. 2568','คุณมณีรัตน์ ทองดี','A-902','เดอะ เครสท์','ค่าเช่ารายเดือน','฿12,500','โอนธนาคาร',true,'รอตรวจสอบ','gold',false],
+      ['3 ก.ค. 2568','คุณสมพงษ์ เจริญสุข','B-1105','บ้านสวน พัทยา','ค่าเช่ารายเดือน','฿16,000','PromptPay',true,'ตรวจสอบแล้ว','green',false],
+      ['3 ก.ค. 2568','คุณกาญจนา ศรีสุข','C-208','แฟลตรุ่งเรือง','ค่าทำความสะอาด','฿800','เงินสด',false,'ต้องตรวจสอบ','gold',true]
+    ];
+    const incomeRows = incomeDef.map(([date, tenant, room, building, type, amount, channel, ok, status, bk, flag]) => ({
+      date, tenant, room, building, type, amount, channel, status,
+      slip: chk(ok), badgeStyle: this.badge(bk), rowStyle: rowBase(flag)
+    }));
+
+    // ---------- ROOMS ----------
+    const statusColorMap = { 'มีผู้เช่า': '#34D399', 'ว่าง': '#38BDF8', 'ค้างชำระ': '#FB7185', 'ปิดปรับปรุง': '#FB923C' };
+    const badgeKindMap = { 'มีผู้เช่า': 'green', 'ว่าง': 'blue', 'ค้างชำระ': 'red', 'ปิดปรับปรุง': 'orange' };
+    const photoBgs = ['linear-gradient(135deg,#0e2a3a,#123)','linear-gradient(135deg,#1a2140,#0e1830)','linear-gradient(135deg,#241436,#141024)','linear-gradient(135deg,#0e2e28,#0a1a18)'];
+    const roomDef = [
+      ['A-1105','เดอะ เครสท์','คุณสมชาย วัฒนโสภณ','มีผู้เช่า','฿12,500','฿2,100','ผู้เช่า: คุณกิตติพงษ์ ใจดี','฿12,500'],
+      ['A-1204','เดอะ เครสท์','คุณสมชาย วัฒนโสภณ','มีผู้เช่า','฿14,000','฿0','ผู้เช่า: คุณศิริพร มงคล','฿14,000'],
+      ['A-902','เดอะ เครสท์','คุณพิมพ์ใจ ธีรกุล','ค้างชำระ','฿0','฿1,200','ผู้เช่า: คุณมณีรัตน์ (ค้าง 5 วัน)','฿12,500'],
+      ['B-802','บ้านสวน พัทยา','คุณอนุชา เดชา','มีผู้เช่า','฿16,000','฿4,600','ผู้เช่า: คุณธนา รุ่งเรือง','฿16,000'],
+      ['B-1105','บ้านสวน พัทยา','คุณอนุชา เดชา','มีผู้เช่า','฿16,000','฿0','ผู้เช่า: คุณสมพงษ์ เจริญสุข','฿16,000'],
+      ['B-410','ศุภาลัย เรส','คุณพิมพ์ใจ ธีรกุล','ว่าง','฿0','฿0','ห้องว่าง · พร้อมปล่อยเช่า','฿9,800'],
+      ['C-305','แฟลตรุ่งเรือง','คุณวีระ สุขสันต์','ค้างชำระ','฿0','฿850','ผู้เช่า: คุณสุดา (ค้าง 15 วัน)','฿7,500'],
+      ['C-208','แฟลตรุ่งเรือง','คุณวีระ สุขสันต์','ปิดปรับปรุง','฿0','฿8,400','กำลังซ่อมห้องน้ำ · คาดเสร็จ 12 ก.ค.','฿7,500'],
+      ['A-701','เดอะ เครสท์','คุณพิมพ์ใจ ธีรกุล','ว่าง','฿0','฿0','ห้องว่าง · พร้อมปล่อยเช่า','฿12,500']
+    ];
+    const rooms = roomDef.map((r, i) => ({
+      no: r[0], building: r[1], owner: r[2], status: r[3], income: r[4], expense: r[5], tenantLine: r[6], rent: r[7],
+      statusColor: statusColorMap[r[3]], photoBg: photoBgs[i % photoBgs.length],
+      statusBadge: this.badge(badgeKindMap[r[3]]),
+      onClick: () => this.setState({ roomId: i })
+    }));
+    const roomFilters = [{ label: 'อาคาร', value: 'ทั้งหมด' }, { label: 'สถานะ', value: 'ทั้งหมด' }, { label: 'ประเภท', value: 'ทั้งหมด' }, { label: 'ช่วงราคา', value: 'ทั้งหมด' }];
+
+    // room drawer
+    let drawerRoom = { building: '', no: '', status: '', statusBadge: this.badge('blue'), income: '', expense: '', net: '', rent: '', info: [], timeline: [] };
+    if (st.roomId != null) {
+      const r = roomDef[st.roomId];
+      const netN = (parseInt(r[4].replace(/\D/g, '')) || 0) - (parseInt(r[5].replace(/\D/g, '')) || 0);
+      drawerRoom = {
+        building: r[1], no: r[0], status: r[3], statusBadge: this.badge(badgeKindMap[r[3]]) + 'margin-top:8px;',
+        income: r[4], expense: r[5], net: '฿' + netN.toLocaleString(), rent: r[7],
+        info: [
+          { k: 'เจ้าของ', v: r[2] }, { k: 'ประเภทห้อง', v: 'สตูดิโอ 28 ตร.ม.' }, { k: 'ค่าเช่าปกติ', v: r[7] + '/เดือน' },
+          { k: 'เงินประกัน', v: '฿24,000' }, { k: 'ชั้น', v: r[0].match(/\d/) ? r[0].replace(/\D/g, '').slice(0, -2) || '1' : '—' }
+        ],
+        timeline: [
+          { title: 'รับค่าเช่าเดือน ก.ค. ' + r[4], time: '6 ก.ค. 2568 · 10:24', color: '#34D399' },
+          { title: 'บันทึกค่าซ่อมก๊อกน้ำ ' + r[5], time: '3 ก.ค. 2568 · 15:10', color: '#FB7185' },
+          { title: 'จ่ายเงินเจ้าของงวดที่แล้ว', time: '30 มิ.ย. 2568 · 09:00', color: '#38BDF8' },
+          { title: 'ต่อสัญญาเช่า 12 เดือน', time: '1 มิ.ย. 2568 · 14:30', color: '#A855F7' }
+        ]
+      };
+    }
+    const drawerTabActive = 'padding:8px 13px;border-radius:11px 11px 0 0;font-size:12.5px;font-weight:600;white-space:nowrap;color:#EAF2FF;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-bottom:none;';
+    const drawerTabIdle = 'padding:8px 13px;font-size:12.5px;white-space:nowrap;color:rgba(234,242,255,0.5);';
+    const drawerTabs = ['ภาพรวม','ข้อมูลห้อง','ผู้เช่า','รายรับ','รายจ่าย','งานซ่อม','เอกสาร'].map((label, i) => ({ label, style: i === 0 ? drawerTabActive : drawerTabIdle }));
+
+    // ---------- RENTALS ----------
+    const rentalDef = [
+      ['RN-2568-0142','คุณกิตติพงษ์ ใจดี','A-1105','เดอะ เครสท์','คุณสมชาย','1 ก.ค. – 31 ก.ค.','฿12,500','฿0','จ่ายครบ','green'],
+      ['RN-2568-0141','คุณศิริพร มงคล','A-1204','เดอะ เครสท์','คุณสมชาย','1 ก.ค. – 31 ธ.ค.','฿84,000','฿0','จ่ายครบ','green'],
+      ['RN-2568-0139','คุณมณีรัตน์ ทองดี','A-902','เดอะ เครสท์','คุณพิมพ์ใจ','1 ก.ค. – 31 ก.ค.','฿12,500','฿12,500','ยังไม่จ่าย','red'],
+      ['RN-2568-0138','คุณสุดา แสงทอง','C-305','แฟลตรุ่งเรือง','คุณวีระ','20 มิ.ย. – 19 ก.ค.','฿7,500','฿7,500','ค้างชำระ','red'],
+      ['RN-2568-0137','คุณธนา รุ่งเรือง','B-802','บ้านสวน พัทยา','คุณอนุชา','1 ก.ค. – 30 ก.ย.','฿48,000','฿16,000','จ่ายบางส่วน','gold'],
+      ['RN-2568-0135','คุณสมพงษ์ เจริญสุข','B-1105','บ้านสวน พัทยา','คุณอนุชา','1 ก.ค. – 31 ก.ค.','฿16,000','฿0','จ่ายครบ','green'],
+      ['RN-2568-0132','คุณกาญจนา ศรีสุข','C-208','แฟลตรุ่งเรือง','คุณวีระ','15 มิ.ย. – 14 ก.ค.','฿7,500','฿0','จ่ายครบ','green']
+    ];
+    const rentalRows = rentalDef.map(r => ({
+      code: r[0], tenant: r[1], room: r[2], building: r[3], owner: r[4], period: r[5], total: r[6], due: r[7], status: r[8],
+      badgeStyle: this.badge(r[9]), dueColor: `color:${r[7] === '฿0' ? 'rgba(234,242,255,0.4)' : '#FDA4AF'}`,
+      rowStyle: rowBase(r[9] === 'red')
+    }));
+    const rentalStepData = [
+      ['เลือกผู้เช่า', 'ค้นหาผู้เช่าเดิมจากระบบ หรือเพิ่มผู้เช่าใหม่', [['ผู้เช่า', 'คุณกิตติพงษ์ ใจดี', '#EAF2FF', this.icon('search',15)], ['เบอร์โทร', '081-234-5678', '#EAF2FF', ''], ['เลขบัตรประชาชน', '1-2345-67890-12-3', '#EAF2FF', ''], ['อีเมล', 'kitti@email.com', 'rgba(234,242,255,0.5)', '']]],
+      ['เลือกห้อง', 'เลือกอาคารและห้องว่าง — ระบบแสดงเจ้าของอัตโนมัติ', [['อาคาร', 'เดอะ เครสท์ สุขุมวิท', '#EAF2FF', this.icon('chevDown',15)], ['ห้อง', 'A-1105 (ว่าง)', '#EAF2FF', this.icon('chevDown',15)], ['เจ้าของ (อัตโนมัติ)', 'คุณสมชาย วัฒนโสภณ', '#7FF0D9', ''], ['ค่าเช่าปกติ', '฿12,500/เดือน', '#7FF0D9', '']]],
+      ['กำหนดเงื่อนไขเช่า', 'ระบุระยะเวลา ค่าเช่า และค่าใช้จ่ายอื่น', [['วันที่เริ่ม', '1 ก.ค. 2568', '#EAF2FF', this.icon('cal',15)], ['วันที่สิ้นสุด', '31 ก.ค. 2568', '#EAF2FF', this.icon('cal',15)], ['ค่าเช่า', '฿12,500', '#7FF0D9', ''], ['เงินประกัน', '฿24,000', '#EAF2FF', ''], ['ค่าทำความสะอาด', '฿800', '#EAF2FF', ''], ['ส่วนลด', '฿0', 'rgba(234,242,255,0.5)', '']]],
+      ['ตรวจสอบและบันทึก', 'ตรวจสอบยอดรวมก่อนยืนยัน', [['ยอดรวมทั้งสิ้น', '฿37,300', '#7FF0D9', ''], ['ต้องชำระตอนนี้', '฿37,300', '#7FF0D9', ''], ['ประเภทการเช่า', 'รายเดือน', '#EAF2FF', ''], ['สถานะ', 'รอชำระเงิน', '#FDE68A', '']]]
+    ];
+    const rSel = Math.min(st.rentalStep, 4);
+    const rentalSteps = ['เลือกผู้เช่า', 'เลือกห้อง', 'เงื่อนไขเช่า', 'ตรวจสอบ'].map((label, i) => {
+      const n = i + 1, cur = n === rSel, done = n < rSel;
+      return { label, num: done ? '✓' : n, onClick: () => this.setState({ rentalStep: n }),
+        style: `display:flex;align-items:center;gap:9px;padding:9px 15px;border-radius:12px;font-family:inherit;font-size:12.5px;font-weight:${cur ? 600 : 400};cursor:pointer;border:1px solid ${cur ? 'rgba(94,234,212,0.4)' : 'rgba(255,255,255,0.1)'};color:${cur ? '#EAF2FF' : 'rgba(234,242,255,0.55)'};background:${cur ? 'linear-gradient(135deg,rgba(94,234,212,0.16),rgba(56,189,248,0.12))' : 'rgba(255,255,255,0.03)'};`,
+        numStyle: `width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:${cur || done ? '#04121A' : 'rgba(234,242,255,0.6)'};background:${cur || done ? 'linear-gradient(135deg,#5EEAD4,#38BDF8)' : 'rgba(255,255,255,0.08)'};` };
+    });
+    const rStep = rentalStepData[rSel - 1];
+    const rentalStepFields = rStep[2].map(f => ({ label: f[0], value: f[1], color: f[2], icon: f[3] }));
+
+    // ---------- PAYOUT ----------
+    const payoutKpis = [
+      ['ยอดรอจ่ายเจ้าของ', 'payout', '#FBBF24', '฿542,800'],
+      ['จ่ายแล้วเดือนนี้', 'payout', '#5EEAD4', '฿318,500'],
+      ['เจ้าของยังไม่ได้รับ', 'owners', '#FB7185', '6 ราย'],
+      ['รอตรวจสอบ', 'audit', '#A855F7', '4 รายการ']
+    ].map(([label, ic, c, value]) => ({ label, value, icon: this.icon(ic, 16), iconWrap: this.iconChip(c).replace('38px','30px').replace('38px','30px'), valueColor: `color:${c === '#5EEAD4' ? '#7FF0D9' : '#EAF2FF'};` }));
+
+    const pSel = Math.min(st.payoutStep, 5);
+    const payoutStepMeta = [
+      ['เลือกเจ้าของ', 'ระบบแสดงห้องทั้งหมดในความดูแลของเจ้าของ'],
+      ['เลือกรายการเช่า/ห้อง', 'ระบบแสดงรายรับที่เกี่ยวข้องในงวดนี้'],
+      ['ตรวจสอบรายการหัก', 'ค่านายหน้า ค่าแม่บ้าน ค่าซ่อม ค่าโอน และอื่น ๆ'],
+      ['คำนวณยอดสุทธิ', 'รายรับรวม − รายการหัก = ยอดสุทธิจ่ายเจ้าของ'],
+      ['บันทึกการจ่าย', 'ระบุจำนวนที่จ่ายจริง ช่องทาง และแนบสลิป']
+    ];
+    const payoutSteps = payoutStepMeta.map((m, i) => {
+      const n = i + 1, cur = n === pSel, done = n < pSel;
+      return { label: m[0], num: done ? '✓' : n, onClick: () => this.setState({ payoutStep: n }),
+        style: `display:flex;align-items:center;gap:9px;padding:9px 14px;border-radius:12px;font-family:inherit;font-size:12.5px;font-weight:${cur ? 600 : 400};cursor:pointer;border:1px solid ${cur ? 'rgba(168,85,247,0.4)' : 'rgba(255,255,255,0.1)'};color:${cur ? '#EAF2FF' : 'rgba(234,242,255,0.55)'};background:${cur ? 'linear-gradient(135deg,rgba(168,85,247,0.18),rgba(56,189,248,0.12))' : 'rgba(255,255,255,0.03)'};`,
+        numStyle: `width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:${cur || done ? '#04121A' : 'rgba(234,242,255,0.6)'};background:${cur || done ? 'linear-gradient(135deg,#A855F7,#38BDF8)' : 'rgba(255,255,255,0.08)'};` };
+    });
+    const payoutShowCalc = pSel === 3 || pSel === 4;
+    const payoutShowFields = !payoutShowCalc;
+    const calcRowStyle = (bold, top) => `display:flex;align-items:center;justify-content:space-between;padding:13px 16px;font-size:13.5px;${top ? 'border-top:1px solid rgba(255,255,255,0.1);' : ''}${bold ? 'background:rgba(94,234,212,0.09);' : 'background:rgba(255,255,255,0.02);'}`;
+    const payoutCalcRows = [
+      { label: 'รายรับรวมของห้อง A-1105', amount: '฿12,500', style: calcRowStyle(false, false), labelColor: 'rgba(234,242,255,0.8)', amountColor: '#EAF2FF' },
+      { label: 'หัก ค่านายหน้า (10%)', amount: '− ฿1,250', style: calcRowStyle(false, true), labelColor: 'rgba(234,242,255,0.7)', amountColor: '#FDA4AF' },
+      { label: 'หัก ค่าแม่บ้าน', amount: '− ฿800', style: calcRowStyle(false, true), labelColor: 'rgba(234,242,255,0.7)', amountColor: '#FDA4AF' },
+      { label: 'หัก ค่าซ่อมก๊อกน้ำ', amount: '− ฿1,300', style: calcRowStyle(false, true), labelColor: 'rgba(234,242,255,0.7)', amountColor: '#FDA4AF' },
+      { label: 'หัก ค่าธรรมเนียมโอน', amount: '− ฿15', style: calcRowStyle(false, true), labelColor: 'rgba(234,242,255,0.7)', amountColor: '#FDA4AF' },
+      { label: 'ยอดสุทธิจ่ายเจ้าของ', amount: '฿9,135', style: calcRowStyle(true, true), labelColor: '#7FF0D9', amountColor: '#7FF0D9' }
+    ];
+    const payoutFieldsByStep = {
+      1: [['เจ้าของ', 'คุณสมชาย วัฒนโสภณ', '#EAF2FF', this.icon('search',15)], ['จำนวนห้องในความดูแล', '4 ห้อง', '#7FF0D9', ''], ['บัญชีรับเงิน', 'KBank · 123-4-56789', '#EAF2FF', ''], ['ยอดค้างจ่ายสะสม', '฿142,000', '#FDE68A', '']],
+      2: [['ห้อง', 'A-1105', '#EAF2FF', this.icon('chevDown',15)], ['รายการเช่า', 'RN-2568-0142', '#EAF2FF', this.icon('chevDown',15)], ['งวด', 'ก.ค. 2568', '#EAF2FF', ''], ['รายรับที่เกี่ยวข้อง', '฿12,500', '#7FF0D9', '']],
+      5: [['จำนวนที่จ่ายจริง', '฿9,135', '#7FF0D9', ''], ['วันที่จ่าย', '6 ก.ค. 2568', '#EAF2FF', this.icon('cal',15)], ['ช่องทางจ่าย', 'โอนธนาคาร', '#EAF2FF', this.icon('chevDown',15)], ['บัญชีเจ้าของ', 'KBank · 123-4-56789', '#EAF2FF', ''], ['เลขอ้างอิง', 'TXN20680706-0091', '#EAF2FF', ''], ['แนบสลิป', 'slip-9135.jpg', '#7FF0D9', this.icon('upload',15)]]
+    };
+    const payoutStepFields = (payoutFieldsByStep[pSel] || []).map(f => ({ label: f[0], value: f[1], color: f[2], icon: f[3] }));
+
+    const payoutTableDef = [
+      ['คุณสมชาย วัฒนโสภณ','A-1105 · เดอะ เครสท์','฿12,500','฿3,365','฿9,135','รอตรวจสอบ','purple'],
+      ['คุณอนุชา เดชา','B-802 · บ้านสวน พัทยา','฿16,000','฿6,200','฿9,800','จ่ายแล้ว','green'],
+      ['คุณพิมพ์ใจ ธีรกุล','A-902 · เดอะ เครสท์','฿12,500','฿2,450','฿10,050','รอจ่าย','gold'],
+      ['คุณวีระ สุขสันต์','C-208 · แฟลตรุ่งเรือง','฿7,500','฿9,250','−฿1,750','มีปัญหา','red'],
+      ['คุณสมชาย วัฒนโสภณ','A-1204 · เดอะ เครสท์','฿14,000','฿1,400','฿12,600','จ่ายแล้ว','green']
+    ];
+    const payoutRows = payoutTableDef.map(r => ({ owner: r[0], room: r[1], income: r[2], deduct: r[3], net: r[4], status: r[5], badgeStyle: this.badge(r[6]), rowStyle: rowBase(r[6] === 'red') }));
+
+    // ---------- SERVICES / KANBAN ----------
+    const initials = n => n.replace('คุณ', '').charAt(0);
+    const mkTask = (type, tb, title, room, building, assignee, cost, color, photos) => ({
+      type, title, room, building, assignee, cost, hasPhotos: photos, initial: initials(assignee),
+      color, typeBadge: this.badge(tb), icon: this.icon('image', 12)
+    });
+    const kanbanColumns = [
+      { title: 'งานใหม่', color: '#38BDF8', tasks: [
+        mkTask('ซ่อม', 'blue', 'แอร์ไม่เย็น ห้องนอน', 'A-701', 'เดอะ เครสท์', 'คุณช่างเอก', '฿—', '#38BDF8', false),
+        mkTask('ทำความสะอาด', 'purple', 'ทำความสะอาดก่อนเข้าอยู่', 'B-410', 'ศุภาลัย เรส', 'คุณแม่บ้านนก', '฿800', '#A855F7', false)
+      ]},
+      { title: 'รอดำเนินการ', color: '#FBBF24', tasks: [
+        mkTask('ซ่อม', 'blue', 'เปลี่ยนก๊อกน้ำห้องน้ำ', 'A-1105', 'เดอะ เครสท์', 'คุณช่างเอก', '฿1,300', '#FBBF24', false)
+      ]},
+      { title: 'กำลังดำเนินการ', color: '#A855F7', tasks: [
+        mkTask('ซ่อมใหญ่', 'red', 'รีโนเวทห้องน้ำ', 'C-208', 'แฟลตรุ่งเรือง', 'คุณช่างสมพร', '฿8,400', '#A855F7', true),
+        mkTask('ทำความสะอาด', 'purple', 'ทำความสะอาดรายเดือน', 'B-802', 'บ้านสวน พัทยา', 'คุณแม่บ้านนก', '฿1,200', '#A855F7', false)
+      ]},
+      { title: 'เสร็จแล้ว', color: '#34D399', tasks: [
+        mkTask('ซ่อม', 'blue', 'เปลี่ยนหลอดไฟ + ปลั๊ก', 'A-902', 'เดอะ เครสท์', 'คุณช่างเอก', '฿650', '#34D399', true)
+      ]},
+      { title: 'รอตรวจสอบ', color: '#FB7185', tasks: [
+        mkTask('ทำความสะอาด', 'purple', 'ทำความสะอาด Big Cleaning', 'A-1204', 'เดอะ เครสท์', 'คุณแม่บ้านนก', '฿2,400', '#FB7185', true)
+      ]},
+      { title: 'ปิดงานแล้ว', color: '#94A3B8', tasks: [
+        mkTask('ซ่อม', 'gray', 'ซ่อมประตูห้อง', 'B-1105', 'บ้านสวน พัทยา', 'คุณช่างสมพร', '฿480', '#94A3B8', true)
+      ]}
+    ].map(c => ({ ...c, count: c.tasks.length }));
+
+    return {
+      // shell
+      pageTitle: titles[V][0], pageSubtitle: titles[V][1],
+      navItems, bottomNav,
+      iconSearch: this.icon('search', 17), iconPlus: this.icon('plus', 17), iconBell: this.icon('bell', 18),
+      iconExport: this.icon('export', 15), iconRefresh: this.icon('refresh', 15), iconFilter: this.icon('filter', 15),
+      iconAlert: this.icon('alert', 16), iconPayout: this.icon('payout', 17), iconIncome: this.icon('income', 18),
+      iconCal: this.icon('cal', 15), iconUpload: this.icon('upload', 26), iconImage: this.icon('image', 12),
+      chevDown: this.icon('chevDown', 14),
+      openIncome: () => this.setState({ incomeModalOpen: true }),
+      closeIncome: () => this.setState({ incomeModalOpen: false }),
+      incomeModalOpen: st.incomeModalOpen,
+      goDashboard: this.setView('dashboard'),
+      // view flags
+      isDashboard: V === 'dashboard', isIncome: V === 'income', isRooms: V === 'rooms',
+      isRentals: V === 'rentals', isPayout: V === 'payout', isServices: V === 'services',
+      isPlaceholder: builtViews.indexOf(V) === -1,
+      placeholderIcon: this.icon((navDef.find(n => n[0] === V) || ['','','dashboard'])[2], 30),
+      // dashboard
+      kpis, dashFilters, urgentTasks,
+      lineChart: this.lineChart(), donutChart: this.donutChart(), barChart: this.barChart(), hbarChart: this.hbarChart(),
+      // income
+      incomeKpis, incomeRows,
+      // rooms
+      rooms, roomFilters, drawerRoom, drawerTabs, roomDrawerOpen: st.roomId != null,
+      closeRoom: () => this.setState({ roomId: null }),
+      // rentals
+      rentalRows, rentalCreateOpen: st.rentalCreateOpen, rentalCreateClosed: !st.rentalCreateOpen,
+      openRentalCreate: () => this.setState({ rentalCreateOpen: true }),
+      closeRentalCreate: () => this.setState({ rentalCreateOpen: false }),
+      rentalSteps, rentalStepTitle: rStep[0], rentalStepDesc: rStep[1], rentalStepFields,
+      rentalNextLabel: rSel === 4 ? 'บันทึกรายการเช่า' : 'ถัดไป',
+      // payout
+      payoutKpis, payoutSteps, payoutRows,
+      payoutStepTitle: payoutStepMeta[pSel - 1][0], payoutStepDesc: payoutStepMeta[pSel - 1][1],
+      payoutShowCalc, payoutShowFields, payoutCalcRows, payoutStepFields,
+      payoutNextLabel: pSel === 5 ? 'ยืนยันการจ่าย' : 'ถัดไป',
+      // services
+      kanbanColumns
+    };
+  }
+}
+</script>
+</body>
+</html>

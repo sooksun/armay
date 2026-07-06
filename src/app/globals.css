@@ -1,0 +1,90 @@
+/* Crystal Ledger — global styles (ported from the design comp) */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  font-family: "Noto Sans Thai", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #07111f;
+  color: #eaf2ff;
+}
+
+a {
+  color: #7dd3fc;
+  text-decoration: none;
+}
+a:hover {
+  color: #bae6fd;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@keyframes cl-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes cl-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Responsive shell: sidebar on desktop, bottom nav on mobile */
+[data-shell-bottomnav] {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  [data-shell-sidebar] {
+    display: none !important;
+  }
+  [data-shell-bottomnav] {
+    display: flex !important;
+  }
+  [data-shell-main] {
+    padding-bottom: 92px !important;
+  }
+  [data-quickadd-label] {
+    display: none !important;
+  }
+  [data-topsearch] {
+    display: none !important;
+  }
+}
+
+/* remove default button styling baseline so inline styles win */
+button {
+  font-family: inherit;
+}

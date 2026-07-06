@@ -1,0 +1,175 @@
+"use client";
+
+import { Icon } from "@/components/Icon";
+import { MiniKpiCard } from "@/components/MiniKpiCard";
+import { badge } from "@/lib/theme";
+import { INCOME_KPIS, INCOME_ROWS } from "@/lib/mock";
+import { useUI } from "@/lib/ui-context";
+
+const th = (align: "left" | "right" | "center" = "left"): React.CSSProperties => ({
+  textAlign: align,
+  padding: "12px 16px",
+  fontWeight: 600,
+  color: "rgba(234,242,255,0.6)",
+  fontSize: 12,
+  whiteSpace: "nowrap",
+});
+
+const softBtn: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 7,
+  padding: "8px 13px",
+  borderRadius: 11,
+  border: "1px solid rgba(255,255,255,0.14)",
+  background: "rgba(255,255,255,0.05)",
+  color: "#EAF2FF",
+  fontFamily: "inherit",
+  fontSize: 12.5,
+  cursor: "pointer",
+};
+
+export default function IncomePage() {
+  const { openIncome } = useUI();
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16 }}>
+        {INCOME_KPIS.map((k) => (
+          <MiniKpiCard key={k.label} kpi={k} />
+        ))}
+      </div>
+
+      <div
+        style={{
+          borderRadius: 22,
+          overflow: "hidden",
+          background: "rgba(255,255,255,0.05)",
+          backdropFilter: "blur(22px)",
+          WebkitBackdropFilter: "blur(22px)",
+          border: "1px solid rgba(255,255,255,0.12)",
+          boxShadow: "0 18px 44px rgba(0,0,0,0.3)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 10,
+            padding: "15px 18px",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          <div style={{ fontWeight: 600, fontSize: 14.5 }}>รายการรับเงิน</div>
+          <div style={{ display: "flex", gap: 8, marginLeft: "auto", flexWrap: "wrap" }}>
+            <button style={softBtn}>
+              <Icon name="filter" size={15} />
+              กรองข้อมูล
+            </button>
+            <button style={{ ...softBtn, fontWeight: 600, border: "1px solid rgba(255,255,255,0.16)" }}>
+              <Icon name="export" size={15} />
+              Export
+            </button>
+            <button
+              onClick={openIncome}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 7,
+                padding: "8px 15px",
+                borderRadius: 11,
+                border: "1px solid rgba(255,255,255,0.28)",
+                color: "#04121A",
+                fontFamily: "inherit",
+                fontSize: 12.5,
+                fontWeight: 700,
+                cursor: "pointer",
+                background: "linear-gradient(135deg,#5EEAD4,#38BDF8)",
+                boxShadow: "0 6px 16px rgba(56,189,248,0.4)",
+              }}
+            >
+              <Icon name="plus" size={15} />
+              บันทึกรับเงิน
+            </button>
+          </div>
+        </div>
+
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 920 }}>
+            <thead>
+              <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+                <th style={th("left")}>วันที่รับเงิน</th>
+                <th style={th("left")}>ผู้เช่า / ห้อง</th>
+                <th style={th("left")}>ประเภท</th>
+                <th style={th("right")}>จำนวนเงิน</th>
+                <th style={th("left")}>ช่องทาง</th>
+                <th style={th("center")}>สลิป</th>
+                <th style={th("left")}>สถานะ</th>
+                <th style={{ padding: "12px 16px" }} />
+              </tr>
+            </thead>
+            <tbody>
+              {INCOME_ROWS.map((r, i) => (
+                <tr
+                  key={i}
+                  style={{
+                    borderTop: "1px solid rgba(255,255,255,0.06)",
+                    background: r.flag ? "rgba(251,113,133,0.06)" : undefined,
+                  }}
+                >
+                  <td style={{ padding: "13px 16px", whiteSpace: "nowrap", color: "rgba(234,242,255,0.85)" }}>{r.date}</td>
+                  <td style={{ padding: "13px 16px" }}>
+                    <div style={{ fontWeight: 600 }}>{r.tenant}</div>
+                    <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>
+                      {r.room} · {r.building}
+                    </div>
+                  </td>
+                  <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.8)" }}>{r.type}</td>
+                  <td
+                    style={{
+                      padding: "13px 16px",
+                      textAlign: "right",
+                      fontFamily: "Sora,sans-serif",
+                      fontWeight: 600,
+                      color: "#7FF0D9",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {r.amount}
+                  </td>
+                  <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.75)", whiteSpace: "nowrap" }}>{r.channel}</td>
+                  <td style={{ padding: "13px 16px", textAlign: "center" }}>
+                    <span style={{ color: r.slipOk ? "#6EE7B7" : "#FDA4AF", display: "inline-flex" }}>
+                      <Icon name={r.slipOk ? "income" : "alert"} size={16} />
+                    </span>
+                  </td>
+                  <td style={{ padding: "13px 16px" }}>
+                    <span style={badge(r.badge)}>{r.status}</span>
+                  </td>
+                  <td style={{ padding: "13px 16px", textAlign: "right" }}>
+                    <button
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: 9,
+                        border: "1px solid rgba(255,255,255,0.16)",
+                        background: "rgba(255,255,255,0.06)",
+                        color: "#EAF2FF",
+                        fontFamily: "inherit",
+                        fontSize: 11.5,
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      รายละเอียด
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
