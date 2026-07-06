@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Drawer, InfoRow, InfoSection } from "@/components/shared/Drawer";
 import { badge } from "@/lib/theme";
 import { rentalsByTenant, type Tenant } from "@/lib/mock";
@@ -19,6 +19,11 @@ export function TenantDrawer({
   onDelete: (tenant: Tenant) => void;
 }) {
   const [tab, setTab] = useState(0);
+
+  // reset to the first tab whenever a different record opens
+  useEffect(() => {
+    setTab(0);
+  }, [tenant?.id]);
 
   if (!tenant) return null;
 

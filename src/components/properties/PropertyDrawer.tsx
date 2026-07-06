@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Drawer, StatBox, InfoRow, InfoSection } from "@/components/shared/Drawer";
 import { badge, fmtTHB, parseAmount } from "@/lib/theme";
 import { roomsByProperty, ROOM_BADGE_KIND, type Property } from "@/lib/mock";
@@ -19,6 +19,11 @@ export function PropertyDrawer({
   onDelete: (property: Property) => void;
 }) {
   const [tab, setTab] = useState(0);
+
+  // reset to the first tab whenever a different record opens
+  useEffect(() => {
+    setTab(0);
+  }, [property?.id]);
 
   if (!property) return null;
 

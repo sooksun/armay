@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Drawer, StatBox, InfoRow, InfoSection } from "@/components/shared/Drawer";
 import { badge, fmtTHB } from "@/lib/theme";
 import {
@@ -27,6 +27,11 @@ export function OwnerDrawer({
   onDelete: (owner: Owner) => void;
 }) {
   const [tab, setTab] = useState(0);
+
+  // reset to the first tab whenever a different record opens
+  useEffect(() => {
+    setTab(0);
+  }, [owner?.id]);
 
   if (!owner) return null;
 

@@ -428,6 +428,10 @@ export const OWNERS: Owner[] = [
   },
 ];
 
+// TODO(backend): these relation helpers match by Thai name string because the mock
+// arrays share names, not ids. When this moves to Prisma, key on ownerId/propertyId/
+// tenantId foreign keys instead — otherwise editing a record's name silently detaches
+// its rooms/payouts/rentals AND disables the name-based delete guards.
 export function roomsByOwner(ownerName: string): Room[] {
   return ROOMS.filter((r) => r.owner === ownerName);
 }
