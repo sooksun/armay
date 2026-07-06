@@ -668,3 +668,71 @@ export function rentalsByTenant(tenantName: string): RentalRow[] {
 export function latestRentalByTenant(tenantName: string): RentalRow | undefined {
   return rentalsByTenant(tenantName)[0];
 }
+
+// ---------- PAYMENT ACCOUNTS ----------
+export type AccountType = "รับผู้เช่า" | "จ่ายเจ้าของ" | "ส่วนตัว" | "เงินสด";
+export type AccountStatus = "ACTIVE" | "INACTIVE";
+
+export type PaymentAccountRecord = {
+  id: number;
+  accountName: string;
+  bankName: string;
+  accountNumber: string;
+  accountHolderName: string;
+  promptpayId: string;
+  accountType: AccountType;
+  status: AccountStatus;
+};
+
+export const ACCOUNT_TYPE_OPTIONS: AccountType[] = ["รับผู้เช่า", "จ่ายเจ้าของ", "ส่วนตัว", "เงินสด"];
+
+export const PAYMENT_ACCOUNTS: PaymentAccountRecord[] = [
+  {
+    id: 1,
+    accountName: "บัญชีรับเงินผู้เช่า",
+    bankName: "KBank",
+    accountNumber: "123-4-56789",
+    accountHolderName: "บจ. คริสตัล เลดเจอร์",
+    promptpayId: "088-123-4567",
+    accountType: "รับผู้เช่า",
+    status: "ACTIVE",
+  },
+  {
+    id: 2,
+    accountName: "บัญชีจ่ายเจ้าของ",
+    bankName: "KBank",
+    accountNumber: "123-4-56789",
+    accountHolderName: "บจ. คริสตัล เลดเจอร์",
+    promptpayId: "",
+    accountType: "จ่ายเจ้าของ",
+    status: "ACTIVE",
+  },
+  {
+    id: 3,
+    accountName: "PromptPay ธุรกิจ",
+    bankName: "",
+    accountNumber: "",
+    accountHolderName: "บจ. คริสตัล เลดเจอร์",
+    promptpayId: "088-123-4567",
+    accountType: "รับผู้เช่า",
+    status: "ACTIVE",
+  },
+  {
+    id: 4,
+    accountName: "เงินสดสำนักงาน",
+    bankName: "",
+    accountNumber: "",
+    accountHolderName: "",
+    promptpayId: "",
+    accountType: "เงินสด",
+    status: "ACTIVE",
+  },
+];
+
+// Matches by accountType/promptpayId/bankName rather than accountName — accountName is
+// free-text and "เงินสดสำนักงาน" !== "เงินสด", so name-equality would silently mis-bucket it.
+export function incomeRowsByChannel(account: PaymentAccountRecord): IncomeRow[] {
+  if (account.accountType === "เงินสด") return INCOME_ROWS.filter((r) => r.channel === "เงินสด");
+  if (account.promptpayId && !account.bankName) return INCOME_ROWS.filter((r) => r.channel === "PromptPay");
+  return INCOME_ROWS.filter((r) => r.channel === "โอนธนาคาร");
+}
