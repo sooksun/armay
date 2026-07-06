@@ -1,4 +1,5 @@
 import type { IconName } from "@/components/Icon";
+import { parseAmount } from "@/lib/theme";
 import type { BadgeKind } from "@/lib/theme";
 
 /** Mock data ported verbatim from the Crystal Ledger design comp. */
@@ -343,4 +344,110 @@ export const KANBAN_COLUMNS: KanbanColumn[] = [
 
 export function initials(name: string): string {
   return name.replace("คุณ", "").charAt(0);
+}
+
+// ---------- OWNERS ----------
+export type OwnerStatus = "ACTIVE" | "INACTIVE";
+
+export type Owner = {
+  id: number;
+  ownerCode: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  lineId: string;
+  address: string;
+  bankName: string;
+  bankAccountNumber: string;
+  bankAccountName: string;
+  promptpayId: string;
+  note: string;
+  status: OwnerStatus;
+};
+
+export const OWNERS: Owner[] = [
+  {
+    id: 1,
+    ownerCode: "OWN-0001",
+    fullName: "คุณสมชาย วัฒนโสภณ",
+    phone: "081-111-2222",
+    email: "somchai.w@email.com",
+    lineId: "somchai_w",
+    address: "99/1 ถ.สุขุมวิท แขวงคลองตัน เขตคลองเตย กรุงเทพฯ 10110",
+    bankName: "KBank",
+    bankAccountNumber: "123-4-56789",
+    bankAccountName: "สมชาย วัฒนโสภณ",
+    promptpayId: "081-111-2222",
+    note: "",
+    status: "ACTIVE",
+  },
+  {
+    id: 2,
+    ownerCode: "OWN-0002",
+    fullName: "คุณพิมพ์ใจ ธีรกุล",
+    phone: "082-222-3333",
+    email: "pimjai.t@email.com",
+    lineId: "pimjai_t",
+    address: "45 ซ.สุขุมวิท 71 แขวงพระโขนงเหนือ เขตวัฒนา กรุงเทพฯ 10110",
+    bankName: "SCB",
+    bankAccountNumber: "234-5-67890",
+    bankAccountName: "พิมพ์ใจ ธีรกุล",
+    promptpayId: "082-222-3333",
+    note: "",
+    status: "ACTIVE",
+  },
+  {
+    id: 3,
+    ownerCode: "OWN-0003",
+    fullName: "คุณอนุชา เดชา",
+    phone: "083-333-4444",
+    email: "anucha.d@email.com",
+    lineId: "anucha_d",
+    address: "12 หมู่ 4 ต.หนองปรือ อ.บางละมุง จ.ชลบุรี 20150",
+    bankName: "BBL",
+    bankAccountNumber: "345-6-78901",
+    bankAccountName: "อนุชา เดชา",
+    promptpayId: "083-333-4444",
+    note: "",
+    status: "ACTIVE",
+  },
+  {
+    id: 4,
+    ownerCode: "OWN-0004",
+    fullName: "คุณวีระ สุขสันต์",
+    phone: "084-444-5555",
+    email: "weera.s@email.com",
+    lineId: "weera_s",
+    address: "78 ถ.รังสิต-นครนายก ต.ประชาธิปัตย์ อ.ธัญบุรี จ.ปทุมธานี 12130",
+    bankName: "KTB",
+    bankAccountNumber: "456-7-89012",
+    bankAccountName: "วีระ สุขสันต์",
+    promptpayId: "084-444-5555",
+    note: "ติดต่อยากช่วงเย็น",
+    status: "ACTIVE",
+  },
+];
+
+export function roomsByOwner(ownerName: string): Room[] {
+  return ROOMS.filter((r) => r.owner === ownerName);
+}
+
+export function monthlyIncomeByOwner(ownerName: string): number {
+  return roomsByOwner(ownerName).reduce((sum, r) => sum + parseAmount(r.income), 0);
+}
+
+export function payoutsByOwner(ownerName: string): PayoutRow[] {
+  return PAYOUT_ROWS.filter((r) => r.owner === ownerName);
+}
+
+export function pendingPayoutTotal(ownerName: string): number {
+  return payoutsByOwner(ownerName)
+    .filter((r) => r.status !== "จ่ายแล้ว")
+    .reduce((sum, r) => sum + parseAmount(r.net), 0);
+}
+
+export function paidPayoutTotal(ownerName: string): number {
+  return payoutsByOwner(ownerName)
+    .filter((r) => r.status === "จ่ายแล้ว")
+    .reduce((sum, r) => sum + parseAmount(r.net), 0);
 }
