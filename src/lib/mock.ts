@@ -451,3 +451,92 @@ export function paidPayoutTotal(ownerName: string): number {
     .filter((r) => r.status === "จ่ายแล้ว")
     .reduce((sum, r) => sum + parseAmount(r.net), 0);
 }
+
+// ---------- PROPERTIES ----------
+export type PropertyStatus = "ACTIVE" | "INACTIVE";
+
+export type Property = {
+  id: number;
+  propertyCode: string;
+  propertyName: string;
+  propertyType: string;
+  address: string;
+  province: string;
+  district: string;
+  subdistrict: string;
+  contactName: string;
+  contactPhone: string;
+  note: string;
+  monthlyIncome: number;
+  status: PropertyStatus;
+};
+
+export const PROPERTY_TYPE_OPTIONS = ["คอนโด", "แฟลต", "บ้านพัก", "อาคารพาณิชย์", "หอพัก", "อื่นๆ"];
+
+// propertyName MUST match ROOMS[].building exactly — roomsByProperty() filters on it.
+export const PROPERTIES: Property[] = [
+  {
+    id: 1,
+    propertyCode: "PPT-0001",
+    propertyName: "เดอะ เครสท์",
+    propertyType: "คอนโด",
+    address: "88 ถ.สุขุมวิท",
+    province: "กรุงเทพมหานคร",
+    district: "วัฒนา",
+    subdistrict: "คลองตันเหนือ",
+    contactName: "ฝ่ายนิติบุคคล เดอะ เครสท์",
+    contactPhone: "02-111-2222",
+    note: "",
+    monthlyIncome: 468000,
+    status: "ACTIVE",
+  },
+  {
+    id: 2,
+    propertyCode: "PPT-0002",
+    propertyName: "บ้านสวน พัทยา",
+    propertyType: "บ้านพัก",
+    address: "12 หมู่ 4",
+    province: "ชลบุรี",
+    district: "บางละมุง",
+    subdistrict: "หนองปรือ",
+    contactName: "คุณอนุชา เดชา",
+    contactPhone: "083-333-4444",
+    note: "",
+    monthlyIncome: 352000,
+    status: "ACTIVE",
+  },
+  {
+    id: 3,
+    propertyCode: "PPT-0003",
+    propertyName: "แฟลตรุ่งเรือง",
+    propertyType: "แฟลต",
+    address: "23 ถ.รุ่งเรือง",
+    province: "กรุงเทพมหานคร",
+    district: "บางกะปิ",
+    subdistrict: "คลองจั่น",
+    contactName: "คุณวีระ สุขสันต์",
+    contactPhone: "084-444-5555",
+    note: "",
+    monthlyIncome: 246000,
+    status: "ACTIVE",
+  },
+  {
+    id: 4,
+    propertyCode: "PPT-0004",
+    propertyName: "ศุภาลัย เรส",
+    propertyType: "คอนโด",
+    address: "56 ถ.ศรีนครินทร์",
+    province: "กรุงเทพมหานคร",
+    district: "สวนหลวง",
+    subdistrict: "สวนหลวง",
+    contactName: "ฝ่ายนิติบุคคล ศุภาลัย",
+    contactPhone: "02-222-3333",
+    note: "",
+    monthlyIncome: 182000,
+    status: "ACTIVE",
+  },
+];
+
+export function roomsByProperty(propertyName: string): Room[] {
+  return ROOMS.filter((r) => r.building === propertyName);
+}
