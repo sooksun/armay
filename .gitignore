@@ -30,3 +30,6 @@ next-env.d.ts
 # uploads (local disk attachments)
 /uploads/*
 !/uploads/.gitkeep
+
+# git worktrees (local dev isolation, not part of the repo)
+/.worktrees/
