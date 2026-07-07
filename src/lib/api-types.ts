@@ -215,7 +215,12 @@ export type PayoutSummaryDTO = { pending: string; paidMonth: string; ownersUnpai
 export type PayoutListDTO = { rows: PayoutDTO[]; summary: PayoutSummaryDTO };
 
 export type PayoutExpenseLineDTO = { sourceId: number; label: string; amount: number };
-export type PayoutPreviewDTO = { gross: number; ownerExpenses: PayoutExpenseLineDTO[] };
+export type PayoutPreviewDTO = {
+  gross: number;
+  ownerExpenses: PayoutExpenseLineDTO[];
+  /** auto-suggested commission (last payout's ratio for this owner, fallback 10%) */
+  suggestedCommission: number;
+};
 
 // ---------- DASHBOARD & REPORTS ----------
 

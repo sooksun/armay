@@ -63,3 +63,9 @@
 - **Context**: PRD บังคับว่ารายการที่อนุมัติแล้วห้ามแก้/ลบตรง (FR-061) เพื่อความน่าเชื่อถือของตัวเลข
 - **Decision**: `verification.service.ts` คุม transition (`DRAFT→PENDING→VERIFIED/NEEDS_FIX/PROBLEM/CANCELLED`); `assertMutable()` บล็อกการแก้ VERIFIED; การเปลี่ยนแปลงหลังอนุมัติทำผ่าน **adjustment** (รายการใหม่) + Audit Log; อนุมัติได้เฉพาะ ADMIN
 - **Consequences**: (+) ตัวเลขตรวจสอบย้อนหลังได้, ป้องกันแก้ทับ. (−) UX การแก้รายการที่อนุมัติแล้วซับซ้อนขึ้น (ต้องสร้าง adjustment)
+
+## ADR-011 — Auto-input จากสลิปฝั่ง client (pdfjs-dist / jsQR / tesseract.js)
+
+- **Context**: ผู้ใช้ต้องการให้ระบบกรอกฟอร์มอัตโนมัติมากที่สุด รวมถึงอ่าน จำนวนเงิน/วันที่โอน/เลขอ้างอิง จากไฟล์สลิป (รูปภาพ/PDF) ตอนบันทึกรับเงิน — PRD เดิมกำหนด OCR เป็น out-of-scope v1 แต่ product owner สั่งเพิ่มภายหลัง (7 ก.ค. 2569)
+- **Decision**: ประมวลผล **ฝั่ง client ทั้งหมด** (ไม่มี egress ของไฟล์สลิป) ผ่าน `lib/slip/{parse,extract}.ts`; lazy-load 3 ไลบรารีเมื่อผู้ใช้แนบไฟล์เท่านั้น — `pdfjs-dist` (text layer ของ PDF สลิป), `jsqr` (mini-QR บนสลิป → เลขอ้างอิง), `tesseract.js` eng (OCR ตัวเลข/วันที่จากรูป; โมเดลโหลดจาก CDN ครั้งแรก). ตัว parser (`parseSlipText`) เป็น pure function มี unit test แยก
+- **Consequences**: (+) ไฟล์การเงินไม่ออกจากเครื่อง, ไม่มีค่า API, bundle หลักไม่บวม (dynamic import). (−) OCR รูปเป็น best-effort (ผู้ใช้ต้องตรวจก่อนบันทึก — UI ระบุชัด), tesseract ต้องการอินเทอร์เน็ตครั้งแรกเพื่อโหลดโมเดล

@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FieldsGrid, SelectField, TextField, TextAreaField } from "@/components/shared/FormModal";
-import { fmtTHB } from "@/lib/theme";
-import { todayBEDate } from "@/lib/date";
+import { fmtTHB, parseAmount } from "@/lib/theme";
+import { todayBEDate, parseThaiBEDate, formatBEDate } from "@/lib/date";
 import { apiGet, apiSend } from "@/lib/api-client";
 import type { TenantDTO, RoomDTO } from "@/lib/api-types";
 
@@ -12,6 +12,18 @@ const RENTAL_TYPE_OPTIONS = [
   { value: "DAILY", label: "รายวัน" },
   { value: "YEARLY", label: "รายปี" },
 ];
+
+/** auto: end date from start + type (MONTHLY -> +1mo −1d, YEARLY -> +1y −1d, DAILY -> +1d) */
+function computeEndBE(startBE: string, rentalType: string): string {
+  const d = parseThaiBEDate(startBE);
+  const end =
+    rentalType === "DAILY"
+      ? new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1))
+      : rentalType === "YEARLY"
+        ? new Date(Date.UTC(d.getUTCFullYear() + 1, d.getUTCMonth(), d.getUTCDate() - 1))
+        : new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate() - 1));
+  return formatBEDate(end);
+}
 
 type RentalDraft = {
   tenantId: string;
@@ -34,7 +46,7 @@ function blankDraft(): RentalDraft {
     roomId: "",
     rentalType: "MONTHLY",
     startDate: todayBEDate(),
-    endDate: "",
+    endDate: computeEndBE(todayBEDate(), "MONTHLY"),
     rentAmount: "",
     depositAmount: "",
     cleaningFee: "",
@@ -73,6 +85,32 @@ export function RentalCreateForm({ onClose, onCreated }: { onClose: () => void; 
 
   const set = (patch: Partial<RentalDraft>) => setDraft((d) => ({ ...d, ...patch }));
   const digits = (v: string) => v.replace(/\D/g, "");
+  const endTouched = useRef(false); // user edited end date manually -> stop auto-computing
+  const lastAutoRent = useRef("");
+
+  /** auto: picking a room fills the rent from the room's default price */
+  function handleRoomChange(v: string) {
+    const rm = rooms.find((r) => String(r.id) === v);
+    setDraft((prev) => {
+      const next = { ...prev, roomId: v };
+      const rent = rm ? parseAmount(rm.rent) : 0;
+      const untouched = prev.rentAmount === "" || prev.rentAmount === lastAutoRent.current;
+      if (rent > 0 && untouched) {
+        next.rentAmount = String(rent);
+        lastAutoRent.current = next.rentAmount;
+      }
+      return next;
+    });
+  }
+
+  /** auto: keep end date in sync with start/type until the user edits it directly */
+  function handleStartOrType(patch: { startDate?: string; rentalType?: string }) {
+    setDraft((prev) => {
+      const next = { ...prev, ...patch };
+      if (!endTouched.current) next.endDate = computeEndBE(next.startDate, next.rentalType);
+      return next;
+    });
+  }
 
   async function handleSubmit() {
     if (!draft.tenantId) return alert("กรุณาเลือกผู้เช่า");
@@ -108,11 +146,19 @@ export function RentalCreateForm({ onClose, onCreated }: { onClose: () => void; 
       <div style={{ padding: 20, borderRadius: 18, background: "rgba(var(--surface-rgb),0.04)", border: "1px solid rgba(var(--surface-rgb),0.09)" }}>
         <FieldsGrid>
           <SelectField label="ผู้เช่า" value={draft.tenantId} onChange={(v) => set({ tenantId: v })} options={tenantOptions} />
-          <SelectField label="ห้อง (เจ้าของ/อาคารตามห้อง)" value={draft.roomId} onChange={(v) => set({ roomId: v })} options={roomOptions} />
-          <SelectField label="ประเภทการเช่า" value={draft.rentalType} onChange={(v) => set({ rentalType: v })} options={RENTAL_TYPE_OPTIONS} />
+          <SelectField label="ห้อง (เจ้าของ/อาคาร/ค่าเช่าตามห้อง)" value={draft.roomId} onChange={handleRoomChange} options={roomOptions} />
+          <SelectField label="ประเภทการเช่า" value={draft.rentalType} onChange={(v) => handleStartOrType({ rentalType: v })} options={RENTAL_TYPE_OPTIONS} />
           <TextField label="ช่องทางการจอง" value={draft.bookingChannel} onChange={(v) => set({ bookingChannel: v })} placeholder="Walk-in, Agoda, ฯลฯ" />
-          <TextField label="วันเริ่มเช่า" value={draft.startDate} onChange={(v) => set({ startDate: v })} placeholder="1 ก.ค. 2569" />
-          <TextField label="วันสิ้นสุด" value={draft.endDate} onChange={(v) => set({ endDate: v })} placeholder="31 ก.ค. 2569" />
+          <TextField label="วันเริ่มเช่า" value={draft.startDate} onChange={(v) => handleStartOrType({ startDate: v })} placeholder="1 ก.ค. 2569" />
+          <TextField
+            label="วันสิ้นสุด (คำนวณอัตโนมัติ)"
+            value={draft.endDate}
+            onChange={(v) => {
+              endTouched.current = true;
+              set({ endDate: v });
+            }}
+            placeholder="31 ก.ค. 2569"
+          />
           <TextField label="ค่าเช่า (บาท)" value={draft.rentAmount} onChange={(v) => set({ rentAmount: digits(v) })} placeholder="12500" />
           <TextField label="เงินประกัน (บาท)" value={draft.depositAmount} onChange={(v) => set({ depositAmount: digits(v) })} placeholder="24000" />
           <TextField label="ค่าทำความสะอาด (บาท)" value={draft.cleaningFee} onChange={(v) => set({ cleaningFee: digits(v) })} placeholder="500" />

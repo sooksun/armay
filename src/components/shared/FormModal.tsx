@@ -25,12 +25,15 @@ export function TextField({
   onChange,
   placeholder,
   type = "text",
+  listId,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   type?: string;
+  /** id of a <datalist> for autocomplete suggestions */
+  listId?: string;
 }) {
   return (
     <div>
@@ -39,6 +42,7 @@ export function TextField({
         type={type}
         value={value}
         placeholder={placeholder}
+        list={listId}
         onChange={(e) => onChange(e.target.value)}
         style={fieldBoxStyle}
       />

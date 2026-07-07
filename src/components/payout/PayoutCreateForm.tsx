@@ -58,6 +58,12 @@ export function PayoutCreateForm({ onClose, onCreated }: { onClose: () => void; 
       const data = await apiGet<PayoutPreviewDTO>(`/api/payouts/preview${qs}`);
       setGross(String(Math.round(data.gross)));
       setLines(data.ownerExpenses.map((e) => ({ ...e, checked: true })));
+      // auto: commission from the owner's usual rate; bank account from the owner profile
+      if (!commission && data.suggestedCommission > 0) setCommission(String(data.suggestedCommission));
+      if (!ownerBankAccount && selectedOwner) {
+        const bank = [selectedOwner.bankName, selectedOwner.bankAccountNumber].filter(Boolean).join(" ");
+        if (bank) setOwnerBankAccount(bank);
+      }
       setPreviewed(true);
     } catch (e) {
       alert(e instanceof Error ? e.message : "คำนวณไม่สำเร็จ");

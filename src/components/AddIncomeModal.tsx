@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { FieldsGrid, SelectField, TextField } from "@/components/shared/FormModal";
 import { ImageUpload } from "@/components/shared/ImageUpload";
-import { INCOME_TYPE, PAYMENT_METHOD } from "@/lib/labels";
+import { INCOME_TYPE, PAYMENT_METHOD, ACCOUNT_TYPE } from "@/lib/labels";
 import { todayBEDate } from "@/lib/date";
+import { parseAmount } from "@/lib/theme";
+import { extractFromSlipFile } from "@/lib/slip/extract";
 import { apiGet, apiSend } from "@/lib/api-client";
 import type { RentalDTO, AccountDTO } from "@/lib/api-types";
 import { useUI } from "@/lib/ui-context";
@@ -42,12 +44,17 @@ export function AddIncomeModal() {
   const [contracts, setContracts] = useState<RentalDTO[]>([]);
   const [accounts, setAccounts] = useState<AccountDTO[]>([]);
   const [saving, setSaving] = useState(false);
+  const [slipStatus, setSlipStatus] = useState<string | null>(null);
+  const lastAutoAmount = useRef(""); // remembers auto-filled amount so we never clobber user edits
 
   const loadOptions = useCallback(async () => {
     try {
       const [rent, acc] = await Promise.all([apiGet<RentalDTO[]>("/api/rentals"), apiGet<AccountDTO[]>("/api/payment-accounts")]);
       setContracts(rent);
       setAccounts(acc);
+      // auto: default receiving account = first "รับผู้เช่า" account
+      const preferred = acc.find((a) => a.accountType === ACCOUNT_TYPE.RECEIVE_TENANT) ?? acc[0];
+      if (preferred) setDraft((prev) => (prev.receivingAccountId ? prev : { ...prev, receivingAccountId: String(preferred.id) }));
     } catch (e) {
       console.error(e);
     }
@@ -57,10 +64,58 @@ export function AddIncomeModal() {
     if (!incomeOpen) return;
     setDraft(blankDraft());
     setSlip(null);
+    setSlipStatus(null);
+    lastAutoAmount.current = "";
     void loadOptions();
   }, [incomeOpen, loadOptions]);
 
   if (!incomeOpen) return null;
+
+  /** auto: picking a contract fills the amount with its outstanding balance */
+  function handleContractChange(v: string) {
+    const c = contracts.find((x) => String(x.id) === v);
+    setDraft((prev) => {
+      const next = { ...prev, contractId: v };
+      const due = c ? parseAmount(c.due) : 0;
+      const amountUntouched = prev.amount === "" || prev.amount === lastAutoAmount.current;
+      if (due > 0 && amountUntouched) {
+        next.amount = String(due);
+        lastAutoAmount.current = next.amount;
+      }
+      return next;
+    });
+  }
+
+  /** auto: read amount / transfer date / reference out of the attached slip */
+  async function handleSlipFile(file: File) {
+    setSlipStatus("กำลังอ่านข้อมูลจากสลิป…");
+    try {
+      const d = await extractFromSlipFile(file);
+      setDraft((prev) => {
+        const next = { ...prev };
+        if (d.amount && (prev.amount === "" || prev.amount === lastAutoAmount.current)) {
+          next.amount = String(Math.round(d.amount));
+          lastAutoAmount.current = next.amount;
+        }
+        if (d.dateBE) next.incomeDate = d.dateBE;
+        if (d.reference && !prev.transactionReference) next.transactionReference = d.reference;
+        return next;
+      });
+      const found = [
+        d.amount ? `฿${Math.round(d.amount).toLocaleString()}` : null,
+        d.dateBE ?? null,
+        d.reference ? `Ref ${d.reference.slice(0, 14)}` : null,
+      ].filter(Boolean);
+      setSlipStatus(
+        found.length
+          ? `อ่านสลิปสำเร็จ (${d.via.join("+")}): ${found.join(" · ")} — ตรวจสอบก่อนบันทึก`
+          : "อ่านข้อมูลจากสลิปไม่ได้ — กรุณากรอกเอง"
+      );
+    } catch (e) {
+      console.error(e);
+      setSlipStatus("อ่านข้อมูลจากสลิปไม่ได้ — กรุณากรอกเอง");
+    }
+  }
 
   const selectedContract = contracts.find((c) => String(c.id) === draft.contractId) ?? null;
 
@@ -193,7 +248,7 @@ export function AddIncomeModal() {
           )}
 
           <FieldsGrid>
-            <SelectField label="รายการเช่า" value={draft.contractId} onChange={(v) => setDraft({ ...draft, contractId: v })} options={contractOptions} />
+            <SelectField label="รายการเช่า" value={draft.contractId} onChange={handleContractChange} options={contractOptions} />
             <SelectField label="ประเภทรายรับ" value={draft.incomeType} onChange={(v) => setDraft({ ...draft, incomeType: v })} options={INCOME_TYPE_OPTIONS} />
             <TextField label="จำนวนเงิน (บาท)" value={draft.amount} onChange={(v) => setDraft({ ...draft, amount: v.replace(/\D/g, "") })} placeholder="12500" />
             <TextField label="วันที่รับเงิน" value={draft.incomeDate} onChange={(v) => setDraft({ ...draft, incomeDate: v })} placeholder="7 ก.ค. 2569" />
@@ -202,7 +257,34 @@ export function AddIncomeModal() {
           </FieldsGrid>
           <TextField label="เลขอ้างอิงการโอน (ถ้ามี)" value={draft.transactionReference} onChange={(v) => setDraft({ ...draft, transactionReference: v })} placeholder="เช่น เลขที่สลิป" />
 
-          <ImageUpload label="แนบสลิปการโอน" value={slip} onChange={setSlip} hint="รองรับ JPG, PNG · ระบบ preview สลิปทันที" />
+          <ImageUpload
+            label="แนบสลิปการโอน (ระบบอ่านจำนวนเงิน/วันที่/เลขอ้างอิงอัตโนมัติ)"
+            value={slip}
+            onChange={setSlip}
+            onFileSelected={handleSlipFile}
+            accept="image/*,application/pdf"
+            hint="รองรับ JPG, PNG, PDF · ระบบดึงข้อมูลจากสลิปให้อัตโนมัติ"
+          />
+          {slipStatus && (
+            <div
+              style={{
+                padding: "9px 12px",
+                borderRadius: 11,
+                background: "rgba(94,234,212,0.08)",
+                border: "1px solid rgba(94,234,212,0.28)",
+                fontSize: 12,
+                color: "var(--text)",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <span style={{ color: "var(--pos)", display: "flex" }}>
+                <Icon name="audit" size={14} />
+              </span>
+              {slipStatus}
+            </div>
+          )}
 
           <div
             style={{

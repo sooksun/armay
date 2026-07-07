@@ -53,6 +53,31 @@ export function PropertyFormModal({
   onSubmit: (draft: PropertyDraft) => void;
 }) {
   const [draft, setDraft] = useState<PropertyDraft>(BLANK_DRAFT);
+  const [locating, setLocating] = useState(false);
+
+  /** auto: fill lat/long from the device's current position */
+  function useCurrentLocation() {
+    if (!navigator.geolocation) {
+      alert("เบราว์เซอร์นี้ไม่รองรับการอ่านพิกัด");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setDraft((prev) => ({
+          ...prev,
+          latitude: pos.coords.latitude.toFixed(7),
+          longitude: pos.coords.longitude.toFixed(7),
+        }));
+        setLocating(false);
+      },
+      (err) => {
+        alert(`อ่านพิกัดไม่สำเร็จ: ${err.message}`);
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -116,6 +141,31 @@ export function PropertyFormModal({
         <TextField label="ละติจูด (latitude)" value={draft.latitude} onChange={(v) => setDraft({ ...draft, latitude: v })} placeholder="13.7398" />
         <TextField label="ลองจิจูด (longitude)" value={draft.longitude} onChange={(v) => setDraft({ ...draft, longitude: v })} placeholder="100.5804" />
       </FieldsGrid>
+      <button
+        type="button"
+        onClick={useCurrentLocation}
+        disabled={locating}
+        style={{
+          alignSelf: "flex-start",
+          display: "flex",
+          alignItems: "center",
+          gap: 7,
+          padding: "9px 14px",
+          borderRadius: 11,
+          border: "1px solid rgba(94,234,212,0.4)",
+          background: "rgba(94,234,212,0.08)",
+          color: "var(--text)",
+          fontFamily: "inherit",
+          fontSize: 12.5,
+          fontWeight: 600,
+          cursor: locating ? "wait" : "pointer",
+        }}
+      >
+        <span style={{ color: "var(--pos)", display: "flex" }}>
+          <Icon name="search" size={15} />
+        </span>
+        {locating ? "กำลังอ่านพิกัด…" : "ใช้พิกัดปัจจุบันของเครื่อง"}
+      </button>
       <ImageUpload label="รูปอาคาร" value={draft.imageUrl} onChange={(url) => setDraft({ ...draft, imageUrl: url })} />
       <TextAreaField label="หมายเหตุ" value={draft.note} onChange={(v) => setDraft({ ...draft, note: v })} />
       <ToggleField

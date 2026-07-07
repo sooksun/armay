@@ -86,7 +86,23 @@ export async function previewPayout(ownerId: number, contractId: number | null):
     label: e.description || EXPENSE_TYPE[e.expenseType] || e.expenseType,
     amount: decToNumber(e.amount),
   }));
-  return { gross, ownerExpenses };
+
+  // suggested commission = ratio of this owner's most recent commission line
+  // (abs: legacy/seed rows store deductions as negatives), clamped 0–50%, fallback 10%
+  let ratio = 0.1;
+  const lastCommission = await prisma.payoutItem.findFirst({
+    where: { sourceType: { in: ["commission", "COMMISSION"] }, payout: { ownerId } },
+    orderBy: { id: "desc" },
+    include: { payout: true },
+  });
+  if (lastCommission) {
+    const lastGross = decToNumber(lastCommission.payout.grossIncomeAmount);
+    const r = lastGross > 0 ? Math.abs(decToNumber(lastCommission.amount)) / lastGross : 0;
+    if (r > 0 && r <= 0.5) ratio = r;
+  }
+  const suggestedCommission = Math.round(gross * ratio);
+
+  return { gross, ownerExpenses, suggestedCommission };
 }
 
 export async function createPayout(input: PayoutCreateInput, session: Session): Promise<number> {

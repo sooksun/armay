@@ -9,15 +9,20 @@ import { ExpenseFormModal, type ExpenseDraft } from "@/components/expenses/Expen
 import { badge } from "@/lib/theme";
 import { type MiniKpi } from "@/lib/mock";
 import { apiGet, apiSend } from "@/lib/api-client";
-import type { ExpenseDTO, ExpenseListDTO } from "@/lib/api-types";
+import type { ExpenseDTO, ExpenseListDTO, RoomDTO } from "@/lib/api-types";
 
 export default function ExpensesPage() {
   const [rows, setRows] = useState<ExpenseDTO[]>([]);
+  const [rooms, setRooms] = useState<RoomDTO[]>([]);
   const [kpis, setKpis] = useState<MiniKpi[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+
+  useEffect(() => {
+    apiGet<RoomDTO[]>("/api/rooms").then(setRooms).catch(console.error);
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -195,7 +200,14 @@ export default function ExpensesPage() {
         onDelete={handleDelete}
       />
 
-      <ExpenseFormModal open={formOpen} editing={editing} onClose={() => setFormOpen(false)} onSubmit={handleSubmit} />
+      <ExpenseFormModal
+        open={formOpen}
+        editing={editing}
+        rooms={rooms.map((r) => ({ no: r.no, building: r.building }))}
+        history={rows}
+        onClose={() => setFormOpen(false)}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }
