@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "seed": "tsx prisma/seed.ts",
+    "test": "tsx scripts/test-slip-parser.ts",
+    "test:api": "bash scripts/test-api.sh",
     "prisma:studio": "prisma studio"
   },
   "prisma": {
