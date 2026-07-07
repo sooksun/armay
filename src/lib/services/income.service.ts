@@ -1,9 +1,14 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { generateCode } from "@/lib/codegen";
+import { writeAudit } from "@/lib/services/audit.service";
 import { decToNumber, fmtTHB } from "@/lib/money";
-import { formatBEDate } from "@/lib/date";
+import { formatBEDate, parseThaiBEDate } from "@/lib/date";
 import { INCOME_TYPE, PAYMENT_METHOD, VERIFICATION_STATUS, VERIFICATION_BADGE } from "@/lib/labels";
+import { ApiError } from "@/lib/api/response";
+import type { Session } from "@/lib/auth/session";
 import type { IncomeDTO, IncomeListDTO, IncomeSummaryDTO } from "@/lib/api-types";
+import type { IncomeCreateInput } from "@/lib/validation/income.schema";
 
 const INCLUDE = {
   tenant: true,
@@ -67,4 +72,47 @@ function summarize(rows: IncomeWithRelations[]): IncomeSummaryDTO {
 export async function listIncomes(): Promise<IncomeListDTO> {
   const rows = await prisma.incomeTransaction.findMany({ orderBy: { incomeDate: "desc" }, include: INCLUDE });
   return { rows: rows.map(toDTO), summary: summarize(rows) };
+}
+
+export async function createIncome(input: IncomeCreateInput, session: Session): Promise<number> {
+  const contract = await prisma.rentalContract.findUnique({ where: { id: input.contractId } });
+  if (!contract) throw new ApiError("CONTRACT_NOT_FOUND", "ไม่พบรายการเช่าที่เลือก", 400);
+
+  const incomeDate = parseThaiBEDate(input.incomeDate);
+  const dayStart = new Date(Date.UTC(incomeDate.getUTCFullYear(), incomeDate.getUTCMonth(), incomeDate.getUTCDate()));
+  const dayEnd = new Date(dayStart.getTime() + 24 * 3600 * 1000);
+
+  // duplicate guard: same day + amount + method + reference
+  const dup = await prisma.incomeTransaction.findFirst({
+    where: {
+      incomeDate: { gte: dayStart, lt: dayEnd },
+      amount: input.amount,
+      paymentMethod: input.paymentMethod as Prisma.IncomeTransactionCreateInput["paymentMethod"],
+      transactionReference: input.transactionReference || null,
+    },
+  });
+  if (dup) throw new ApiError("DUPLICATE_INCOME", "มีรายการรับเงินที่ตรงกันนี้อยู่แล้ว (วันที่ + จำนวน + ช่องทาง + อ้างอิง)", 409);
+
+  const incomeCode = await generateCode("INCOME", "INC");
+  const created = await prisma.incomeTransaction.create({
+    data: {
+      incomeCode,
+      contractId: contract.id,
+      tenantId: contract.tenantId,
+      roomId: contract.roomId,
+      ownerId: contract.ownerId,
+      propertyId: contract.propertyId,
+      incomeDate,
+      incomeType: input.incomeType as Prisma.IncomeTransactionCreateInput["incomeType"],
+      amount: input.amount,
+      paymentMethod: input.paymentMethod as Prisma.IncomeTransactionCreateInput["paymentMethod"],
+      receivingAccountId: input.receivingAccountId ?? null,
+      transactionReference: input.transactionReference || null,
+      proofFileUrl: input.proofFileUrl || null,
+      verificationStatus: input.proofFileUrl ? "VERIFIED" : "PENDING",
+      recordedBy: session.userId,
+    },
+  });
+  await writeAudit({ userId: session.userId, action: "CREATE", tableName: "income_transactions", recordId: created.id, newValue: input });
+  return created.id;
 }

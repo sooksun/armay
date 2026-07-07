@@ -185,6 +185,9 @@ export type PayoutDTO = {
 export type PayoutSummaryDTO = { pending: string; paidMonth: string; ownersUnpaid: string; toReview: string };
 export type PayoutListDTO = { rows: PayoutDTO[]; summary: PayoutSummaryDTO };
 
+export type PayoutExpenseLineDTO = { sourceId: number; label: string; amount: number };
+export type PayoutPreviewDTO = { gross: number; ownerExpenses: PayoutExpenseLineDTO[] };
+
 // ---------- DASHBOARD & REPORTS ----------
 
 export type DashboardKpiDTO = {
