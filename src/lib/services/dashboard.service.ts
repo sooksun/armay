@@ -6,6 +6,9 @@ import type { DashboardDTO, UrgentTaskDTO, DashboardChartsDTO, ChartPointDTO } f
 const TH_MONTHS = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
 const PALETTE = ["#38BDF8", "#5EEAD4", "#A855F7", "#FBBF24", "#FB7185", "var(--pos)", "#818CF8"];
 
+// CANCELLED transactions never count toward dashboard totals/charts (business rule)
+const NOT_CANCELLED = { verificationStatus: { not: "CANCELLED" as const } };
+
 function monthBounds(now: Date) {
   const y = now.getUTCFullYear();
   const m = now.getUTCMonth();
@@ -21,8 +24,8 @@ function dayBounds(now: Date) {
 
 async function computeCharts(now: Date): Promise<DashboardChartsDTO> {
   const [incomes, expenses, properties, rooms] = await Promise.all([
-    prisma.incomeTransaction.findMany({ select: { amount: true, incomeDate: true, propertyId: true, roomId: true } }),
-    prisma.expenseTransaction.findMany({ select: { amount: true, expenseDate: true, expenseType: true } }),
+    prisma.incomeTransaction.findMany({ where: NOT_CANCELLED, select: { amount: true, incomeDate: true, propertyId: true, roomId: true } }),
+    prisma.expenseTransaction.findMany({ where: NOT_CANCELLED, select: { amount: true, expenseDate: true, expenseType: true } }),
     prisma.property.findMany({ select: { id: true, propertyName: true } }),
     prisma.room.findMany({ select: { id: true, roomNumber: true, property: { select: { propertyName: true } } } }),
   ]);
@@ -78,9 +81,9 @@ export async function getDashboard(): Promise<DashboardDTO> {
   const { start: dStart, end: dEnd } = dayBounds(now);
 
   const [incMonth, expMonth, incToday, pendPayout, unverified, overdue] = await Promise.all([
-    prisma.incomeTransaction.aggregate({ _sum: { amount: true }, where: { incomeDate: { gte: start, lt: end } } }),
-    prisma.expenseTransaction.aggregate({ _sum: { amount: true }, where: { expenseDate: { gte: start, lt: end } } }),
-    prisma.incomeTransaction.aggregate({ _sum: { amount: true }, where: { incomeDate: { gte: dStart, lt: dEnd } } }),
+    prisma.incomeTransaction.aggregate({ _sum: { amount: true }, where: { incomeDate: { gte: start, lt: end }, ...NOT_CANCELLED } }),
+    prisma.expenseTransaction.aggregate({ _sum: { amount: true }, where: { expenseDate: { gte: start, lt: end }, ...NOT_CANCELLED } }),
+    prisma.incomeTransaction.aggregate({ _sum: { amount: true }, where: { incomeDate: { gte: dStart, lt: dEnd }, ...NOT_CANCELLED } }),
     prisma.ownerPayout.aggregate({ _sum: { netPayoutAmount: true }, where: { payoutStatus: "PENDING" } }),
     prisma.incomeTransaction.count({ where: { verificationStatus: { in: ["DRAFT", "PENDING"] } } }),
     prisma.rentalContract.count({ where: { paymentStatus: "OVERDUE" } }),
@@ -106,7 +109,7 @@ export async function getDashboard(): Promise<DashboardDTO> {
     });
   }
   const noSlip = await prisma.incomeTransaction.findMany({
-    where: { proofFileUrl: null },
+    where: { proofFileUrl: null, ...NOT_CANCELLED },
     include: { tenant: true, room: true },
     orderBy: { incomeDate: "desc" },
     take: 2,

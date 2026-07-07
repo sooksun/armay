@@ -49,6 +49,7 @@ function summarize(rows: IncomeWithRelations[]): IncomeSummaryDTO {
   const dupSeen = new Map<string, number>();
 
   for (const t of rows) {
+    if (t.verificationStatus === "CANCELLED") continue; // never count cancelled in summary totals
     const amt = decToNumber(t.amount);
     const d = t.incomeDate;
     if (`${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}` === todayKey) today += amt;

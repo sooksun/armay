@@ -10,9 +10,11 @@ function row(label: string, income: number, expense: number): ReportRowDTO {
 }
 
 export async function getReports(): Promise<ReportsDTO> {
+  // CANCELLED transactions never count toward reported totals (business rule)
+  const notCancelled = { verificationStatus: { not: "CANCELLED" as const } };
   const [incomes, expenses, properties] = await Promise.all([
-    prisma.incomeTransaction.findMany({ select: { amount: true, propertyId: true, incomeDate: true } }),
-    prisma.expenseTransaction.findMany({ select: { amount: true, propertyId: true, expenseDate: true } }),
+    prisma.incomeTransaction.findMany({ where: notCancelled, select: { amount: true, propertyId: true, incomeDate: true } }),
+    prisma.expenseTransaction.findMany({ where: notCancelled, select: { amount: true, propertyId: true, expenseDate: true } }),
     prisma.property.findMany({ select: { id: true, propertyName: true }, orderBy: { id: "asc" } }),
   ]);
 

@@ -62,6 +62,7 @@ function summarize(rows: ExpenseWithRelations[]): ExpenseSummaryDTO {
   let pendingReview = 0;
   let problem = 0;
   for (const t of rows) {
+    if (t.verificationStatus === "CANCELLED") continue; // never count cancelled in summary totals
     const amt = decToNumber(t.amount);
     const d = t.expenseDate;
     if (`${d.getUTCFullYear()}-${d.getUTCMonth()}` === monthKey) month += amt;
