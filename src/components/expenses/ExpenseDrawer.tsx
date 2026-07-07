@@ -1,10 +1,10 @@
 "use client";
 
 import { Drawer, InfoRow, InfoSection } from "@/components/shared/Drawer";
-import { badge } from "@/lib/theme";
-import type { ExpenseRow } from "@/lib/mock";
+import { badge, type BadgeKind } from "@/lib/theme";
+import type { ExpenseDTO } from "@/lib/api-types";
 
-const RESP_BADGE = { "นายหน้า": "blue", "เจ้าของ": "purple", "ผู้เช่า": "gold" } as const;
+const RESP_BADGE: Record<string, BadgeKind> = { "นายหน้า": "blue", "เจ้าของ": "purple", "ผู้เช่า": "gold" };
 
 function ImageBox({ label, url }: { label: string; url: string | null }) {
   return (
@@ -41,10 +41,10 @@ export function ExpenseDrawer({
   onEdit,
   onDelete,
 }: {
-  expense: ExpenseRow | null;
+  expense: ExpenseDTO | null;
   onClose: () => void;
-  onEdit: (e: ExpenseRow) => void;
-  onDelete: (e: ExpenseRow) => void;
+  onEdit: (e: ExpenseDTO) => void;
+  onDelete: (e: ExpenseDTO) => void;
 }) {
   if (!expense) return null;
 
@@ -66,7 +66,7 @@ export function ExpenseDrawer({
       <InfoSection title="ผู้รับผิดชอบ">
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
           <span style={{ color: "rgba(234,242,255,0.55)" }}>ค่าใช้จ่ายนี้รับผิดชอบโดย</span>
-          <span style={badge(RESP_BADGE[expense.responsibility])}>{expense.responsibility}</span>
+          <span style={badge(RESP_BADGE[expense.responsibility] ?? "gray")}>{expense.responsibility}</span>
         </div>
       </InfoSection>
 

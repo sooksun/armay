@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { StepTabs, StepFieldsGrid, StepNavButtons } from "@/components/StepFlow";
 import { badge } from "@/lib/theme";
-import { RENTAL_ROWS, RENTAL_STEPS, RENTAL_STEP_DATA } from "@/lib/mock";
+import { RENTAL_STEPS, RENTAL_STEP_DATA } from "@/lib/mock";
+import { apiGet } from "@/lib/api-client";
+import type { RentalDTO } from "@/lib/api-types";
 
 const th = (align: "left" | "right" = "left"): React.CSSProperties => ({
   textAlign: align,
@@ -19,6 +21,21 @@ export default function RentalsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [step, setStep] = useState(1);
   const active = RENTAL_STEP_DATA[step - 1];
+  const [rows, setRows] = useState<RentalDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    try {
+      setRows(await apiGet<RentalDTO[]>("/api/rentals"));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -103,7 +120,21 @@ export default function RentalsPage() {
                 </tr>
               </thead>
               <tbody>
-                {RENTAL_ROWS.map((r) => (
+                {loading && (
+                  <tr>
+                    <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                      กำลังโหลด…
+                    </td>
+                  </tr>
+                )}
+                {!loading && rows.length === 0 && (
+                  <tr>
+                    <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                      ยังไม่มีรายการเช่า
+                    </td>
+                  </tr>
+                )}
+                {rows.map((r) => (
                   <tr
                     key={r.code}
                     style={{

@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { MiniKpiCard } from "@/components/MiniKpiCard";
 import { StepTabs, StepFieldsGrid, StepNavButtons } from "@/components/StepFlow";
 import { badge } from "@/lib/theme";
 import {
-  PAYOUT_KPIS,
   PAYOUT_STEP_META,
   PAYOUT_CALC_ROWS,
   PAYOUT_FIELDS_BY_STEP,
-  PAYOUT_ROWS,
+  type MiniKpi,
 } from "@/lib/mock";
+import { apiGet } from "@/lib/api-client";
+import type { PayoutDTO, PayoutListDTO } from "@/lib/api-types";
 
 const th = (align: "left" | "right" = "left"): React.CSSProperties => ({
   textAlign: align,
@@ -26,11 +27,34 @@ export default function PayoutPage() {
   const [title, desc] = PAYOUT_STEP_META[step - 1];
   const showCalc = step === 3 || step === 4;
   const fields = PAYOUT_FIELDS_BY_STEP[step] ?? [];
+  const [rows, setRows] = useState<PayoutDTO[]>([]);
+  const [kpis, setKpis] = useState<MiniKpi[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    try {
+      const data = await apiGet<PayoutListDTO>("/api/payouts");
+      setRows(data.rows);
+      setKpis([
+        { label: "ยอดรอจ่ายเจ้าของ", icon: "payout", color: "#FBBF24", value: data.summary.pending },
+        { label: "จ่ายแล้วเดือนนี้", icon: "payout", color: "#5EEAD4", value: data.summary.paidMonth },
+        { label: "เจ้าของยังไม่ได้รับ", icon: "owners", color: "#FB7185", value: data.summary.ownersUnpaid },
+        { label: "รอตรวจสอบ", icon: "audit", color: "#A855F7", value: data.summary.toReview },
+      ]);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16 }}>
-        {PAYOUT_KPIS.map((k) => (
+        {kpis.map((k) => (
           <MiniKpiCard key={k.label} kpi={k} />
         ))}
       </div>
@@ -134,9 +158,23 @@ export default function PayoutPage() {
               </tr>
             </thead>
             <tbody>
-              {PAYOUT_ROWS.map((r, i) => (
+              {loading && (
+                <tr>
+                  <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                    กำลังโหลด…
+                  </td>
+                </tr>
+              )}
+              {!loading && rows.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                    ยังไม่มีรายการจ่ายเจ้าของ
+                  </td>
+                </tr>
+              )}
+              {rows.map((r, i) => (
                 <tr
-                  key={i}
+                  key={r.id ?? i}
                   style={{
                     borderTop: "1px solid rgba(255,255,255,0.06)",
                     background: r.badge === "red" ? "rgba(251,113,133,0.06)" : undefined,

@@ -1,7 +1,23 @@
-import { Icon } from "@/components/Icon";
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import { Icon, type IconName } from "@/components/Icon";
 import { LineChart, DonutChart, BarChart, HBarChart } from "@/components/Charts";
 import { iconChip } from "@/lib/theme";
-import { DASHBOARD_KPIS, DASH_FILTERS, URGENT_TASKS, type Kpi } from "@/lib/mock";
+import { DASH_FILTERS, type Kpi } from "@/lib/mock";
+import { apiGet } from "@/lib/api-client";
+import type { DashboardDTO, UrgentTaskDTO } from "@/lib/api-types";
+
+const URGENT_ICON: Record<UrgentTaskDTO["kind"], { icon: IconName; color: string }> = {
+  income: { icon: "income", color: "#5EEAD4" },
+  expense: { icon: "expense", color: "#FB7185" },
+  payout: { icon: "payout", color: "#A855F7" },
+  alert: { icon: "alert", color: "#FB7185" },
+};
+
+function fmtNum(n: number): string {
+  return Math.round(n).toLocaleString("en-US");
+}
 
 const glowStyle = (c: string): React.CSSProperties => ({
   position: "absolute",
@@ -36,19 +52,21 @@ function KpiCard({ k }: { k: Kpi }) {
         <div style={iconChip(k.color)}>
           <Icon name={k.icon} size={18} />
         </div>
-        <div
-          style={{
-            fontSize: 11.5,
-            fontWeight: 700,
-            padding: "3px 9px",
-            borderRadius: 20,
-            background: k.up ? "rgba(52,211,153,0.16)" : "rgba(251,113,133,0.16)",
-            color: k.up ? "#6EE7B7" : "#FDA4AF",
-            border: `1px solid ${k.up ? "rgba(52,211,153,0.35)" : "rgba(251,113,133,0.35)"}`,
-          }}
-        >
-          {k.up ? "▲" : "▼"} {k.delta}
-        </div>
+        {k.delta ? (
+          <div
+            style={{
+              fontSize: 11.5,
+              fontWeight: 700,
+              padding: "3px 9px",
+              borderRadius: 20,
+              background: k.up ? "rgba(52,211,153,0.16)" : "rgba(251,113,133,0.16)",
+              color: k.up ? "#6EE7B7" : "#FDA4AF",
+              border: `1px solid ${k.up ? "rgba(52,211,153,0.35)" : "rgba(251,113,133,0.35)"}`,
+            }}
+          >
+            {k.up ? "▲" : "▼"} {k.delta}
+          </div>
+        ) : null}
       </div>
       <div style={{ fontSize: 12.5, color: "rgba(234,242,255,0.62)", marginTop: 14 }}>{k.label}</div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginTop: 3 }}>
@@ -90,6 +108,28 @@ const softBtn: React.CSSProperties = {
 };
 
 export default function DashboardPage() {
+  const [kpiCards, setKpiCards] = useState<Kpi[]>([]);
+  const [urgent, setUrgent] = useState<UrgentTaskDTO[]>([]);
+
+  const load = useCallback(async () => {
+    try {
+      const data = await apiGet<DashboardDTO>("/api/dashboard");
+      const k = data.kpis;
+      setKpiCards([
+        { label: "รายรับเดือนนี้", icon: "income", color: "#5EEAD4", value: fmtNum(k.incomeMonth), suffix: "", delta: "", up: true, hint: "เดือนปัจจุบัน" },
+        { label: "รายจ่ายเดือนนี้", icon: "expense", color: "#FB7185", value: fmtNum(k.expenseMonth), suffix: "", delta: "", up: false, hint: "เดือนปัจจุบัน" },
+        { label: "ยอดสุทธิเบื้องต้น", icon: "payout", color: "#38BDF8", value: fmtNum(k.netMonth), suffix: "", delta: "", up: k.netMonth >= 0, hint: "รายรับ − รายจ่าย" },
+        { label: "รอจ่ายเจ้าของ", icon: "owners", color: "#A855F7", value: fmtNum(k.pendingPayout), suffix: "", delta: "", up: true, hint: `รอตรวจ ${k.unverifiedCount} · เกินกำหนด ${k.overdueCount}` },
+      ]);
+      setUrgent(data.urgent);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* filter bar */}
@@ -147,7 +187,7 @@ export default function DashboardPage() {
 
       {/* KPI cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(232px,1fr))", gap: 16 }}>
-        {DASHBOARD_KPIS.map((k) => (
+        {kpiCards.map((k) => (
           <KpiCard key={k.label} k={k} />
         ))}
       </div>
@@ -218,16 +258,20 @@ export default function DashboardPage() {
               border: "1px solid rgba(251,113,133,0.4)",
             }}
           >
-            5 รายการ
+            {urgent.length} รายการ
           </span>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {URGENT_TASKS.map((t) => {
+          {urgent.length === 0 && (
+            <div style={{ padding: "13px 15px", fontSize: 13, color: "rgba(234,242,255,0.5)" }}>ไม่มีรายการเร่งด่วน</div>
+          )}
+          {urgent.map((t, idx) => {
+            const meta = URGENT_ICON[t.kind];
             const amountColor =
               t.amount.indexOf("−") === 0 ? "#FDA4AF" : t.amount === "—" ? "rgba(234,242,255,0.4)" : "#EAF2FF";
             return (
               <div
-                key={t.title}
+                key={`${t.title}-${idx}`}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -236,11 +280,11 @@ export default function DashboardPage() {
                   borderRadius: 14,
                   background: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(255,255,255,0.09)",
-                  borderLeft: `3px solid ${t.color}`,
+                  borderLeft: `3px solid ${meta.color}`,
                 }}
               >
-                <div style={iconChip(t.color, 30)}>
-                  <Icon name={t.icon} size={15} />
+                <div style={iconChip(meta.color, 30)}>
+                  <Icon name={meta.icon} size={15} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13.5, fontWeight: 600 }}>{t.title}</div>

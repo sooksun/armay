@@ -1,9 +1,12 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { MiniKpiCard } from "@/components/MiniKpiCard";
 import { badge } from "@/lib/theme";
-import { INCOME_KPIS, INCOME_ROWS } from "@/lib/mock";
+import { type MiniKpi } from "@/lib/mock";
+import { apiGet } from "@/lib/api-client";
+import type { IncomeDTO, IncomeListDTO } from "@/lib/api-types";
 import { useUI } from "@/lib/ui-context";
 
 const th = (align: "left" | "right" | "center" = "left"): React.CSSProperties => ({
@@ -31,11 +34,35 @@ const softBtn: React.CSSProperties = {
 
 export default function IncomePage() {
   const { openIncome } = useUI();
+  const [rows, setRows] = useState<IncomeDTO[]>([]);
+  const [kpis, setKpis] = useState<MiniKpi[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    try {
+      const data = await apiGet<IncomeListDTO>("/api/incomes");
+      setRows(data.rows);
+      setKpis([
+        { label: "รายรับวันนี้", icon: "income", color: "#5EEAD4", value: data.summary.today },
+        { label: "รายรับเดือนนี้", icon: "income", color: "#38BDF8", value: data.summary.month },
+        { label: "รอตรวจสอบ", icon: "audit", color: "#FBBF24", value: data.summary.pending },
+        { label: "ไม่มีสลิป", icon: "alert", color: "#FB7185", value: data.summary.noSlip },
+        { label: "อาจซ้ำ", icon: "alert", color: "#A855F7", value: data.summary.maybeDup },
+      ]);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16 }}>
-        {INCOME_KPIS.map((k) => (
+        {kpis.map((k) => (
           <MiniKpiCard key={k.label} kpi={k} />
         ))}
       </div>
@@ -110,9 +137,23 @@ export default function IncomePage() {
               </tr>
             </thead>
             <tbody>
-              {INCOME_ROWS.map((r, i) => (
+              {loading && (
+                <tr>
+                  <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                    กำลังโหลด…
+                  </td>
+                </tr>
+              )}
+              {!loading && rows.length === 0 && (
+                <tr>
+                  <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                    ยังไม่มีรายการรับเงิน
+                  </td>
+                </tr>
+              )}
+              {rows.map((r, i) => (
                 <tr
-                  key={i}
+                  key={r.id ?? i}
                   style={{
                     borderTop: "1px solid rgba(255,255,255,0.06)",
                     background: r.flag ? "rgba(251,113,133,0.06)" : undefined,

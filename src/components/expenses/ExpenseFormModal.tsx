@@ -8,9 +8,9 @@ import {
   EXPENSE_TYPE_OPTIONS,
   RESPONSIBILITY_OPTIONS,
   ROOMS,
-  type ExpenseRow,
   type Responsibility,
 } from "@/lib/mock";
+import type { ExpenseDTO } from "@/lib/api-types";
 
 export const EXPENSE_STATUS_OPTIONS = ["รอจ่าย", "จ่ายแล้ว", "รอตรวจสอบ", "มีปัญหา"];
 
@@ -49,7 +49,7 @@ export function ExpenseFormModal({
   onSubmit,
 }: {
   open: boolean;
-  editing: ExpenseRow | null;
+  editing: ExpenseDTO | null;
   onClose: () => void;
   onSubmit: (draft: ExpenseDraft) => void;
 }) {
@@ -66,7 +66,7 @@ export function ExpenseFormModal({
             description: editing.description,
             payeeName: editing.payeeName,
             amount: editing.amount.replace(/\D/g, ""),
-            responsibility: editing.responsibility,
+            responsibility: editing.responsibility as Responsibility,
             status: editing.status,
             beforeUrl: editing.beforeUrl,
             afterUrl: editing.afterUrl,

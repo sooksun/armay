@@ -1,20 +1,13 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { MiniKpiCard } from "@/components/MiniKpiCard";
 import { ListCard, TableWrap, Th } from "@/components/shared/ListCard";
 import { badge, fmtTHB, parseAmount, type BadgeKind } from "@/lib/theme";
-import {
-  PROPERTIES,
-  OWNERS,
-  RENTAL_ROWS,
-  EXPENSE_ROWS,
-  roomsByOwner,
-  roomsByProperty,
-  pendingPayoutTotal,
-  paidPayoutTotal,
-  type MiniKpi,
-} from "@/lib/mock";
+import { type MiniKpi } from "@/lib/mock";
+import { apiGet } from "@/lib/api-client";
+import type { ReportsDTO, OwnerDTO, RentalDTO } from "@/lib/api-types";
 
 const softBtn: React.CSSProperties = {
   display: "flex",
@@ -30,19 +23,38 @@ const softBtn: React.CSSProperties = {
   cursor: "pointer",
 };
 
-function expenseByBuilding(building: string): number {
-  return EXPENSE_ROWS.filter((e) => e.building === building).reduce((s, e) => s + parseAmount(e.amount), 0);
-}
-
-const SUMMARY: MiniKpi[] = [
-  { label: "รายรับรวมเดือนนี้", icon: "income", color: "#5EEAD4", value: "฿1,248,500" },
-  { label: "รายจ่ายรวมเดือนนี้", icon: "expense", color: "#FB7185", value: "฿386,200" },
-  { label: "กำไรสุทธิเบื้องต้น", icon: "payout", color: "#38BDF8", value: "฿862,300" },
-  { label: "ยอดค้างชำระผู้เช่า", icon: "alert", color: "#FBBF24", value: "฿184,000" },
-];
-
 export default function ReportsPage() {
-  const overdue = RENTAL_ROWS.filter((r) => r.due !== "฿0");
+  const [reports, setReports] = useState<ReportsDTO | null>(null);
+  const [owners, setOwners] = useState<OwnerDTO[]>([]);
+  const [rentals, setRentals] = useState<RentalDTO[]>([]);
+
+  const load = useCallback(async () => {
+    try {
+      const [rep, own, rent] = await Promise.all([
+        apiGet<ReportsDTO>("/api/reports"),
+        apiGet<OwnerDTO[]>("/api/owners"),
+        apiGet<RentalDTO[]>("/api/rentals"),
+      ]);
+      setReports(rep);
+      setOwners(own);
+      setRentals(rent);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const overdue = rentals.filter((r) => parseAmount(r.due) > 0);
+  const outstandingTotal = overdue.reduce((s, r) => s + parseAmount(r.due), 0);
+
+  const summary: MiniKpi[] = [
+    { label: "รายรับรวมสะสม", icon: "income", color: "#5EEAD4", value: reports?.totalIncome ?? "—" },
+    { label: "รายจ่ายรวมสะสม", icon: "expense", color: "#FB7185", value: reports?.totalExpense ?? "—" },
+    { label: "กำไรสุทธิเบื้องต้น", icon: "payout", color: "#38BDF8", value: reports?.totalNet ?? "—" },
+    { label: "ยอดค้างชำระผู้เช่า", icon: "alert", color: "#FBBF24", value: fmtTHB(outstandingTotal) },
+  ];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -90,37 +102,55 @@ export default function ReportsPage() {
 
       {/* summary KPIs */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16 }}>
-        {SUMMARY.map((k) => (
+        {summary.map((k) => (
           <MiniKpiCard key={k.label} kpi={k} />
         ))}
       </div>
 
-      {/* by building */}
+      {/* by property */}
       <ListCard title="รายงานแยกตามอาคาร">
         <TableWrap minWidth={720}>
           <thead>
             <tr style={{ background: "rgba(255,255,255,0.04)" }}>
               <Th>อาคาร / โครงการ</Th>
-              <Th align="right">ห้อง</Th>
               <Th align="right">รายรับ</Th>
               <Th align="right">รายจ่าย</Th>
               <Th align="right">กำไรเบื้องต้น</Th>
             </tr>
           </thead>
           <tbody>
-            {PROPERTIES.map((p) => {
-              const exp = expenseByBuilding(p.propertyName);
-              const net = p.monthlyIncome - exp;
-              return (
-                <tr key={p.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                  <td style={{ padding: "13px 16px", fontWeight: 600 }}>{p.propertyName}</td>
-                  <td style={{ padding: "13px 16px", textAlign: "right" }}>{roomsByProperty(p.propertyName).length}</td>
-                  <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#7FF0D9" }}>{fmtTHB(p.monthlyIncome)}</td>
-                  <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#FDA4AF" }}>{fmtTHB(exp)}</td>
-                  <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 700, color: net >= 0 ? "#7FF0D9" : "#FDA4AF" }}>{fmtTHB(net)}</td>
-                </tr>
-              );
-            })}
+            {(reports?.byProperty ?? []).map((p) => (
+              <tr key={p.label} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <td style={{ padding: "13px 16px", fontWeight: 600 }}>{p.label}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#7FF0D9" }}>{p.income}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#FDA4AF" }}>{p.expense}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 700, color: p.netNeg ? "#FDA4AF" : "#7FF0D9" }}>{p.net}</td>
+              </tr>
+            ))}
+          </tbody>
+        </TableWrap>
+      </ListCard>
+
+      {/* by month */}
+      <ListCard title="รายรับ–รายจ่ายย้อนหลัง 6 เดือน">
+        <TableWrap minWidth={720}>
+          <thead>
+            <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+              <Th>เดือน</Th>
+              <Th align="right">รายรับ</Th>
+              <Th align="right">รายจ่าย</Th>
+              <Th align="right">สุทธิ</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {(reports?.byMonth ?? []).map((m) => (
+              <tr key={m.label} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <td style={{ padding: "13px 16px", fontWeight: 600 }}>{m.label}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#7FF0D9" }}>{m.income}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#FDA4AF" }}>{m.expense}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 700, color: m.netNeg ? "#FDA4AF" : "#7FF0D9" }}>{m.net}</td>
+              </tr>
+            ))}
           </tbody>
         </TableWrap>
       </ListCard>
@@ -137,17 +167,14 @@ export default function ReportsPage() {
             </tr>
           </thead>
           <tbody>
-            {OWNERS.map((o) => {
-              const pending = pendingPayoutTotal(o.fullName);
-              return (
-                <tr key={o.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                  <td style={{ padding: "13px 16px", fontWeight: 600 }}>{o.fullName}</td>
-                  <td style={{ padding: "13px 16px", textAlign: "right" }}>{roomsByOwner(o.fullName).length} ห้อง</td>
-                  <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#7FF0D9" }}>{fmtTHB(paidPayoutTotal(o.fullName))}</td>
-                  <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 600, color: pending > 0 ? "#FDA4AF" : "rgba(234,242,255,0.4)" }}>{fmtTHB(pending)}</td>
-                </tr>
-              );
-            })}
+            {owners.map((o) => (
+              <tr key={o.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <td style={{ padding: "13px 16px", fontWeight: 600 }}>{o.fullName}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right" }}>{o.roomCount} ห้อง</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#7FF0D9" }}>{fmtTHB(o.paidPayout)}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 600, color: o.pendingPayout > 0 ? "#FDA4AF" : "rgba(234,242,255,0.4)" }}>{fmtTHB(o.pendingPayout)}</td>
+              </tr>
+            ))}
           </tbody>
         </TableWrap>
       </ListCard>

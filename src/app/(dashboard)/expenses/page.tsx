@@ -1,30 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { MiniKpiCard } from "@/components/MiniKpiCard";
 import { ListCard, TableWrap, Th } from "@/components/shared/ListCard";
 import { ExpenseDrawer } from "@/components/expenses/ExpenseDrawer";
 import { ExpenseFormModal, type ExpenseDraft } from "@/components/expenses/ExpenseFormModal";
-import { badge, type BadgeKind } from "@/lib/theme";
-import { EXPENSE_ROWS, EXPENSE_KPIS, ROOMS, type ExpenseRow } from "@/lib/mock";
-
-const STATUS_BADGE: Record<string, BadgeKind> = {
-  "รอจ่าย": "gold",
-  "จ่ายแล้ว": "green",
-  "รอตรวจสอบ": "gold",
-  "มีปัญหา": "red",
-};
-
-function nextExpenseId(list: ExpenseRow[]): number {
-  return list.reduce((max, e) => Math.max(max, e.id), 0) + 1;
-}
+import { badge } from "@/lib/theme";
+import { type MiniKpi } from "@/lib/mock";
+import { apiGet, apiSend } from "@/lib/api-client";
+import type { ExpenseDTO, ExpenseListDTO } from "@/lib/api-types";
 
 export default function ExpensesPage() {
-  const [rows, setRows] = useState<ExpenseRow[]>(EXPENSE_ROWS);
+  const [rows, setRows] = useState<ExpenseDTO[]>([]);
+  const [kpis, setKpis] = useState<MiniKpi[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const data = await apiGet<ExpenseListDTO>("/api/expenses");
+      setRows(data.rows);
+      setKpis([
+        { label: "รายจ่ายเดือนนี้", icon: "expense", color: "#FB7185", value: data.summary.month },
+        { label: "ค่าซ่อม/แม่บ้าน", icon: "service", color: "#FBBF24", value: data.summary.repairCleaning },
+        { label: "รอตรวจสอบ", icon: "audit", color: "#A855F7", value: data.summary.pendingReview },
+        { label: "มีปัญหา", icon: "alert", color: "#FB7185", value: data.summary.problem },
+      ]);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const selected = rows.find((r) => r.id === selectedId) ?? null;
   const editing = rows.find((r) => r.id === editingId) ?? null;
@@ -33,53 +46,38 @@ export default function ExpensesPage() {
     setEditingId(null);
     setFormOpen(true);
   }
-  function openEdit(e: ExpenseRow) {
+  function openEdit(e: ExpenseDTO) {
     setEditingId(e.id);
     setFormOpen(true);
   }
 
-  function toRow(draft: ExpenseDraft, id: number, code: string): ExpenseRow {
-    const building = ROOMS.find((r) => r.no === draft.room)?.building ?? "";
-    const amountNum = parseInt(draft.amount || "0", 10) || 0;
-    return {
-      id,
-      expenseCode: code,
-      date: draft.date,
-      room: draft.room,
-      building,
-      expenseType: draft.expenseType,
-      description: draft.description,
-      payeeName: draft.payeeName,
-      amount: "฿" + amountNum.toLocaleString(),
-      responsibility: draft.responsibility,
-      status: draft.status,
-      badge: STATUS_BADGE[draft.status] ?? "gold",
-      beforeUrl: draft.beforeUrl,
-      afterUrl: draft.afterUrl,
-    };
-  }
-
-  function handleSubmit(draft: ExpenseDraft) {
-    if (editingId != null) {
-      setRows((list) => list.map((r) => (r.id === editingId ? toRow(draft, r.id, r.expenseCode) : r)));
-    } else {
-      const id = nextExpenseId(rows);
-      setRows((list) => [toRow(draft, id, `EXP-2568-${String(id).padStart(4, "0")}`), ...list]);
+  async function handleSubmit(draft: ExpenseDraft) {
+    try {
+      if (editingId != null) await apiSend(`/api/expenses/${editingId}`, "PATCH", draft);
+      else await apiSend("/api/expenses", "POST", draft);
+      setFormOpen(false);
+      setEditingId(null);
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "บันทึกไม่สำเร็จ");
     }
-    setFormOpen(false);
-    setEditingId(null);
   }
 
-  function handleDelete(e: ExpenseRow) {
+  async function handleDelete(e: ExpenseDTO) {
     if (!confirm(`ยืนยันลบรายการค่าใช้จ่าย "${e.description || e.expenseType}"?`)) return;
-    setRows((list) => list.filter((r) => r.id !== e.id));
-    setSelectedId(null);
+    try {
+      await apiSend(`/api/expenses/${e.id}`, "DELETE");
+      setSelectedId(null);
+      await load();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "ลบไม่สำเร็จ");
+    }
   }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16 }}>
-        {EXPENSE_KPIS.map((k) => (
+        {kpis.map((k) => (
           <MiniKpiCard key={k.label} kpi={k} />
         ))}
       </div>
@@ -124,6 +122,20 @@ export default function ExpensesPage() {
             </tr>
           </thead>
           <tbody>
+            {loading && (
+              <tr>
+                <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                  กำลังโหลด…
+                </td>
+              </tr>
+            )}
+            {!loading && rows.length === 0 && (
+              <tr>
+                <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                  ยังไม่มีรายการค่าใช้จ่าย
+                </td>
+              </tr>
+            )}
             {rows.map((r) => (
               <tr
                 key={r.id}
