@@ -200,7 +200,14 @@ export type DashboardKpiDTO = {
   overdueCount: number;
 };
 export type UrgentTaskDTO = { title: string; sub: string; amount: string; kind: "income" | "expense" | "payout" | "alert" };
-export type DashboardDTO = { kpis: DashboardKpiDTO; urgent: UrgentTaskDTO[] };
+export type ChartPointDTO = { label: string; value: number; color: string };
+export type DashboardChartsDTO = {
+  line: { months: string[]; inc: number[]; exp: number[] };
+  donut: ChartPointDTO[];
+  bar: ChartPointDTO[];
+  hbar: ChartPointDTO[];
+};
+export type DashboardDTO = { kpis: DashboardKpiDTO; urgent: UrgentTaskDTO[]; charts: DashboardChartsDTO };
 
 export type ReportRowDTO = { label: string; income: string; expense: string; net: string; netNeg: boolean };
 export type ReportsDTO = {

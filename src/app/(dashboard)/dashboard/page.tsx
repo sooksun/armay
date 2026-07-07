@@ -6,7 +6,7 @@ import { LineChart, DonutChart, BarChart, HBarChart } from "@/components/Charts"
 import { iconChip } from "@/lib/theme";
 import { DASH_FILTERS, type Kpi } from "@/lib/mock";
 import { apiGet } from "@/lib/api-client";
-import type { DashboardDTO, UrgentTaskDTO } from "@/lib/api-types";
+import type { DashboardDTO, UrgentTaskDTO, DashboardChartsDTO } from "@/lib/api-types";
 
 const URGENT_ICON: Record<UrgentTaskDTO["kind"], { icon: IconName; color: string }> = {
   income: { icon: "income", color: "#5EEAD4" },
@@ -110,6 +110,7 @@ const softBtn: React.CSSProperties = {
 export default function DashboardPage() {
   const [kpiCards, setKpiCards] = useState<Kpi[]>([]);
   const [urgent, setUrgent] = useState<UrgentTaskDTO[]>([]);
+  const [charts, setCharts] = useState<DashboardChartsDTO | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -122,6 +123,7 @@ export default function DashboardPage() {
         { label: "รอจ่ายเจ้าของ", icon: "owners", color: "#A855F7", value: fmtNum(k.pendingPayout), suffix: "", delta: "", up: true, hint: `รอตรวจ ${k.unverifiedCount} · เกินกำหนด ${k.overdueCount}` },
       ]);
       setUrgent(data.urgent);
+      setCharts(data.charts);
     } catch (e) {
       console.error(e);
     }
@@ -198,7 +200,7 @@ export default function DashboardPage() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
             <div>
               <div style={{ fontWeight: 600, fontSize: 15.5 }}>รายรับ–รายจ่ายรายเดือน</div>
-              <div style={{ fontSize: 12, color: "rgba(234,242,255,0.5)", marginTop: 2 }}>ปี 2568 · หน่วยล้านบาท</div>
+              <div style={{ fontSize: 12, color: "rgba(234,242,255,0.5)", marginTop: 2 }}>12 เดือนล่าสุด · หน่วยบาท</div>
             </div>
             <div style={{ display: "flex", gap: 14, fontSize: 12 }}>
               <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -211,14 +213,14 @@ export default function DashboardPage() {
               </span>
             </div>
           </div>
-          <LineChart />
+          <LineChart months={charts?.line.months} inc={charts?.line.inc} exp={charts?.line.exp} />
         </div>
         <div style={chartCard}>
           <div style={{ fontWeight: 600, fontSize: 15.5 }}>สัดส่วนรายจ่าย</div>
           <div style={{ fontSize: 12, color: "rgba(234,242,255,0.5)", marginTop: 2, marginBottom: 6 }}>
-            เดือนนี้ · ฿386,200
+            รายจ่ายสะสมตามประเภท
           </div>
-          <DonutChart />
+          <DonutChart data={charts?.donut} />
         </div>
       </div>
 
@@ -227,16 +229,16 @@ export default function DashboardPage() {
         <div style={chartCard}>
           <div style={{ fontWeight: 600, fontSize: 15.5 }}>รายรับแยกตามอาคาร</div>
           <div style={{ fontSize: 12, color: "rgba(234,242,255,0.5)", marginTop: 2, marginBottom: 10 }}>
-            เดือนนี้ · หน่วยพันบาท
+            รายรับสะสม · หน่วยบาท
           </div>
-          <BarChart />
+          <BarChart data={charts?.bar} />
         </div>
         <div style={chartCard}>
           <div style={{ fontWeight: 600, fontSize: 15.5 }}>ห้องที่ทำรายรับสูงสุด</div>
           <div style={{ fontSize: 12, color: "rgba(234,242,255,0.5)", marginTop: 2, marginBottom: 12 }}>
-            Top 5 · เดือนนี้
+            Top 5 · รายรับสะสม
           </div>
-          <HBarChart />
+          <HBarChart data={charts?.hbar} />
         </div>
       </div>
 

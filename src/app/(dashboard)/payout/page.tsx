@@ -3,14 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { MiniKpiCard } from "@/components/MiniKpiCard";
-import { StepTabs, StepFieldsGrid, StepNavButtons } from "@/components/StepFlow";
+import { PayoutCreateForm } from "@/components/payout/PayoutCreateForm";
 import { badge } from "@/lib/theme";
-import {
-  PAYOUT_STEP_META,
-  PAYOUT_CALC_ROWS,
-  PAYOUT_FIELDS_BY_STEP,
-  type MiniKpi,
-} from "@/lib/mock";
+import { type MiniKpi } from "@/lib/mock";
 import { apiGet } from "@/lib/api-client";
 import type { PayoutDTO, PayoutListDTO } from "@/lib/api-types";
 
@@ -23,13 +18,10 @@ const th = (align: "left" | "right" = "left"): React.CSSProperties => ({
 });
 
 export default function PayoutPage() {
-  const [step, setStep] = useState(4);
-  const [title, desc] = PAYOUT_STEP_META[step - 1];
-  const showCalc = step === 3 || step === 4;
-  const fields = PAYOUT_FIELDS_BY_STEP[step] ?? [];
   const [rows, setRows] = useState<PayoutDTO[]>([]);
   const [kpis, setKpis] = useState<MiniKpi[]>([]);
   const [loading, setLoading] = useState(true);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -59,7 +51,7 @@ export default function PayoutPage() {
         ))}
       </div>
 
-      {/* payout step flow */}
+      {/* payout create */}
       <div
         style={{
           borderRadius: 24,
@@ -71,7 +63,7 @@ export default function PayoutPage() {
           overflow: "hidden",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 22px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 22px", borderBottom: createOpen ? "1px solid rgba(255,255,255,0.08)" : "none" }}>
           <span
             style={{
               width: 34,
@@ -89,45 +81,41 @@ export default function PayoutPage() {
           </span>
           <div>
             <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 16 }}>สร้างรายการจ่ายเจ้าของ</div>
-            <div style={{ fontSize: 12, color: "rgba(234,242,255,0.5)" }}>
-              เจ้าของ: คุณสมชาย วัฒนโสภณ · เดอะ เครสท์ สุขุมวิท
-            </div>
+            <div style={{ fontSize: 12, color: "rgba(234,242,255,0.5)" }}>เลือกเจ้าของ → คำนวณรายรับ − ค่านายหน้า − ค่าใช้จ่าย = ยอดสุทธิ</div>
           </div>
+          <button
+            onClick={() => setCreateOpen((v) => !v)}
+            style={{
+              marginLeft: "auto",
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+              padding: "9px 16px",
+              borderRadius: 11,
+              border: "1px solid rgba(255,255,255,0.28)",
+              color: "#04121A",
+              fontFamily: "inherit",
+              fontSize: 12.5,
+              fontWeight: 700,
+              cursor: "pointer",
+              background: "linear-gradient(135deg,#A855F7,#38BDF8)",
+              boxShadow: "0 6px 16px rgba(168,85,247,0.4)",
+            }}
+          >
+            <Icon name={createOpen ? "chevDown" : "plus"} size={15} />
+            {createOpen ? "ปิดฟอร์ม" : "สร้างรายการจ่าย"}
+          </button>
         </div>
 
-        <StepTabs labels={PAYOUT_STEP_META.map((m) => m[0])} current={step} onSelect={setStep} accent="purple" pad="9px 14px" />
-
-        <div style={{ padding: "14px 22px 26px" }}>
-          <div style={{ padding: 22, borderRadius: 18, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}>
-            <div style={{ fontWeight: 600, fontSize: 14.5, marginBottom: 4 }}>{title}</div>
-            <div style={{ fontSize: 12.5, color: "rgba(234,242,255,0.55)", marginBottom: 18 }}>{desc}</div>
-
-            {showCalc ? (
-              <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)" }}>
-                {PAYOUT_CALC_ROWS.map((c, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "13px 16px",
-                      fontSize: 13.5,
-                      borderTop: c.top ? "1px solid rgba(255,255,255,0.1)" : undefined,
-                      background: c.bold ? "rgba(94,234,212,0.09)" : "rgba(255,255,255,0.02)",
-                    }}
-                  >
-                    <span style={{ color: c.labelColor }}>{c.label}</span>
-                    <span style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, color: c.amountColor }}>{c.amount}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <StepFieldsGrid fields={fields} />
-            )}
-          </div>
-          <StepNavButtons nextLabel={step === 5 ? "ยืนยันการจ่าย" : "ถัดไป"} />
-        </div>
+        {createOpen && (
+          <PayoutCreateForm
+            onClose={() => setCreateOpen(false)}
+            onCreated={() => {
+              setCreateOpen(false);
+              void load();
+            }}
+          />
+        )}
       </div>
 
       {/* recent payouts */}

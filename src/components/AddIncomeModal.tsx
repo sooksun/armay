@@ -1,45 +1,107 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
+import { FieldsGrid, SelectField, TextField } from "@/components/shared/FormModal";
 import { ImageUpload } from "@/components/shared/ImageUpload";
+import { INCOME_TYPE, PAYMENT_METHOD } from "@/lib/labels";
+import { todayBEDate } from "@/lib/date";
+import { apiGet, apiSend } from "@/lib/api-client";
+import type { RentalDTO, AccountDTO } from "@/lib/api-types";
 import { useUI } from "@/lib/ui-context";
 
-const chevDown = <Icon name="chevDown" size={14} />;
+const INCOME_TYPE_OPTIONS = Object.entries(INCOME_TYPE).map(([value, label]) => ({ value, label }));
+const METHOD_OPTIONS = Object.entries(PAYMENT_METHOD).map(([value, label]) => ({ value, label }));
 
-function Field({ label, value, accent }: { label: string; value: React.ReactNode; accent?: boolean }) {
-  return (
-    <div>
-      <div style={{ fontSize: 12, color: "rgba(234,242,255,0.6)", marginBottom: 6 }}>{label}</div>
-      <div
-        style={{
-          padding: "11px 13px",
-          borderRadius: 12,
-          border: `1px solid ${accent ? "rgba(94,234,212,0.4)" : "rgba(255,255,255,0.14)"}`,
-          background: accent ? "rgba(94,234,212,0.08)" : "rgba(255,255,255,0.05)",
-          fontSize: accent ? 15 : 13,
-          fontFamily: accent ? "Sora,sans-serif" : "inherit",
-          fontWeight: accent ? 700 : 400,
-          color: accent ? "#7FF0D9" : "#EAF2FF",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        {value}
-      </div>
-    </div>
-  );
+type IncomeDraft = {
+  contractId: string;
+  incomeType: string;
+  amount: string;
+  incomeDate: string;
+  paymentMethod: string;
+  receivingAccountId: string;
+  transactionReference: string;
+};
+
+function blankDraft(): IncomeDraft {
+  return {
+    contractId: "",
+    incomeType: "RENT",
+    amount: "",
+    incomeDate: todayBEDate(),
+    paymentMethod: "PROMPTPAY",
+    receivingAccountId: "",
+    transactionReference: "",
+  };
 }
 
 export function AddIncomeModal() {
   const { incomeOpen, closeIncome } = useUI();
+  const [draft, setDraft] = useState<IncomeDraft>(blankDraft);
   const [slip, setSlip] = useState<string | null>(null);
-  // start each open with a fresh (empty) slip
+  const [contracts, setContracts] = useState<RentalDTO[]>([]);
+  const [accounts, setAccounts] = useState<AccountDTO[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  const loadOptions = useCallback(async () => {
+    try {
+      const [rent, acc] = await Promise.all([apiGet<RentalDTO[]>("/api/rentals"), apiGet<AccountDTO[]>("/api/payment-accounts")]);
+      setContracts(rent);
+      setAccounts(acc);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
   useEffect(() => {
-    if (incomeOpen) setSlip(null);
-  }, [incomeOpen]);
+    if (!incomeOpen) return;
+    setDraft(blankDraft());
+    setSlip(null);
+    void loadOptions();
+  }, [incomeOpen, loadOptions]);
+
   if (!incomeOpen) return null;
+
+  const selectedContract = contracts.find((c) => String(c.id) === draft.contractId) ?? null;
+
+  const contractOptions = [
+    { value: "", label: "— เลือกรายการเช่า —" },
+    ...contracts.map((c) => ({ value: String(c.id), label: `${c.code} · ${c.tenant} · ${c.room}` })),
+  ];
+  const accountOptions = [
+    { value: "", label: "— ไม่ระบุ —" },
+    ...accounts.map((a) => ({ value: String(a.id), label: a.bankName ? `${a.accountName} · ${a.bankName}` : a.accountName })),
+  ];
+
+  async function handleSubmit() {
+    if (!draft.contractId) {
+      alert("กรุณาเลือกรายการเช่า");
+      return;
+    }
+    if (!draft.amount || Number(draft.amount) <= 0) {
+      alert("กรุณาระบุจำนวนเงิน");
+      return;
+    }
+    setSaving(true);
+    try {
+      await apiSend("/api/incomes", "POST", {
+        contractId: draft.contractId,
+        incomeDate: draft.incomeDate,
+        incomeType: draft.incomeType,
+        amount: draft.amount,
+        paymentMethod: draft.paymentMethod,
+        receivingAccountId: draft.receivingAccountId || null,
+        transactionReference: draft.transactionReference,
+        proofFileUrl: slip,
+      });
+      closeIncome();
+      window.dispatchEvent(new CustomEvent("armay:income-changed"));
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "บันทึกไม่สำเร็จ");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div
@@ -70,15 +132,7 @@ export function AddIncomeModal() {
           overflow: "hidden",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            padding: "20px 24px",
-            borderBottom: "1px solid rgba(255,255,255,0.1)",
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 24px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
           <span
             style={{
               width: 36,
@@ -116,41 +170,39 @@ export function AddIncomeModal() {
         </div>
 
         <div style={{ padding: "22px 24px", display: "flex", flexDirection: "column", gap: 15 }}>
-          <div
-            style={{
-              padding: "12px 14px",
-              borderRadius: 13,
-              background: "rgba(56,189,248,0.1)",
-              border: "1px solid rgba(56,189,248,0.25)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <div>
-              <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.6)" }}>ยอดค้างของรายการเช่าที่เลือก</div>
-              <div style={{ fontSize: 12.5, fontWeight: 600, marginTop: 1 }}>
-                RN-2568-0142 · คุณกิตติพงษ์ · A-1105
+          {selectedContract && (
+            <div
+              style={{
+                padding: "12px 14px",
+                borderRadius: 13,
+                background: "rgba(56,189,248,0.1)",
+                border: "1px solid rgba(56,189,248,0.25)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.6)" }}>รายการเช่าที่เลือก</div>
+                <div style={{ fontSize: 12.5, fontWeight: 600, marginTop: 1 }}>
+                  {selectedContract.code} · {selectedContract.tenant} · {selectedContract.room}
+                </div>
               </div>
+              <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 18, color: "#FDA4AF" }}>{selectedContract.due}</div>
             </div>
-            <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 18, color: "#FDA4AF" }}>฿12,500</div>
-          </div>
+          )}
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 13 }}>
-            <Field label="รายการเช่า" value={<>RN-2568-0142{chevDown}</>} />
-            <Field label="ประเภทรายรับ" value={<>ค่าเช่ารายเดือน{chevDown}</>} />
-            <Field label="จำนวนเงิน" value="฿12,500" accent />
-            <Field label="วันที่รับเงิน" value={<>6 ก.ค. 2568<Icon name="cal" size={15} /></>} />
-            <Field label="ช่องทางรับเงิน" value={<>โอนผ่าน PromptPay{chevDown}</>} />
-            <Field label="บัญชีที่รับเงิน" value={<>KBank · 123-4-56789{chevDown}</>} />
-          </div>
+          <FieldsGrid>
+            <SelectField label="รายการเช่า" value={draft.contractId} onChange={(v) => setDraft({ ...draft, contractId: v })} options={contractOptions} />
+            <SelectField label="ประเภทรายรับ" value={draft.incomeType} onChange={(v) => setDraft({ ...draft, incomeType: v })} options={INCOME_TYPE_OPTIONS} />
+            <TextField label="จำนวนเงิน (บาท)" value={draft.amount} onChange={(v) => setDraft({ ...draft, amount: v.replace(/\D/g, "") })} placeholder="12500" />
+            <TextField label="วันที่รับเงิน" value={draft.incomeDate} onChange={(v) => setDraft({ ...draft, incomeDate: v })} placeholder="7 ก.ค. 2569" />
+            <SelectField label="ช่องทางรับเงิน" value={draft.paymentMethod} onChange={(v) => setDraft({ ...draft, paymentMethod: v })} options={METHOD_OPTIONS} />
+            <SelectField label="บัญชีที่รับเงิน" value={draft.receivingAccountId} onChange={(v) => setDraft({ ...draft, receivingAccountId: v })} options={accountOptions} />
+          </FieldsGrid>
+          <TextField label="เลขอ้างอิงการโอน (ถ้ามี)" value={draft.transactionReference} onChange={(v) => setDraft({ ...draft, transactionReference: v })} placeholder="เช่น เลขที่สลิป" />
 
-          <ImageUpload
-            label="แนบสลิปการโอน"
-            value={slip}
-            onChange={setSlip}
-            hint="รองรับ JPG, PNG · ระบบ preview สลิปทันที"
-          />
+          <ImageUpload label="แนบสลิปการโอน" value={slip} onChange={setSlip} hint="รองรับ JPG, PNG · ระบบ preview สลิปทันที" />
 
           <div
             style={{
@@ -197,7 +249,8 @@ export function AddIncomeModal() {
             ยกเลิก
           </button>
           <button
-            onClick={closeIncome}
+            onClick={handleSubmit}
+            disabled={saving}
             style={{
               padding: "11px 24px",
               borderRadius: 12,
@@ -206,12 +259,13 @@ export function AddIncomeModal() {
               fontFamily: "inherit",
               fontSize: 13,
               fontWeight: 700,
-              cursor: "pointer",
+              cursor: saving ? "wait" : "pointer",
+              opacity: saving ? 0.7 : 1,
               background: "linear-gradient(135deg,#5EEAD4,#38BDF8)",
               boxShadow: "0 8px 20px rgba(56,189,248,0.42)",
             }}
           >
-            ยืนยันการบันทึก
+            {saving ? "กำลังบันทึก…" : "ยืนยันการบันทึก"}
           </button>
         </div>
       </div>

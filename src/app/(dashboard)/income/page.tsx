@@ -57,6 +57,9 @@ export default function IncomePage() {
   }, []);
   useEffect(() => {
     void load();
+    const onChanged = () => void load();
+    window.addEventListener("armay:income-changed", onChanged);
+    return () => window.removeEventListener("armay:income-changed", onChanged);
   }, [load]);
 
   return (

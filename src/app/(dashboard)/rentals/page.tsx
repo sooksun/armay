@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
-import { StepTabs, StepFieldsGrid, StepNavButtons } from "@/components/StepFlow";
+import { RentalCreateForm } from "@/components/rentals/RentalCreateForm";
 import { badge } from "@/lib/theme";
-import { RENTAL_STEPS, RENTAL_STEP_DATA } from "@/lib/mock";
 import { apiGet } from "@/lib/api-client";
 import type { RentalDTO } from "@/lib/api-types";
 
@@ -19,8 +18,6 @@ const th = (align: "left" | "right" = "left"): React.CSSProperties => ({
 
 export default function RentalsPage() {
   const [createOpen, setCreateOpen] = useState(false);
-  const [step, setStep] = useState(1);
-  const active = RENTAL_STEP_DATA[step - 1];
   const [rows, setRows] = useState<RentalDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -228,16 +225,13 @@ export default function RentalsPage() {
             </button>
           </div>
 
-          <StepTabs labels={RENTAL_STEPS} current={step} onSelect={setStep} accent="teal" pad="9px 15px" />
-
-          <div style={{ padding: "14px 22px 26px" }}>
-            <div style={{ padding: 20, borderRadius: 18, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}>
-              <div style={{ fontWeight: 600, fontSize: 14.5, marginBottom: 4 }}>{active.title}</div>
-              <div style={{ fontSize: 12.5, color: "rgba(234,242,255,0.55)", marginBottom: 18 }}>{active.desc}</div>
-              <StepFieldsGrid fields={active.fields} />
-            </div>
-            <StepNavButtons nextLabel={step === 4 ? "บันทึกรายการเช่า" : "ถัดไป"} />
-          </div>
+          <RentalCreateForm
+            onClose={() => setCreateOpen(false)}
+            onCreated={() => {
+              setCreateOpen(false);
+              void load();
+            }}
+          />
         </div>
       )}
     </div>
