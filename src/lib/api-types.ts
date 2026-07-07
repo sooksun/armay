@@ -119,3 +119,91 @@ export type RoomDTO = {
   rent: string;
   tenantLine: string;
 };
+
+// ---------- TRANSACTIONS (read models) ----------
+
+export type IncomeDTO = {
+  id: number;
+  date: string; // Thai BE date
+  tenant: string;
+  room: string;
+  building: string;
+  type: string; // Thai label
+  amount: string; // ฿ formatted
+  channel: string; // Thai payment-method label
+  slipOk: boolean;
+  status: string; // Thai verification label
+  badge: BadgeKind;
+  flag: boolean;
+};
+export type IncomeSummaryDTO = { today: string; month: string; pending: string; noSlip: string; maybeDup: string };
+export type IncomeListDTO = { rows: IncomeDTO[]; summary: IncomeSummaryDTO };
+
+export type ExpenseDTO = {
+  id: number;
+  expenseCode: string;
+  date: string;
+  room: string;
+  building: string;
+  expenseType: string; // Thai label
+  description: string;
+  payeeName: string;
+  amount: string; // ฿ formatted
+  responsibility: string; // Thai label
+  status: string; // Thai verification label
+  badge: BadgeKind;
+  beforeUrl: string | null;
+  afterUrl: string | null;
+};
+export type ExpenseSummaryDTO = { month: string; repairCleaning: string; pendingReview: string; problem: string };
+export type ExpenseListDTO = { rows: ExpenseDTO[]; summary: ExpenseSummaryDTO };
+
+export type RentalDTO = {
+  id: number;
+  code: string;
+  tenant: string;
+  room: string;
+  building: string;
+  owner: string;
+  period: string;
+  total: string; // ฿ formatted
+  due: string; // ฿ formatted
+  status: string; // Thai payment-status label
+  badge: BadgeKind;
+};
+
+export type PayoutDTO = {
+  id: number;
+  owner: string;
+  room: string;
+  income: string; // ฿ formatted
+  deduct: string; // ฿ formatted
+  net: string; // ฿ formatted
+  status: string; // Thai payout-status label
+  badge: BadgeKind;
+};
+export type PayoutSummaryDTO = { pending: string; paidMonth: string; ownersUnpaid: string; toReview: string };
+export type PayoutListDTO = { rows: PayoutDTO[]; summary: PayoutSummaryDTO };
+
+// ---------- DASHBOARD & REPORTS ----------
+
+export type DashboardKpiDTO = {
+  incomeMonth: number;
+  expenseMonth: number;
+  netMonth: number;
+  pendingPayout: number;
+  incomeToday: number;
+  unverifiedCount: number;
+  overdueCount: number;
+};
+export type UrgentTaskDTO = { title: string; sub: string; amount: string; kind: "income" | "expense" | "payout" | "alert" };
+export type DashboardDTO = { kpis: DashboardKpiDTO; urgent: UrgentTaskDTO[] };
+
+export type ReportRowDTO = { label: string; income: string; expense: string; net: string; netNeg: boolean };
+export type ReportsDTO = {
+  totalIncome: string;
+  totalExpense: string;
+  totalNet: string;
+  byProperty: ReportRowDTO[];
+  byMonth: ReportRowDTO[];
+};
