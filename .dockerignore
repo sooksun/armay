@@ -1,0 +1,33 @@
+# deps & build output (reinstalled/rebuilt inside the image)
+node_modules
+.next
+out
+build
+
+# secrets & local env — never bake into the image
+.env
+.env.*
+!.env.production.example
+
+# vcs & tooling
+.git
+.gitignore
+.worktrees
+.vscode
+.idea
+
+# docs, scripts, tests — not needed at runtime
+docs
+scripts
+**/*.md
+
+# local disk attachments (mounted as a volume at runtime)
+uploads
+
+# misc
+*.log
+*.tsbuildinfo
+.DS_Store
+Dockerfile
+.dockerignore
+docker-compose*.yml

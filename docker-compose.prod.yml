@@ -1,0 +1,48 @@
+# Production stack for armay (Rental Broker Finance Control System).
+# Single full-stack Next.js service fronted by nginx-proxy-manager; connects to
+# the external MariaDB on the host LAN. No DB service here (would collide with
+# the host's :3306). Deploy path on the server: /DATA/AppData/www/armay
+#
+#   docker compose -f docker-compose.prod.yml up -d --build          # start
+#   docker compose -f docker-compose.prod.yml --profile seed run --rm seed
+#   docker compose -f docker-compose.prod.yml logs -f web
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: armay-web:latest
+    container_name: armay-web
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    ports:
+      - "9960:3000" # host LAN only — do NOT port-forward on the router; NPM fronts it
+    volumes:
+      - ./uploads:/app/uploads # persist attachments across redeploys
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - armay-net
+
+  # One-off seeder (admin user + demo data). Runs the build stage, which still
+  # has tsx + the prisma CLI. Use ONCE on a fresh DB:
+  #   docker compose -f docker-compose.prod.yml --profile seed run --rm seed
+  seed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
+    command: ["npm", "run", "seed"]
+    env_file:
+      - .env.production
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - armay-net
+    profiles:
+      - seed
+
+networks:
+  armay-net:
+    driver: bridge

@@ -22,6 +22,8 @@ yarn-error.log*
 # local env files
 .env
 .env*.local
+# production env holds the DB password + JWT secret — never commit
+.env.production
 
 # typescript
 *.tsbuildinfo
