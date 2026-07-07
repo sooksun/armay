@@ -1,20 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { ListCard, TableWrap, Th } from "@/components/shared/ListCard";
 import { UserFormModal, type UserDraft } from "@/components/users/UserFormModal";
 import { badge } from "@/lib/theme";
-import { USERS, ROLE_LABEL, ROLE_BADGE, type UserRecord } from "@/lib/mock";
-
-function nextUserId(list: UserRecord[]): number {
-  return list.reduce((max, u) => Math.max(max, u.id), 0) + 1;
-}
+import { ROLE_LABEL, ROLE_BADGE } from "@/lib/mock";
+import { apiGet, apiSend } from "@/lib/api-client";
+import type { UserDTO } from "@/lib/api-types";
 
 export default function PermissionsPage() {
-  const [users, setUsers] = useState<UserRecord[]>(USERS);
+  const [users, setUsers] = useState<UserDTO[]>([]);
+  const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      setUsers(await apiGet<UserDTO[]>("/api/users"));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const editing = users.find((u) => u.id === editingId) ?? null;
 
@@ -22,29 +34,29 @@ export default function PermissionsPage() {
     setEditingId(null);
     setFormOpen(true);
   }
-  function openEdit(u: UserRecord) {
+  function openEdit(u: UserDTO) {
     setEditingId(u.id);
     setFormOpen(true);
   }
-
-  function handleSubmit(draft: UserDraft) {
-    if (editingId != null) {
-      setUsers((list) => list.map((u) => (u.id === editingId ? { ...u, ...draft } : u)));
-    } else {
-      const id = nextUserId(users);
-      setUsers((list) => [...list, { id, ...draft, lastActive: "เพิ่งเพิ่ม" }]);
+  async function handleSubmit(draft: UserDraft) {
+    try {
+      if (editingId != null) await apiSend(`/api/users/${editingId}`, "PATCH", draft);
+      else await apiSend("/api/users", "POST", draft);
+      setFormOpen(false);
+      setEditingId(null);
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "บันทึกไม่สำเร็จ");
     }
-    setFormOpen(false);
-    setEditingId(null);
   }
-
-  function handleDelete(u: UserRecord) {
-    if (u.role === "ADMIN" && users.filter((x) => x.role === "ADMIN").length <= 1) {
-      alert("ลบไม่ได้ — ต้องมีผู้ดูแลระบบ (ADMIN) อย่างน้อย 1 คน");
-      return;
-    }
+  async function handleDelete(u: UserDTO) {
     if (!confirm(`ยืนยันลบผู้ใช้งาน "${u.fullName}"?`)) return;
-    setUsers((list) => list.filter((x) => x.id !== u.id));
+    try {
+      await apiSend(`/api/users/${u.id}`, "DELETE");
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "ลบไม่สำเร็จ");
+    }
   }
 
   const actionBtn: React.CSSProperties = {
@@ -98,30 +110,38 @@ export default function PermissionsPage() {
             </tr>
           </thead>
           <tbody>
-            {users.map((u) => (
-              <tr key={u.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                <td style={{ padding: "13px 16px" }}>
-                  <div style={{ fontWeight: 600 }}>{u.fullName}</div>
-                  <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{u.email}</div>
-                </td>
-                <td style={{ padding: "13px 16px" }}>
-                  <span style={badge(ROLE_BADGE[u.role])}>{u.role}</span>
-                  <span style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)", marginLeft: 8 }}>{ROLE_LABEL[u.role]}</span>
-                </td>
-                <td style={{ padding: "13px 16px" }}>
-                  <span style={badge(u.status === "ACTIVE" ? "green" : "gray")}>{u.status === "ACTIVE" ? "ใช้งานอยู่" : "ปิดใช้งาน"}</span>
-                </td>
-                <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.7)", whiteSpace: "nowrap" }}>{u.lastActive}</td>
-                <td style={{ padding: "13px 16px", textAlign: "right", whiteSpace: "nowrap" }}>
-                  <button onClick={() => openEdit(u)} style={actionBtn}>
-                    แก้ไข
-                  </button>
-                  <button onClick={() => handleDelete(u)} style={{ ...actionBtn, marginLeft: 8, color: "#FDA4AF", borderColor: "rgba(251,113,133,0.35)" }}>
-                    ลบ
-                  </button>
+            {loading ? (
+              <tr>
+                <td colSpan={5} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                  กำลังโหลด…
                 </td>
               </tr>
-            ))}
+            ) : (
+              users.map((u) => (
+                <tr key={u.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                  <td style={{ padding: "13px 16px" }}>
+                    <div style={{ fontWeight: 600 }}>{u.fullName}</div>
+                    <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{u.email}</div>
+                  </td>
+                  <td style={{ padding: "13px 16px" }}>
+                    <span style={badge(ROLE_BADGE[u.role])}>{u.role}</span>
+                    <span style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)", marginLeft: 8 }}>{ROLE_LABEL[u.role]}</span>
+                  </td>
+                  <td style={{ padding: "13px 16px" }}>
+                    <span style={badge(u.status === "ACTIVE" ? "green" : "gray")}>{u.status === "ACTIVE" ? "ใช้งานอยู่" : "ปิดใช้งาน"}</span>
+                  </td>
+                  <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.7)", whiteSpace: "nowrap" }}>{u.lastActive}</td>
+                  <td style={{ padding: "13px 16px", textAlign: "right", whiteSpace: "nowrap" }}>
+                    <button onClick={() => openEdit(u)} style={actionBtn}>
+                      แก้ไข
+                    </button>
+                    <button onClick={() => handleDelete(u)} style={{ ...actionBtn, marginLeft: 8, color: "#FDA4AF", borderColor: "rgba(251,113,133,0.35)" }}>
+                      ลบ
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </TableWrap>
       </ListCard>

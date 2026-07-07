@@ -1,16 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { ListCard, TableWrap, Th } from "@/components/shared/ListCard";
 import { badge } from "@/lib/theme";
-import { AUDIT_LOGS, AUDIT_ACTION_BADGE, type AuditAction } from "@/lib/mock";
+import { apiGet } from "@/lib/api-client";
+import type { AuditLogDTO } from "@/lib/api-types";
 
-const ACTION_FILTERS: ("ทั้งหมด" | AuditAction)[] = ["ทั้งหมด", "สร้าง", "แก้ไข", "ลบ", "อนุมัติ", "ยกเลิก", "เข้าสู่ระบบ"];
+const ACTION_FILTERS = ["ทั้งหมด", "สร้าง", "แก้ไข", "ลบ", "อนุมัติ", "ยกเลิก", "เข้าสู่ระบบ"] as const;
+type ActionFilter = (typeof ACTION_FILTERS)[number];
 
 export default function AuditPage() {
-  const [filter, setFilter] = useState<"ทั้งหมด" | AuditAction>("ทั้งหมด");
-  const rows = filter === "ทั้งหมด" ? AUDIT_LOGS : AUDIT_LOGS.filter((r) => r.action === filter);
+  const [logs, setLogs] = useState<AuditLogDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<ActionFilter>("ทั้งหมด");
+
+  const load = useCallback(async () => {
+    try {
+      setLogs(await apiGet<AuditLogDTO[]>("/api/audit"));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const rows = filter === "ทั้งหมด" ? logs : logs.filter((r) => r.action === filter);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -76,18 +94,32 @@ export default function AuditPage() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
-              <tr key={r.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                <td style={{ padding: "13px 16px", whiteSpace: "nowrap", color: "rgba(234,242,255,0.75)", fontSize: 12 }}>{r.time}</td>
-                <td style={{ padding: "13px 16px", fontWeight: 600, whiteSpace: "nowrap" }}>{r.user}</td>
-                <td style={{ padding: "13px 16px" }}>
-                  <span style={badge(AUDIT_ACTION_BADGE[r.action])}>{r.action}</span>
+            {loading ? (
+              <tr>
+                <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                  กำลังโหลด…
                 </td>
-                <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.8)", whiteSpace: "nowrap" }}>{r.table}</td>
-                <td style={{ padding: "13px 16px", fontFamily: "monospace", fontSize: 12, color: "rgba(234,242,255,0.7)", whiteSpace: "nowrap" }}>{r.record}</td>
-                <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.75)" }}>{r.detail}</td>
               </tr>
-            ))}
+            ) : rows.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                  ไม่มีประวัติการเปลี่ยนแปลง
+                </td>
+              </tr>
+            ) : (
+              rows.map((r) => (
+                <tr key={r.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                  <td style={{ padding: "13px 16px", whiteSpace: "nowrap", color: "rgba(234,242,255,0.75)", fontSize: 12 }}>{r.time}</td>
+                  <td style={{ padding: "13px 16px", fontWeight: 600, whiteSpace: "nowrap" }}>{r.user}</td>
+                  <td style={{ padding: "13px 16px" }}>
+                    <span style={badge(r.badge)}>{r.action}</span>
+                  </td>
+                  <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.8)", whiteSpace: "nowrap" }}>{r.table}</td>
+                  <td style={{ padding: "13px 16px", fontFamily: "monospace", fontSize: 12, color: "rgba(234,242,255,0.7)", whiteSpace: "nowrap" }}>{r.record}</td>
+                  <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.75)" }}>{r.detail}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </TableWrap>
       </ListCard>

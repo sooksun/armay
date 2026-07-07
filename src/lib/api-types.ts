@@ -85,6 +85,26 @@ export type PropertyDTO = {
   rooms: RoomBrief[];
 };
 
+export type UserDTO = {
+  id: number;
+  fullName: string;
+  email: string;
+  role: "ADMIN" | "STAFF" | "VIEWER";
+  status: "ACTIVE" | "INACTIVE";
+  lastActive: string;
+};
+
+export type AuditLogDTO = {
+  id: number;
+  time: string;
+  user: string;
+  action: string; // Thai label
+  badge: BadgeKind;
+  table: string;
+  record: string;
+  detail: string;
+};
+
 export type RoomDTO = {
   id: number;
   roomCode: string;

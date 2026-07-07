@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { FormModal, FieldsGrid, TextField, SelectField, ToggleField } from "@/components/shared/FormModal";
-import { ROLE_OPTIONS, ROLE_LABEL, type UserRole, type UserRecord, type UserStatus } from "@/lib/mock";
+import { ROLE_OPTIONS, ROLE_LABEL, type UserRole, type UserStatus } from "@/lib/mock";
+import type { UserDTO } from "@/lib/api-types";
 
 export type UserDraft = {
   fullName: string;
@@ -26,7 +27,7 @@ export function UserFormModal({
   onSubmit,
 }: {
   open: boolean;
-  editing: UserRecord | null;
+  editing: UserDTO | null;
   onClose: () => void;
   onSubmit: (draft: UserDraft) => void;
 }) {
