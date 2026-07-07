@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { FormModal, FieldsGrid, TextField, TextAreaField, ToggleField } from "@/components/shared/FormModal";
-import type { Owner, OwnerStatus } from "@/lib/mock";
+import type { OwnerDTO } from "@/lib/api-types";
+
+type OwnerStatus = "ACTIVE" | "INACTIVE";
 
 export type OwnerDraft = {
   fullName: string;
@@ -40,7 +42,7 @@ export function OwnerFormModal({
   onSubmit,
 }: {
   open: boolean;
-  editing: Owner | null;
+  editing: OwnerDTO | null;
   onClose: () => void;
   onSubmit: (draft: OwnerDraft) => void;
 }) {
