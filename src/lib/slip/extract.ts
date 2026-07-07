@@ -4,7 +4,7 @@ import { parseSlipText, refFromQrPayload, type SlipData } from "@/lib/slip/parse
 
 export type SlipExtract = SlipData & { via: string[] };
 
-const OCR_TIMEOUT_MS = 25_000;
+const OCR_TIMEOUT_MS = 60_000; // tha+eng: first run downloads both models (cached in IndexedDB after)
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
   return Promise.race([p, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
@@ -46,11 +46,13 @@ async function qrReference(canvas: HTMLCanvasElement): Promise<string | undefine
   return qr?.data ? refFromQrPayload(qr.data) : undefined;
 }
 
-async function ocrText(canvas: HTMLCanvasElement): Promise<string> {
-  // eng model reads the digits/latin parts of Thai slips (amount, date, ref);
-  // model files are fetched lazily from the tesseract.js CDN on first use.
+async function ocrText(canvas: HTMLCanvasElement, lang: "tha" | "eng"): Promise<string> {
+  // Two dedicated passes beat "tha+eng": the mixed model reads Thai months as
+  // latin lookalikes ("ก.ค." -> "n.n."). tha-pass nails Thai dates/labels,
+  // eng-pass nails latin refs. Models are fetched lazily from the tesseract.js
+  // CDN on first use, then cached in IndexedDB.
   const Tesseract = (await import("tesseract.js")).default;
-  const result = await withTimeout(Tesseract.recognize(canvas, "eng"), OCR_TIMEOUT_MS);
+  const result = await withTimeout(Tesseract.recognize(canvas, lang), OCR_TIMEOUT_MS);
   return result.data.text ?? "";
 }
 
@@ -85,11 +87,20 @@ export async function extractFromSlipFile(file: File): Promise<SlipExtract> {
       console.error("[slip] qr decode failed", e);
     }
     try {
-      const parsed = parseSlipText(await ocrText(canvas));
-      if (parsed.amount) data.amount = parsed.amount;
-      if (parsed.dateBE) data.dateBE = parsed.dateBE;
-      if (!data.reference && parsed.reference) data.reference = parsed.reference;
-      if (parsed.amount || parsed.dateBE) via.push("OCR");
+      // pass 1 — tha: Thai date + labeled amount
+      const tha = parseSlipText(await ocrText(canvas, "tha"));
+      if (tha.amount) data.amount = tha.amount;
+      if (tha.dateBE) data.dateBE = tha.dateBE;
+      if (!data.reference && tha.reference) data.reference = tha.reference;
+      if (tha.amount || tha.dateBE) via.push("OCR-ไทย");
+      // pass 2 — eng: only when something is still missing (usually a latin ref with no QR)
+      if (!data.amount || !data.dateBE || !data.reference) {
+        const eng = parseSlipText(await ocrText(canvas, "eng"));
+        if (!data.amount && eng.amount) data.amount = eng.amount;
+        if (!data.dateBE && eng.dateBE) data.dateBE = eng.dateBE;
+        if (!data.reference && eng.reference) data.reference = eng.reference;
+        if (eng.amount || eng.dateBE || eng.reference) via.push("OCR-eng");
+      }
     } catch (e) {
       console.error("[slip] ocr failed", e);
     }

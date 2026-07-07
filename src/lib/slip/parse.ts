@@ -32,8 +32,9 @@ function fmtBE(day: number, monthIdx: number, beYear: number): string | undefine
 
 function parseAmountFrom(text: string): number | undefined {
   // labeled amount first: "จำนวน: 1,300.00 บาท" / "Amount 12,500.00"
+  // (จํานวน = OCR nikhahit form of จำนวน)
   const labeled = text.match(
-    /(?:จำนวนเงิน|จํานวนเงิน|จำนวน|ยอดเงิน|ยอดโอน|amount)\s*(?:\(THB\)|\(บาท\))?\s*:?\s*(?:฿|THB)?\s*([\d,]+(?:\.\d{1,2})?)/i
+    /(?:จำนวนเงิน|จํานวนเงิน|จำนวน|จํานวน|ยอดเงิน|ยอดโอน|amount)\s*(?:\(THB\)|\(บาท\))?\s*:?\s*(?:฿|THB)?\s*([\d,]+(?:\.\d{1,2})?)/i
   );
   if (labeled) {
     const n = parseFloat(labeled[1].replace(/,/g, ""));
@@ -45,14 +46,23 @@ function parseAmountFrom(text: string): number | undefined {
   return max > 0 ? max : undefined;
 }
 
+// OCR noise allowed where a "." should be: spaces, dots, stray Thai combining
+// marks (e.g. tesseract reads "ก.ค." as "ก.ุค."). NOT stripped globally because
+// มี.ค legitimately contains ี.
+const DOT_NOISE = "[\\s.\\u0E31\\u0E34-\\u0E3A\\u0E47-\\u0E4E]*";
+
 function parseDateFrom(text: string): string | undefined {
-  // Thai abbreviated month, e.g. "06 ก.ค. 68" / "6 ก.ค. 2568"
-  const abbrAlt = TH_MONTH_ABBR.map((m) => m.replace(/\./g, "\\.?")).join("|");
-  const mAbbr = text.match(new RegExp(`(\\d{1,2})\\s*(${abbrAlt})\\.?\\s*(\\d{2,4})`));
+  // Thai abbreviated month, e.g. "06 ก.ค. 68" / "6 ก.ค. 2568".
+  // OCR-tolerant: dots dropped/padded/garbled ("กค", "ก . ค", "ก.ุค").
+  const abbrAlt = TH_MONTH_ABBR.map((m) => m.replace(/\./g, DOT_NOISE)).join("|");
+  const mAbbr = text.match(new RegExp(`(\\d{1,2})\\s*(${abbrAlt})${DOT_NOISE}(\\d{2,4})`));
   if (mAbbr) {
-    const stripped = mAbbr[2].replace(/\./g, "");
-    const key = Object.keys(ABBR_TO_INDEX).find((k) => k.replace(/\./g, "") === stripped);
-    if (key) return fmtBE(parseInt(mAbbr[1], 10), ABBR_TO_INDEX[key], toBE(parseInt(mAbbr[3], 10)));
+    // resolve month by re-testing patterns longest-first (strip would turn มี into ม)
+    for (const abbr of TH_MONTH_ABBR) {
+      if (new RegExp(`^${abbr.replace(/\./g, DOT_NOISE)}$`).test(mAbbr[2])) {
+        return fmtBE(parseInt(mAbbr[1], 10), ABBR_TO_INDEX[abbr], toBE(parseInt(mAbbr[3], 10)));
+      }
+    }
   }
   // Thai full month, e.g. "6 กรกฎาคม 2568"
   const mFull = text.match(new RegExp(`(\\d{1,2})\\s*(${TH_MONTH_FULL.join("|")})\\s*(\\d{2,4})`));
