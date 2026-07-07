@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { RoomDrawer } from "@/components/RoomDrawer";
 import { badge } from "@/lib/theme";
-import { ROOM_FILTERS, ROOM_PHOTO_BGS } from "@/lib/mock";
+import { ROOM_FILTERS } from "@/lib/mock";
 import { apiGet } from "@/lib/api-client";
 import type { RoomDTO } from "@/lib/api-types";
 
@@ -73,7 +73,7 @@ export default function RoomsPage() {
         <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>กำลังโหลด…</div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 16 }}>
-          {rooms.map((rm, i) => (
+          {rooms.map((rm) => (
             <div
               key={rm.id}
               onClick={() => setSelected(rm.id)}
@@ -94,7 +94,7 @@ export default function RoomsPage() {
                   height: 104,
                   position: "relative",
                   overflow: "hidden",
-                  background: ROOM_PHOTO_BGS[i % ROOM_PHOTO_BGS.length],
+                  background: "linear-gradient(135deg,#5EEAD4,#38BDF8)",
                   display: "flex",
                   alignItems: "flex-end",
                   justifyContent: "space-between",

@@ -132,7 +132,7 @@ export default function PropertiesPage() {
                   height: 88,
                   position: "relative",
                   overflow: "hidden",
-                  background: "linear-gradient(135deg,#0e2a3a,#123)",
+                  background: "linear-gradient(135deg,#5EEAD4,#38BDF8)",
                   display: "flex",
                   alignItems: "flex-end",
                   justifyContent: "space-between",
