@@ -107,6 +107,7 @@ export default function AccountsPage() {
                 marginTop: 14,
                 height: 64,
                 borderRadius: 12,
+                overflow: "hidden",
                 background: "rgba(255,255,255,0.06)",
                 border: "1px solid rgba(255,255,255,0.1)",
                 display: "flex",
@@ -117,7 +118,12 @@ export default function AccountsPage() {
                 color: "rgba(234,242,255,0.4)",
               }}
             >
-              QR
+              {a.qrUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- reason: in-memory object URL, not next/image-optimizable
+                <img src={a.qrUrl} alt="QR" style={{ height: "100%", width: "100%", objectFit: "contain" }} />
+              ) : (
+                "QR"
+              )}
             </div>
           </div>
         ))}

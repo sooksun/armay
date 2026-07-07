@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
+import { ImageUpload } from "@/components/shared/ImageUpload";
 import { useUI } from "@/lib/ui-context";
 
 const chevDown = <Icon name="chevDown" size={14} />;
@@ -32,6 +34,11 @@ function Field({ label, value, accent }: { label: string; value: React.ReactNode
 
 export function AddIncomeModal() {
   const { incomeOpen, closeIncome } = useUI();
+  const [slip, setSlip] = useState<string | null>(null);
+  // start each open with a fresh (empty) slip
+  useEffect(() => {
+    if (incomeOpen) setSlip(null);
+  }, [incomeOpen]);
   if (!incomeOpen) return null;
 
   return (
@@ -138,27 +145,12 @@ export function AddIncomeModal() {
             <Field label="บัญชีที่รับเงิน" value={<>KBank · 123-4-56789{chevDown}</>} />
           </div>
 
-          <div>
-            <div style={{ fontSize: 12, color: "rgba(234,242,255,0.6)", marginBottom: 6 }}>แนบสลิปการโอน</div>
-            <div
-              style={{
-                padding: 22,
-                borderRadius: 14,
-                border: "1.5px dashed rgba(94,234,212,0.4)",
-                background: "rgba(94,234,212,0.05)",
-                textAlign: "center",
-                cursor: "pointer",
-              }}
-            >
-              <div style={{ color: "#7FF0D9", display: "flex", justifyContent: "center", marginBottom: 8 }}>
-                <Icon name="upload" size={26} />
-              </div>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>ลากสลิปมาวาง หรือถ่ายจากกล้อง</div>
-              <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)", marginTop: 3 }}>
-                รองรับ JPG, PNG, PDF · ระบบ preview สลิปทันที
-              </div>
-            </div>
-          </div>
+          <ImageUpload
+            label="แนบสลิปการโอน"
+            value={slip}
+            onChange={setSlip}
+            hint="รองรับ JPG, PNG · ระบบ preview สลิปทันที"
+          />
 
           <div
             style={{

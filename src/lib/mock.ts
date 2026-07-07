@@ -473,6 +473,9 @@ export type Property = {
   note: string;
   monthlyIncome: number;
   status: PropertyStatus;
+  latitude: string;
+  longitude: string;
+  imageUrl: string | null;
 };
 
 export const PROPERTY_TYPE_OPTIONS = ["คอนโด", "แฟลต", "บ้านพัก", "อาคารพาณิชย์", "หอพัก", "อื่นๆ"];
@@ -493,6 +496,9 @@ export const PROPERTIES: Property[] = [
     note: "",
     monthlyIncome: 468000,
     status: "ACTIVE",
+    latitude: "13.7398",
+    longitude: "100.5804",
+    imageUrl: null,
   },
   {
     id: 2,
@@ -508,6 +514,9 @@ export const PROPERTIES: Property[] = [
     note: "",
     monthlyIncome: 352000,
     status: "ACTIVE",
+    latitude: "12.9276",
+    longitude: "100.8770",
+    imageUrl: null,
   },
   {
     id: 3,
@@ -523,6 +532,9 @@ export const PROPERTIES: Property[] = [
     note: "",
     monthlyIncome: 246000,
     status: "ACTIVE",
+    latitude: "13.7659",
+    longitude: "100.6434",
+    imageUrl: null,
   },
   {
     id: 4,
@@ -538,6 +550,9 @@ export const PROPERTIES: Property[] = [
     note: "",
     monthlyIncome: 182000,
     status: "ACTIVE",
+    latitude: "13.7255",
+    longitude: "100.6465",
+    imageUrl: null,
   },
 ];
 
@@ -686,6 +701,7 @@ export type PaymentAccountRecord = {
   promptpayId: string;
   accountType: AccountType;
   status: AccountStatus;
+  qrUrl: string | null;
 };
 
 export const ACCOUNT_TYPE_OPTIONS: AccountType[] = ["รับผู้เช่า", "จ่ายเจ้าของ", "ส่วนตัว", "เงินสด"];
@@ -694,6 +710,7 @@ export const PAYMENT_ACCOUNTS: PaymentAccountRecord[] = [
   {
     id: 1,
     accountName: "บัญชีรับเงินผู้เช่า",
+    qrUrl: null,
     bankName: "KBank",
     accountNumber: "123-4-56789",
     accountHolderName: "บจ. คริสตัล เลดเจอร์",
@@ -704,6 +721,7 @@ export const PAYMENT_ACCOUNTS: PaymentAccountRecord[] = [
   {
     id: 2,
     accountName: "บัญชีจ่ายเจ้าของ",
+    qrUrl: null,
     bankName: "KBank",
     accountNumber: "123-4-56789",
     accountHolderName: "บจ. คริสตัล เลดเจอร์",
@@ -714,6 +732,7 @@ export const PAYMENT_ACCOUNTS: PaymentAccountRecord[] = [
   {
     id: 3,
     accountName: "PromptPay ธุรกิจ",
+    qrUrl: null,
     bankName: "",
     accountNumber: "",
     accountHolderName: "บจ. คริสตัล เลดเจอร์",
@@ -724,6 +743,7 @@ export const PAYMENT_ACCOUNTS: PaymentAccountRecord[] = [
   {
     id: 4,
     accountName: "เงินสดสำนักงาน",
+    qrUrl: null,
     bankName: "",
     accountNumber: "",
     accountHolderName: "",

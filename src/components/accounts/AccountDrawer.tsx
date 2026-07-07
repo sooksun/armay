@@ -30,22 +30,31 @@ export function AccountDrawer({
         </span>
       }
     >
-      <div
-        style={{
-          height: 140,
-          borderRadius: 16,
-          background: "repeating-linear-gradient(135deg,rgba(255,255,255,0.05) 0 8px,transparent 8px 16px)",
-          border: "1px solid rgba(255,255,255,0.09)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "monospace",
-          fontSize: 11,
-          color: "rgba(234,242,255,0.4)",
-        }}
-      >
-        QR Code (placeholder)
-      </div>
+      {account.qrUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element -- reason: in-memory object URL, not next/image-optimizable
+        <img
+          src={account.qrUrl}
+          alt="QR Code"
+          style={{ display: "block", width: 180, height: 180, objectFit: "contain", margin: "0 auto", borderRadius: 16, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", padding: 8 }}
+        />
+      ) : (
+        <div
+          style={{
+            height: 140,
+            borderRadius: 16,
+            background: "repeating-linear-gradient(135deg,rgba(255,255,255,0.05) 0 8px,transparent 8px 16px)",
+            border: "1px solid rgba(255,255,255,0.09)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontFamily: "monospace",
+            fontSize: 11,
+            color: "rgba(234,242,255,0.4)",
+          }}
+        >
+          QR Code (placeholder)
+        </div>
+      )}
 
       <InfoSection title="ข้อมูลบัญชี">
         <InfoRow k="ธนาคาร" v={account.bankName || "—"} />
