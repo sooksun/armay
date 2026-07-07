@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { FormModal, FieldsGrid, TextField, SelectField, ToggleField } from "@/components/shared/FormModal";
 import { ImageUpload } from "@/components/shared/ImageUpload";
-import { ACCOUNT_TYPE_OPTIONS, type AccountType, type PaymentAccountRecord, type AccountStatus } from "@/lib/mock";
+import { ACCOUNT_TYPE_OPTIONS, type AccountType, type AccountStatus } from "@/lib/mock";
+import type { AccountDTO } from "@/lib/api-types";
 
 export type AccountDraft = {
   accountName: string;
@@ -35,7 +36,7 @@ export function AccountFormModal({
   onSubmit,
 }: {
   open: boolean;
-  editing: PaymentAccountRecord | null;
+  editing: AccountDTO | null;
   onClose: () => void;
   onSubmit: (draft: AccountDraft) => void;
 }) {
@@ -51,7 +52,7 @@ export function AccountFormModal({
             accountNumber: editing.accountNumber,
             accountHolderName: editing.accountHolderName,
             promptpayId: editing.promptpayId,
-            accountType: editing.accountType,
+            accountType: editing.accountType as AccountType,
             status: editing.status,
             qrUrl: editing.qrUrl,
           }

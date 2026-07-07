@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { FormModal, FieldsGrid, TextField, TextAreaField, SelectField, ToggleField } from "@/components/shared/FormModal";
 import { ImageUpload } from "@/components/shared/ImageUpload";
-import { PROPERTY_TYPE_OPTIONS, type Property, type PropertyStatus } from "@/lib/mock";
+import { PROPERTY_TYPE_OPTIONS, type PropertyStatus } from "@/lib/mock";
+import type { PropertyDTO } from "@/lib/api-types";
 
 export type PropertyDraft = {
   propertyName: string;
@@ -47,7 +48,7 @@ export function PropertyFormModal({
   onSubmit,
 }: {
   open: boolean;
-  editing: Property | null;
+  editing: PropertyDTO | null;
   onClose: () => void;
   onSubmit: (draft: PropertyDraft) => void;
 }) {

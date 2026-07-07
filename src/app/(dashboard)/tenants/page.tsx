@@ -1,26 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { ListCard, TableWrap, Th } from "@/components/shared/ListCard";
 import { TenantDrawer } from "@/components/tenants/TenantDrawer";
 import { TenantFormModal, type TenantDraft } from "@/components/tenants/TenantFormModal";
 import { badge } from "@/lib/theme";
-import { TENANTS, latestRentalByTenant, type Tenant } from "@/lib/mock";
-
-function nextTenantId(list: Tenant[]): number {
-  return list.reduce((max, t) => Math.max(max, t.id), 0) + 1;
-}
-
-function nextTenantCode(nextId: number): string {
-  return `TNT-${String(nextId).padStart(4, "0")}`;
-}
+import { apiGet, apiSend } from "@/lib/api-client";
+import type { TenantDTO } from "@/lib/api-types";
 
 export default function TenantsPage() {
-  const [tenants, setTenants] = useState<Tenant[]>(TENANTS);
+  const [tenants, setTenants] = useState<TenantDTO[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      setTenants(await apiGet<TenantDTO[]>("/api/tenants"));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const selected = tenants.find((t) => t.id === selectedId) ?? null;
   const editing = tenants.find((t) => t.id === editingId) ?? null;
@@ -29,32 +36,30 @@ export default function TenantsPage() {
     setEditingId(null);
     setFormOpen(true);
   }
-
-  function openEdit(tenant: Tenant) {
-    setEditingId(tenant.id);
+  function openEdit(t: TenantDTO) {
+    setEditingId(t.id);
     setFormOpen(true);
   }
-
-  function handleSubmit(draft: TenantDraft) {
-    if (editingId != null) {
-      setTenants((list) => list.map((t) => (t.id === editingId ? { ...t, ...draft } : t)));
-    } else {
-      const id = nextTenantId(tenants);
-      setTenants((list) => [...list, { id, tenantCode: nextTenantCode(id), ...draft }]);
+  async function handleSubmit(draft: TenantDraft) {
+    try {
+      if (editingId != null) await apiSend(`/api/tenants/${editingId}`, "PATCH", draft);
+      else await apiSend("/api/tenants", "POST", draft);
+      setFormOpen(false);
+      setEditingId(null);
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "บันทึกไม่สำเร็จ");
     }
-    setFormOpen(false);
-    setEditingId(null);
   }
-
-  function handleDelete(tenant: Tenant) {
-    const latest = latestRentalByTenant(tenant.fullName);
-    if (latest && latest.due !== "฿0") {
-      alert(`ลบไม่ได้ — ผู้เช่ารายนี้ยังมีสัญญาที่ค้างชำระอยู่ (${latest.code})`);
-      return;
+  async function handleDelete(t: TenantDTO) {
+    if (!confirm(`ยืนยันลบผู้เช่า "${t.fullName}"?`)) return;
+    try {
+      await apiSend(`/api/tenants/${t.id}`, "DELETE");
+      setSelectedId(null);
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "ลบไม่สำเร็จ");
     }
-    if (!confirm(`ยืนยันลบผู้เช่า "${tenant.fullName}"?`)) return;
-    setTenants((list) => list.filter((t) => t.id !== tenant.id));
-    setSelectedId(null);
   }
 
   return (
@@ -97,9 +102,14 @@ export default function TenantsPage() {
             </tr>
           </thead>
           <tbody>
-            {tenants.map((t) => {
-              const latest = latestRentalByTenant(t.fullName);
-              return (
+            {loading ? (
+              <tr>
+                <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                  กำลังโหลด…
+                </td>
+              </tr>
+            ) : (
+              tenants.map((t) => (
                 <tr key={t.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                   <td style={{ padding: "13px 16px", fontFamily: "monospace", fontSize: 12, color: "rgba(234,242,255,0.7)", whiteSpace: "nowrap" }}>
                     {t.tenantCode}
@@ -108,9 +118,9 @@ export default function TenantsPage() {
                     <div style={{ fontWeight: 600 }}>{t.fullName}</div>
                     <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{t.phone}</div>
                   </td>
-                  <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.8)" }}>{latest ? `${latest.room} · ${latest.building}` : "—"}</td>
+                  <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.8)" }}>{t.latest ? `${t.latest.room} · ${t.latest.building}` : "—"}</td>
                   <td style={{ padding: "13px 16px" }}>
-                    {latest ? <span style={badge(latest.badge)}>{latest.status}</span> : <span style={{ color: "rgba(234,242,255,0.4)" }}>—</span>}
+                    {t.latest ? <span style={badge(t.latest.badge)}>{t.latest.status}</span> : <span style={{ color: "rgba(234,242,255,0.4)" }}>—</span>}
                   </td>
                   <td style={{ padding: "13px 16px" }}>
                     {t.blacklist ? <span style={badge("red")}>Blacklist</span> : <span style={{ color: "rgba(234,242,255,0.4)" }}>—</span>}
@@ -134,8 +144,8 @@ export default function TenantsPage() {
                     </button>
                   </td>
                 </tr>
-              );
-            })}
+              ))
+            )}
           </tbody>
         </TableWrap>
       </ListCard>
@@ -143,9 +153,9 @@ export default function TenantsPage() {
       <TenantDrawer
         tenant={selected}
         onClose={() => setSelectedId(null)}
-        onEdit={(tenant) => {
+        onEdit={(t) => {
           setSelectedId(null);
-          openEdit(tenant);
+          openEdit(t);
         }}
         onDelete={handleDelete}
       />

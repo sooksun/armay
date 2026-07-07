@@ -1,19 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { badge, fmtTHB } from "@/lib/theme";
 import { PropertyDrawer } from "@/components/properties/PropertyDrawer";
 import { PropertyFormModal, type PropertyDraft } from "@/components/properties/PropertyFormModal";
-import { PROPERTIES, roomsByProperty, type Property } from "@/lib/mock";
-
-function nextPropertyId(list: Property[]): number {
-  return list.reduce((max, p) => Math.max(max, p.id), 0) + 1;
-}
-
-function nextPropertyCode(nextId: number): string {
-  return `PPT-${String(nextId).padStart(4, "0")}`;
-}
+import { apiGet, apiSend } from "@/lib/api-client";
+import type { PropertyDTO } from "@/lib/api-types";
 
 const softBtn: React.CSSProperties = {
   display: "flex",
@@ -30,10 +23,24 @@ const softBtn: React.CSSProperties = {
 };
 
 export default function PropertiesPage() {
-  const [properties, setProperties] = useState<Property[]>(PROPERTIES);
+  const [properties, setProperties] = useState<PropertyDTO[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      setProperties(await apiGet<PropertyDTO[]>("/api/properties"));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const selected = properties.find((p) => p.id === selectedId) ?? null;
   const editing = properties.find((p) => p.id === editingId) ?? null;
@@ -42,32 +49,30 @@ export default function PropertiesPage() {
     setEditingId(null);
     setFormOpen(true);
   }
-
-  function openEdit(property: Property) {
-    setEditingId(property.id);
+  function openEdit(p: PropertyDTO) {
+    setEditingId(p.id);
     setFormOpen(true);
   }
-
-  function handleSubmit(draft: PropertyDraft) {
-    if (editingId != null) {
-      setProperties((list) => list.map((p) => (p.id === editingId ? { ...p, ...draft } : p)));
-    } else {
-      const id = nextPropertyId(properties);
-      setProperties((list) => [...list, { id, propertyCode: nextPropertyCode(id), ...draft }]);
+  async function handleSubmit(draft: PropertyDraft) {
+    try {
+      if (editingId != null) await apiSend(`/api/properties/${editingId}`, "PATCH", draft);
+      else await apiSend("/api/properties", "POST", draft);
+      setFormOpen(false);
+      setEditingId(null);
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "บันทึกไม่สำเร็จ");
     }
-    setFormOpen(false);
-    setEditingId(null);
   }
-
-  function handleDelete(property: Property) {
-    const roomCount = roomsByProperty(property.propertyName).length;
-    if (roomCount > 0) {
-      alert(`ลบไม่ได้ — อาคารนี้ยังมีห้องอยู่ ${roomCount} ห้อง`);
-      return;
+  async function handleDelete(p: PropertyDTO) {
+    if (!confirm(`ยืนยันลบอาคาร "${p.propertyName}"?`)) return;
+    try {
+      await apiSend(`/api/properties/${p.id}`, "DELETE");
+      setSelectedId(null);
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "ลบไม่สำเร็จ");
     }
-    if (!confirm(`ยืนยันลบอาคาร "${property.propertyName}"?`)) return;
-    setProperties((list) => list.filter((p) => p.id !== property.id));
-    setSelectedId(null);
   }
 
   return (
@@ -75,12 +80,6 @@ export default function PropertiesPage() {
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
         <button style={softBtn}>
           ประเภทอาคาร<span style={{ color: "rgba(234,242,255,0.5)" }}>ทั้งหมด</span>
-          <span style={{ color: "rgba(234,242,255,0.4)" }}>
-            <Icon name="chevDown" size={14} />
-          </span>
-        </button>
-        <button style={softBtn}>
-          จังหวัด<span style={{ color: "rgba(234,242,255,0.5)" }}>ทั้งหมด</span>
           <span style={{ color: "rgba(234,242,255,0.4)" }}>
             <Icon name="chevDown" size={14} />
           </span>
@@ -109,12 +108,11 @@ export default function PropertiesPage() {
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 16 }}>
-        {properties.map((p) => {
-          const rooms = roomsByProperty(p.propertyName);
-          const occupied = rooms.filter((r) => r.status === "มีผู้เช่า").length;
-          const vacant = rooms.filter((r) => r.status === "ว่าง").length;
-          return (
+      {loading ? (
+        <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>กำลังโหลด…</div>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 16 }}>
+          {properties.map((p) => (
             <div
               key={p.id}
               onClick={() => setSelectedId(p.id)}
@@ -156,16 +154,17 @@ export default function PropertiesPage() {
                   <span style={badge("blue")}>{p.propertyType}</span>
                 </div>
                 <div style={{ fontSize: 12, color: "rgba(234,242,255,0.55)", marginTop: 3 }}>
-                  {p.district}, {p.province}
+                  {p.district ? `${p.district}, ` : ""}
+                  {p.province}
                 </div>
                 <div style={{ display: "flex", gap: 8, marginTop: 13 }}>
                   <div style={{ flex: 1, padding: "9px 11px", borderRadius: 12, background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.16)" }}>
                     <div style={{ fontSize: 10.5, color: "rgba(234,242,255,0.55)" }}>มีผู้เช่า</div>
-                    <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, fontSize: 14.5, color: "#6EE7B7", marginTop: 2 }}>{occupied} ห้อง</div>
+                    <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, fontSize: 14.5, color: "#6EE7B7", marginTop: 2 }}>{p.occupied} ห้อง</div>
                   </div>
                   <div style={{ flex: 1, padding: "9px 11px", borderRadius: 12, background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.2)" }}>
                     <div style={{ fontSize: 10.5, color: "rgba(234,242,255,0.55)" }}>ห้องว่าง</div>
-                    <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, fontSize: 14.5, color: "#7DD3FC", marginTop: 2 }}>{vacant} ห้อง</div>
+                    <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, fontSize: 14.5, color: "#7DD3FC", marginTop: 2 }}>{p.vacant} ห้อง</div>
                   </div>
                 </div>
                 <div style={{ fontSize: 12, color: "rgba(234,242,255,0.6)", marginTop: 12, paddingTop: 11, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
@@ -173,16 +172,16 @@ export default function PropertiesPage() {
                 </div>
               </div>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
 
       <PropertyDrawer
         property={selected}
         onClose={() => setSelectedId(null)}
-        onEdit={(property) => {
+        onEdit={(p) => {
           setSelectedId(null);
-          openEdit(property);
+          openEdit(p);
         }}
         onDelete={handleDelete}
       />

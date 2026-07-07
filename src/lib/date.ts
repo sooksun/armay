@@ -10,6 +10,11 @@ export function formatBEDate(d: Date): string {
   return `${d.getUTCDate()} ${TH_MONTHS[d.getUTCMonth()]} ${toBEYear(d.getUTCFullYear())}`;
 }
 
+/** e.g. "6 ก.ค." (day + Thai month, no year). */
+export function formatDayMonth(d: Date): string {
+  return `${d.getUTCDate()} ${TH_MONTHS[d.getUTCMonth()]}`;
+}
+
 /** UTC [start, end) range for a Buddhist-era "YYYY-MM" period, e.g. "2568-07". */
 export function monthRangeUTC(period: string): { start: Date; end: Date } {
   const [beYear, month] = period.split("-").map((x) => parseInt(x, 10));

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Drawer, InfoRow, InfoSection } from "@/components/shared/Drawer";
 import { badge } from "@/lib/theme";
-import { rentalsByTenant, type Tenant } from "@/lib/mock";
+import type { TenantDTO } from "@/lib/api-types";
 
 const TABS = ["ภาพรวม", "ประวัติการเช่า", "เอกสารแนบ"];
 
@@ -13,10 +13,10 @@ export function TenantDrawer({
   onEdit,
   onDelete,
 }: {
-  tenant: Tenant | null;
+  tenant: TenantDTO | null;
   onClose: () => void;
-  onEdit: (tenant: Tenant) => void;
-  onDelete: (tenant: Tenant) => void;
+  onEdit: (tenant: TenantDTO) => void;
+  onDelete: (tenant: TenantDTO) => void;
 }) {
   const [tab, setTab] = useState(0);
 
@@ -27,7 +27,7 @@ export function TenantDrawer({
 
   if (!tenant) return null;
 
-  const rentals = rentalsByTenant(tenant.fullName);
+  const rentals = tenant.rentals;
 
   return (
     <Drawer

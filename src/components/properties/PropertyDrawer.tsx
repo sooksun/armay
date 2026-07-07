@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Drawer, StatBox, InfoRow, InfoSection } from "@/components/shared/Drawer";
-import { badge, fmtTHB, parseAmount } from "@/lib/theme";
-import { roomsByProperty, ROOM_BADGE_KIND, type Property } from "@/lib/mock";
+import { badge, fmtTHB } from "@/lib/theme";
+import type { PropertyDTO } from "@/lib/api-types";
 
 const TABS = ["ภาพรวม", "ห้องทั้งหมด", "สรุปรายรับ-รายจ่าย"];
 
@@ -13,10 +13,10 @@ export function PropertyDrawer({
   onEdit,
   onDelete,
 }: {
-  property: Property | null;
+  property: PropertyDTO | null;
   onClose: () => void;
-  onEdit: (property: Property) => void;
-  onDelete: (property: Property) => void;
+  onEdit: (property: PropertyDTO) => void;
+  onDelete: (property: PropertyDTO) => void;
 }) {
   const [tab, setTab] = useState(0);
 
@@ -27,10 +27,10 @@ export function PropertyDrawer({
 
   if (!property) return null;
 
-  const rooms = roomsByProperty(property.propertyName);
-  const occupied = rooms.filter((r) => r.status === "มีผู้เช่า").length;
-  const vacant = rooms.filter((r) => r.status === "ว่าง").length;
-  const totalExpense = rooms.reduce((sum, r) => sum + parseAmount(r.expense), 0);
+  const rooms = property.rooms;
+  const occupied = property.occupied;
+  const vacant = property.vacant;
+  const totalExpense = property.totalExpense;
 
   return (
     <Drawer
@@ -126,9 +126,9 @@ export function PropertyDrawer({
               >
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>{r.no}</div>
-                  <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>เจ้าของ: {r.owner}</div>
+                  <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{r.building}</div>
                 </div>
-                <span style={badge(ROOM_BADGE_KIND[r.status])}>{r.status}</span>
+                <span style={badge(r.badge)}>{r.status}</span>
               </div>
             ))
           )}

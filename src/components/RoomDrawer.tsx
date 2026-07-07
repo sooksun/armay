@@ -2,7 +2,8 @@
 
 import { badge } from "@/lib/theme";
 import { ImageUpload } from "@/components/shared/ImageUpload";
-import { ROOM_BADGE_KIND, ROOM_DRAWER_TABS, type Room } from "@/lib/mock";
+import { ROOM_DRAWER_TABS } from "@/lib/mock";
+import type { RoomDTO } from "@/lib/api-types";
 
 function statBox(bg: string, border: string, color: string, label: string, value: string) {
   return (
@@ -19,7 +20,7 @@ export function RoomDrawer({
   image,
   onImageChange,
 }: {
-  room: Room | null;
+  room: RoomDTO | null;
   onClose: () => void;
   image: string | null;
   onImageChange: (url: string | null) => void;
@@ -88,7 +89,7 @@ export function RoomDrawer({
           <div>
             <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{room.building}</div>
             <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 22 }}>ห้อง {room.no}</div>
-            <span style={{ ...badge(ROOM_BADGE_KIND[room.status]), marginTop: 8 }}>{room.status}</span>
+            <span style={{ ...badge(room.badge), marginTop: 8 }}>{room.status}</span>
           </div>
           <button onClick={onClose} style={closeBtn}>
             ✕

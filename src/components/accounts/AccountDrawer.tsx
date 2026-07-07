@@ -2,7 +2,7 @@
 
 import { Drawer, InfoRow, InfoSection } from "@/components/shared/Drawer";
 import { badge, maskAccountNumber } from "@/lib/theme";
-import { incomeRowsByChannel, type PaymentAccountRecord } from "@/lib/mock";
+import type { AccountDTO } from "@/lib/api-types";
 
 export function AccountDrawer({
   account,
@@ -10,14 +10,14 @@ export function AccountDrawer({
   onEdit,
   onDelete,
 }: {
-  account: PaymentAccountRecord | null;
+  account: AccountDTO | null;
   onClose: () => void;
-  onEdit: (account: PaymentAccountRecord) => void;
-  onDelete: (account: PaymentAccountRecord) => void;
+  onEdit: (account: AccountDTO) => void;
+  onDelete: (account: AccountDTO) => void;
 }) {
   if (!account) return null;
 
-  const recentIncome = incomeRowsByChannel(account).slice(0, 5);
+  const recentIncome = account.recentIncomes;
 
   return (
     <Drawer

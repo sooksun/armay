@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { FormModal, FieldsGrid, TextField, TextAreaField, ToggleField } from "@/components/shared/FormModal";
-import type { Tenant, TenantStatus } from "@/lib/mock";
+import type { TenantDTO } from "@/lib/api-types";
+
+type TenantStatus = "ACTIVE" | "INACTIVE";
 
 export type TenantDraft = {
   fullName: string;
@@ -38,7 +40,7 @@ export function TenantFormModal({
   onSubmit,
 }: {
   open: boolean;
-  editing: Tenant | null;
+  editing: TenantDTO | null;
   onClose: () => void;
   onSubmit: (draft: TenantDraft) => void;
 }) {
