@@ -172,6 +172,35 @@ export type RentalDTO = {
   badge: BadgeKind;
 };
 
+export type RentalIncomeLineDTO = { date: string; type: string; amount: string; status: string; badge: BadgeKind };
+export type RentalDetailDTO = {
+  id: number;
+  code: string;
+  tenant: string;
+  tenantPhone: string;
+  room: string;
+  building: string;
+  owner: string;
+  rentalType: string; // Thai label
+  period: string;
+  startDate: string;
+  endDate: string;
+  rent: string;
+  deposit: string;
+  cleaningFee: string;
+  otherFee: string;
+  discount: string;
+  total: string;
+  paid: string;
+  due: string;
+  bookingChannel: string;
+  status: string; // Thai payment-status label
+  badge: BadgeKind;
+  rentalStatus: string; // Thai rental-status label
+  note: string;
+  incomes: RentalIncomeLineDTO[];
+};
+
 export type PayoutDTO = {
   id: number;
   owner: string;

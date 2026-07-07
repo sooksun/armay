@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { RentalCreateForm } from "@/components/rentals/RentalCreateForm";
+import { RentalDrawer } from "@/components/rentals/RentalDrawer";
 import { badge } from "@/lib/theme";
 import { apiGet } from "@/lib/api-client";
 import type { RentalDTO } from "@/lib/api-types";
@@ -20,6 +21,7 @@ export default function RentalsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [rows, setRows] = useState<RentalDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -170,6 +172,7 @@ export default function RentalsPage() {
                     </td>
                     <td style={{ padding: "13px 16px", textAlign: "right" }}>
                       <button
+                        onClick={() => setSelectedId(r.id)}
                         style={{
                           padding: "6px 12px",
                           borderRadius: 9,
@@ -234,6 +237,8 @@ export default function RentalsPage() {
           />
         </div>
       )}
+
+      <RentalDrawer rentalId={selectedId} onClose={() => setSelectedId(null)} />
     </div>
   );
 }

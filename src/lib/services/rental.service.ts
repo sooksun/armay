@@ -3,12 +3,74 @@ import { prisma } from "@/lib/prisma";
 import { generateCode } from "@/lib/codegen";
 import { writeAudit } from "@/lib/services/audit.service";
 import { decToNumber, fmtTHB } from "@/lib/money";
-import { formatDayMonth, parseThaiBEDate } from "@/lib/date";
-import { PAYMENT_STATUS, PAYMENT_STATUS_BADGE } from "@/lib/labels";
+import { formatDayMonth, formatBEDate, parseThaiBEDate } from "@/lib/date";
+import {
+  PAYMENT_STATUS,
+  PAYMENT_STATUS_BADGE,
+  RENTAL_STATUS,
+  INCOME_TYPE,
+  VERIFICATION_STATUS,
+  VERIFICATION_BADGE,
+} from "@/lib/labels";
 import { ApiError } from "@/lib/api/response";
 import type { Session } from "@/lib/auth/session";
-import type { RentalDTO } from "@/lib/api-types";
+import type { RentalDTO, RentalDetailDTO } from "@/lib/api-types";
 import type { RentalCreateInput } from "@/lib/validation/rental.schema";
+
+const RENTAL_TYPE_LABEL: Record<string, string> = { DAILY: "รายวัน", MONTHLY: "รายเดือน", YEARLY: "รายปี" };
+
+const DETAIL_INCLUDE = {
+  tenant: true,
+  room: true,
+  property: true,
+  owner: true,
+  incomes: { orderBy: { incomeDate: "desc" } },
+} satisfies Prisma.RentalContractInclude;
+
+export async function getRentalDetail(id: number): Promise<RentalDetailDTO> {
+  const c = await prisma.rentalContract.findUnique({ where: { id }, include: DETAIL_INCLUDE });
+  if (!c) throw new ApiError("NOT_FOUND", "ไม่พบรายการเช่านี้", 404);
+
+  const total = decToNumber(c.totalAmount);
+  const paid = c.incomes
+    .filter((i) => i.verificationStatus !== "CANCELLED")
+    .reduce((s, i) => s + decToNumber(i.amount), 0);
+  const due = c.paymentStatus === "PAID" ? 0 : Math.max(0, total - paid);
+
+  return {
+    id: c.id,
+    code: c.contractCode,
+    tenant: c.tenant.fullName,
+    tenantPhone: c.tenant.phone ?? "",
+    room: c.room.roomNumber,
+    building: c.property.propertyName,
+    owner: c.owner.fullName,
+    rentalType: RENTAL_TYPE_LABEL[c.rentalType] ?? c.rentalType,
+    period: `${formatBEDate(c.startDate)} – ${formatBEDate(c.endDate)}`,
+    startDate: formatBEDate(c.startDate),
+    endDate: formatBEDate(c.endDate),
+    rent: fmtTHB(decToNumber(c.rentAmount)),
+    deposit: fmtTHB(decToNumber(c.depositAmount)),
+    cleaningFee: fmtTHB(decToNumber(c.cleaningFee)),
+    otherFee: fmtTHB(decToNumber(c.otherFee)),
+    discount: fmtTHB(decToNumber(c.discountAmount)),
+    total: fmtTHB(total),
+    paid: fmtTHB(paid),
+    due: fmtTHB(due),
+    bookingChannel: c.bookingChannel ?? "",
+    status: PAYMENT_STATUS[c.paymentStatus] ?? c.paymentStatus,
+    badge: PAYMENT_STATUS_BADGE[c.paymentStatus] ?? "gray",
+    rentalStatus: RENTAL_STATUS[c.rentalStatus] ?? c.rentalStatus,
+    note: c.note ?? "",
+    incomes: c.incomes.map((i) => ({
+      date: formatBEDate(i.incomeDate),
+      type: INCOME_TYPE[i.incomeType] ?? i.incomeType,
+      amount: fmtTHB(decToNumber(i.amount)),
+      status: VERIFICATION_STATUS[i.verificationStatus] ?? i.verificationStatus,
+      badge: VERIFICATION_BADGE[i.verificationStatus] ?? "gray",
+    })),
+  };
+}
 
 const INCLUDE = {
   tenant: true,
