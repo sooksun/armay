@@ -75,7 +75,7 @@ export default function TenantsPage() {
               gap: 7,
               padding: "8px 15px",
               borderRadius: 11,
-              border: "1px solid rgba(255,255,255,0.28)",
+              border: "1px solid rgba(var(--surface-rgb),0.28)",
               color: "#04121A",
               fontFamily: "inherit",
               fontSize: 12.5,
@@ -92,7 +92,7 @@ export default function TenantsPage() {
       >
         <TableWrap minWidth={860}>
           <thead>
-            <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+            <tr style={{ background: "rgba(var(--surface-rgb),0.04)" }}>
               <Th>รหัส</Th>
               <Th>ชื่อ-นามสกุล</Th>
               <Th>ห้อง/สัญญาปัจจุบัน</Th>
@@ -104,26 +104,26 @@ export default function TenantsPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>
                   กำลังโหลด…
                 </td>
               </tr>
             ) : (
               tenants.map((t) => (
-                <tr key={t.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                  <td style={{ padding: "13px 16px", fontFamily: "monospace", fontSize: 12, color: "rgba(234,242,255,0.7)", whiteSpace: "nowrap" }}>
+                <tr key={t.id} style={{ borderTop: "1px solid rgba(var(--surface-rgb),0.06)" }}>
+                  <td style={{ padding: "13px 16px", fontFamily: "monospace", fontSize: 12, color: "rgba(var(--text-rgb),0.7)", whiteSpace: "nowrap" }}>
                     {t.tenantCode}
                   </td>
                   <td style={{ padding: "13px 16px" }}>
                     <div style={{ fontWeight: 600 }}>{t.fullName}</div>
-                    <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{t.phone}</div>
+                    <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>{t.phone}</div>
                   </td>
-                  <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.8)" }}>{t.latest ? `${t.latest.room} · ${t.latest.building}` : "—"}</td>
+                  <td style={{ padding: "13px 16px", color: "rgba(var(--text-rgb),0.8)" }}>{t.latest ? `${t.latest.room} · ${t.latest.building}` : "—"}</td>
                   <td style={{ padding: "13px 16px" }}>
-                    {t.latest ? <span style={badge(t.latest.badge)}>{t.latest.status}</span> : <span style={{ color: "rgba(234,242,255,0.4)" }}>—</span>}
+                    {t.latest ? <span style={badge(t.latest.badge)}>{t.latest.status}</span> : <span style={{ color: "rgba(var(--text-rgb),0.4)" }}>—</span>}
                   </td>
                   <td style={{ padding: "13px 16px" }}>
-                    {t.blacklist ? <span style={badge("red")}>Blacklist</span> : <span style={{ color: "rgba(234,242,255,0.4)" }}>—</span>}
+                    {t.blacklist ? <span style={badge("red")}>Blacklist</span> : <span style={{ color: "rgba(var(--text-rgb),0.4)" }}>—</span>}
                   </td>
                   <td style={{ padding: "13px 16px", textAlign: "right" }}>
                     <button
@@ -131,9 +131,9 @@ export default function TenantsPage() {
                       style={{
                         padding: "6px 12px",
                         borderRadius: 9,
-                        border: "1px solid rgba(255,255,255,0.16)",
-                        background: "rgba(255,255,255,0.06)",
-                        color: "#EAF2FF",
+                        border: "1px solid rgba(var(--surface-rgb),0.16)",
+                        background: "rgba(var(--surface-rgb),0.06)",
+                        color: "var(--text)",
                         fontFamily: "inherit",
                         fontSize: 11.5,
                         cursor: "pointer",

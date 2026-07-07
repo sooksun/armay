@@ -6,9 +6,9 @@ const fieldBoxStyle: React.CSSProperties = {
   width: "100%",
   padding: "11px 13px",
   borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.14)",
-  background: "rgba(255,255,255,0.05)",
-  color: "#EAF2FF",
+  border: "1px solid rgba(var(--surface-rgb),0.14)",
+  background: "rgba(var(--surface-rgb),0.05)",
+  color: "var(--text)",
   fontFamily: "inherit",
   fontSize: 13,
   outline: "none",
@@ -16,7 +16,7 @@ const fieldBoxStyle: React.CSSProperties = {
 };
 
 function Label({ children }: { children: ReactNode }) {
-  return <div style={{ fontSize: 12, color: "rgba(234,242,255,0.6)", marginBottom: 6 }}>{children}</div>;
+  return <div style={{ fontSize: 12, color: "rgba(var(--text-rgb),0.6)", marginBottom: 6 }}>{children}</div>;
 }
 
 export function TextField({
@@ -84,7 +84,7 @@ export function SelectField({
       <Label>{label}</Label>
       <select value={value} onChange={(e) => onChange(e.target.value)} style={{ ...fieldBoxStyle, cursor: "pointer" }}>
         {options.map((o) => (
-          <option key={o.value} value={o.value} style={{ background: "#0B1020" }}>
+          <option key={o.value} value={o.value} style={{ background: "var(--panel)" }}>
             {o.label}
           </option>
         ))}
@@ -116,9 +116,9 @@ export function ToggleField({
           ...fieldBoxStyle,
           cursor: "pointer",
           textAlign: "left",
-          color: checked ? "#7FF0D9" : "#EAF2FF",
-          borderColor: checked ? "rgba(94,234,212,0.4)" : "rgba(255,255,255,0.14)",
-          background: checked ? "rgba(94,234,212,0.08)" : "rgba(255,255,255,0.05)",
+          color: checked ? "var(--pos)" : "var(--text)",
+          borderColor: checked ? "rgba(94,234,212,0.4)" : "rgba(var(--surface-rgb),0.14)",
+          background: checked ? "rgba(94,234,212,0.08)" : "rgba(var(--surface-rgb),0.05)",
         }}
       >
         {checked ? onLabel : offLabel}
@@ -173,11 +173,11 @@ export function FormModal({
           width: "100%",
           maxWidth: 560,
           borderRadius: 26,
-          background: "linear-gradient(180deg,rgba(20,28,48,0.96),rgba(12,18,34,0.96))",
+          background: "linear-gradient(180deg,rgba(var(--panel2-rgb),0.96),rgba(var(--panel-rgb),0.96))",
           backdropFilter: "blur(30px)",
           WebkitBackdropFilter: "blur(30px)",
-          border: "1px solid rgba(255,255,255,0.16)",
-          boxShadow: "0 30px 70px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.2)",
+          border: "1px solid rgba(var(--surface-rgb),0.16)",
+          boxShadow: "0 30px 70px rgba(0,0,0,0.5),inset 0 1px 0 rgba(var(--surface-rgb),0.2)",
           overflow: "hidden",
         }}
       >
@@ -187,7 +187,7 @@ export function FormModal({
             alignItems: "center",
             gap: 12,
             padding: "20px 24px",
-            borderBottom: "1px solid rgba(255,255,255,0.1)",
+            borderBottom: "1px solid rgba(var(--surface-rgb),0.1)",
           }}
         >
           <span
@@ -206,7 +206,7 @@ export function FormModal({
           </span>
           <div>
             <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 17 }}>{title}</div>
-            <div style={{ fontSize: 12, color: "rgba(234,242,255,0.5)" }}>{subtitle}</div>
+            <div style={{ fontSize: 12, color: "rgba(var(--text-rgb),0.5)" }}>{subtitle}</div>
           </div>
           <button
             onClick={onClose}
@@ -215,9 +215,9 @@ export function FormModal({
               width: 34,
               height: 34,
               borderRadius: 10,
-              border: "1px solid rgba(255,255,255,0.14)",
-              background: "rgba(255,255,255,0.05)",
-              color: "#EAF2FF",
+              border: "1px solid rgba(var(--surface-rgb),0.14)",
+              background: "rgba(var(--surface-rgb),0.05)",
+              color: "var(--text)",
               cursor: "pointer",
               fontSize: 16,
             }}
@@ -234,8 +234,8 @@ export function FormModal({
             justifyContent: "flex-end",
             gap: 11,
             padding: "16px 24px",
-            borderTop: "1px solid rgba(255,255,255,0.1)",
-            background: "rgba(255,255,255,0.02)",
+            borderTop: "1px solid rgba(var(--surface-rgb),0.1)",
+            background: "rgba(var(--surface-rgb),0.02)",
           }}
         >
           <button
@@ -243,9 +243,9 @@ export function FormModal({
             style={{
               padding: "11px 20px",
               borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.16)",
-              background: "rgba(255,255,255,0.05)",
-              color: "#EAF2FF",
+              border: "1px solid rgba(var(--surface-rgb),0.16)",
+              background: "rgba(var(--surface-rgb),0.05)",
+              color: "var(--text)",
               fontFamily: "inherit",
               fontSize: 13,
               fontWeight: 600,
@@ -259,7 +259,7 @@ export function FormModal({
             style={{
               padding: "11px 24px",
               borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.28)",
+              border: "1px solid rgba(var(--surface-rgb),0.28)",
               color: "#04121A",
               fontFamily: "inherit",
               fontSize: 13,

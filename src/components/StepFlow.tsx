@@ -52,9 +52,9 @@ export function StepTabs({
               fontSize: 12.5,
               fontWeight: cur ? 600 : 400,
               cursor: "pointer",
-              border: `1px solid ${cur ? a.border : "rgba(255,255,255,0.1)"}`,
-              color: cur ? "#EAF2FF" : "rgba(234,242,255,0.55)",
-              background: cur ? a.bg : "rgba(255,255,255,0.03)",
+              border: `1px solid ${cur ? a.border : "rgba(var(--surface-rgb),0.1)"}`,
+              color: cur ? "var(--text)" : "rgba(var(--text-rgb),0.55)",
+              background: cur ? a.bg : "rgba(var(--surface-rgb),0.03)",
             }}
           >
             <span
@@ -67,8 +67,8 @@ export function StepTabs({
                 justifyContent: "center",
                 fontSize: 11.5,
                 fontWeight: 700,
-                color: cur || done ? "#04121A" : "rgba(234,242,255,0.6)",
-                background: cur || done ? a.grad : "rgba(255,255,255,0.08)",
+                color: cur || done ? "#04121A" : "rgba(var(--text-rgb),0.6)",
+                background: cur || done ? a.grad : "rgba(var(--surface-rgb),0.08)",
               }}
             >
               {done ? "✓" : n}
@@ -86,13 +86,13 @@ export function StepFieldsGrid({ fields }: { fields: StepField[] }) {
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 14 }}>
       {fields.map((fld, i) => (
         <div key={i}>
-          <div style={{ fontSize: 12, color: "rgba(234,242,255,0.6)", marginBottom: 6 }}>{fld.label}</div>
+          <div style={{ fontSize: 12, color: "rgba(var(--text-rgb),0.6)", marginBottom: 6 }}>{fld.label}</div>
           <div
             style={{
               padding: "11px 13px",
               borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.14)",
-              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(var(--surface-rgb),0.14)",
+              background: "rgba(var(--surface-rgb),0.05)",
               fontSize: 13.5,
               color: fld.color,
               display: "flex",
@@ -101,7 +101,7 @@ export function StepFieldsGrid({ fields }: { fields: StepField[] }) {
             }}
           >
             {fld.value}
-            <span style={{ color: "rgba(234,242,255,0.4)" }}>{fld.icon ? <Icon name={fld.icon} size={15} /> : null}</span>
+            <span style={{ color: "rgba(var(--text-rgb),0.4)" }}>{fld.icon ? <Icon name={fld.icon} size={15} /> : null}</span>
           </div>
         </div>
       ))}
@@ -116,9 +116,9 @@ export function StepNavButtons({ nextLabel }: { nextLabel: string }) {
         style={{
           padding: "11px 18px",
           borderRadius: 12,
-          border: "1px solid rgba(255,255,255,0.16)",
-          background: "rgba(255,255,255,0.05)",
-          color: "#EAF2FF",
+          border: "1px solid rgba(var(--surface-rgb),0.16)",
+          background: "rgba(var(--surface-rgb),0.05)",
+          color: "var(--text)",
           fontFamily: "inherit",
           fontSize: 13,
           fontWeight: 600,
@@ -131,7 +131,7 @@ export function StepNavButtons({ nextLabel }: { nextLabel: string }) {
         style={{
           padding: "11px 22px",
           borderRadius: 12,
-          border: "1px solid rgba(255,255,255,0.28)",
+          border: "1px solid rgba(var(--surface-rgb),0.28)",
           color: "#04121A",
           fontFamily: "inherit",
           fontSize: 13,

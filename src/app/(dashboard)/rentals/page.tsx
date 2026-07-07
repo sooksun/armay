@@ -11,7 +11,7 @@ const th = (align: "left" | "right" = "left"): React.CSSProperties => ({
   textAlign: align,
   padding: "12px 16px",
   fontWeight: 600,
-  color: "rgba(234,242,255,0.6)",
+  color: "rgba(var(--text-rgb),0.6)",
   fontSize: 12,
   whiteSpace: "nowrap",
 });
@@ -41,10 +41,10 @@ export default function RentalsPage() {
           style={{
             borderRadius: 22,
             overflow: "hidden",
-            background: "rgba(255,255,255,0.05)",
+            background: "rgba(var(--surface-rgb),0.05)",
             backdropFilter: "blur(22px)",
             WebkitBackdropFilter: "blur(22px)",
-            border: "1px solid rgba(255,255,255,0.12)",
+            border: "1px solid rgba(var(--surface-rgb),0.12)",
             boxShadow: "0 18px 44px rgba(0,0,0,0.3)",
           }}
         >
@@ -55,7 +55,7 @@ export default function RentalsPage() {
               alignItems: "center",
               gap: 10,
               padding: "15px 18px",
-              borderBottom: "1px solid rgba(255,255,255,0.08)",
+              borderBottom: "1px solid rgba(var(--surface-rgb),0.08)",
             }}
           >
             <div style={{ fontWeight: 600, fontSize: 14.5 }}>รายการเช่าทั้งหมด</div>
@@ -67,9 +67,9 @@ export default function RentalsPage() {
                   gap: 7,
                   padding: "8px 13px",
                   borderRadius: 11,
-                  border: "1px solid rgba(255,255,255,0.14)",
-                  background: "rgba(255,255,255,0.05)",
-                  color: "#EAF2FF",
+                  border: "1px solid rgba(var(--surface-rgb),0.14)",
+                  background: "rgba(var(--surface-rgb),0.05)",
+                  color: "var(--text)",
                   fontFamily: "inherit",
                   fontSize: 12.5,
                   cursor: "pointer",
@@ -86,7 +86,7 @@ export default function RentalsPage() {
                   gap: 7,
                   padding: "8px 15px",
                   borderRadius: 11,
-                  border: "1px solid rgba(255,255,255,0.28)",
+                  border: "1px solid rgba(var(--surface-rgb),0.28)",
                   color: "#04121A",
                   fontFamily: "inherit",
                   fontSize: 12.5,
@@ -105,7 +105,7 @@ export default function RentalsPage() {
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 980 }}>
               <thead>
-                <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+                <tr style={{ background: "rgba(var(--surface-rgb),0.04)" }}>
                   <th style={th()}>รหัส</th>
                   <th style={th()}>ผู้เช่า / ห้อง</th>
                   <th style={th()}>เจ้าของ</th>
@@ -119,14 +119,14 @@ export default function RentalsPage() {
               <tbody>
                 {loading && (
                   <tr>
-                    <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                    <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>
                       กำลังโหลด…
                     </td>
                   </tr>
                 )}
                 {!loading && rows.length === 0 && (
                   <tr>
-                    <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                    <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>
                       ยังไม่มีรายการเช่า
                     </td>
                   </tr>
@@ -135,21 +135,21 @@ export default function RentalsPage() {
                   <tr
                     key={r.code}
                     style={{
-                      borderTop: "1px solid rgba(255,255,255,0.06)",
+                      borderTop: "1px solid rgba(var(--surface-rgb),0.06)",
                       background: r.badge === "red" ? "rgba(251,113,133,0.06)" : undefined,
                     }}
                   >
-                    <td style={{ padding: "13px 16px", fontFamily: "monospace", fontSize: 12, color: "rgba(234,242,255,0.7)", whiteSpace: "nowrap" }}>
+                    <td style={{ padding: "13px 16px", fontFamily: "monospace", fontSize: 12, color: "rgba(var(--text-rgb),0.7)", whiteSpace: "nowrap" }}>
                       {r.code}
                     </td>
                     <td style={{ padding: "13px 16px" }}>
                       <div style={{ fontWeight: 600 }}>{r.tenant}</div>
-                      <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>
+                      <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>
                         {r.room} · {r.building}
                       </div>
                     </td>
-                    <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.8)" }}>{r.owner}</td>
-                    <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.75)", whiteSpace: "nowrap", fontSize: 12 }}>{r.period}</td>
+                    <td style={{ padding: "13px 16px", color: "rgba(var(--text-rgb),0.8)" }}>{r.owner}</td>
+                    <td style={{ padding: "13px 16px", color: "rgba(var(--text-rgb),0.75)", whiteSpace: "nowrap", fontSize: 12 }}>{r.period}</td>
                     <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 600, whiteSpace: "nowrap" }}>
                       {r.total}
                     </td>
@@ -159,7 +159,7 @@ export default function RentalsPage() {
                         textAlign: "right",
                         fontFamily: "Sora,sans-serif",
                         fontWeight: 600,
-                        color: r.due === "฿0" ? "rgba(234,242,255,0.4)" : "#FDA4AF",
+                        color: r.due === "฿0" ? "rgba(var(--text-rgb),0.4)" : "var(--neg)",
                         whiteSpace: "nowrap",
                       }}
                     >
@@ -173,9 +173,9 @@ export default function RentalsPage() {
                         style={{
                           padding: "6px 12px",
                           borderRadius: 9,
-                          border: "1px solid rgba(255,255,255,0.16)",
-                          background: "rgba(255,255,255,0.06)",
-                          color: "#EAF2FF",
+                          border: "1px solid rgba(var(--surface-rgb),0.16)",
+                          background: "rgba(var(--surface-rgb),0.06)",
+                          color: "var(--text)",
                           fontFamily: "inherit",
                           fontSize: 11.5,
                           cursor: "pointer",
@@ -197,15 +197,15 @@ export default function RentalsPage() {
         <div
           style={{
             borderRadius: 24,
-            background: "rgba(255,255,255,0.055)",
+            background: "rgba(var(--surface-rgb),0.055)",
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
-            border: "1px solid rgba(255,255,255,0.14)",
+            border: "1px solid rgba(var(--surface-rgb),0.14)",
             boxShadow: "0 22px 54px rgba(0,0,0,0.36)",
             overflow: "hidden",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 22px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 22px", borderBottom: "1px solid rgba(var(--surface-rgb),0.08)" }}>
             <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 17 }}>สร้างรายการเช่าใหม่</div>
             <button
               onClick={() => setCreateOpen(false)}
@@ -213,9 +213,9 @@ export default function RentalsPage() {
                 marginLeft: "auto",
                 padding: "8px 14px",
                 borderRadius: 11,
-                border: "1px solid rgba(255,255,255,0.16)",
-                background: "rgba(255,255,255,0.05)",
-                color: "#EAF2FF",
+                border: "1px solid rgba(var(--surface-rgb),0.16)",
+                background: "rgba(var(--surface-rgb),0.05)",
+                color: "var(--text)",
                 fontFamily: "inherit",
                 fontSize: 12.5,
                 cursor: "pointer",

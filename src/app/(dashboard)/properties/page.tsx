@@ -14,9 +14,9 @@ const softBtn: React.CSSProperties = {
   gap: 7,
   padding: "8px 13px",
   borderRadius: 11,
-  border: "1px solid rgba(255,255,255,0.14)",
-  background: "rgba(255,255,255,0.05)",
-  color: "#EAF2FF",
+  border: "1px solid rgba(var(--surface-rgb),0.14)",
+  background: "rgba(var(--surface-rgb),0.05)",
+  color: "var(--text)",
   fontFamily: "inherit",
   fontSize: 12.5,
   cursor: "pointer",
@@ -79,8 +79,8 @@ export default function PropertiesPage() {
     <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
         <button style={softBtn}>
-          ประเภทอาคาร<span style={{ color: "rgba(234,242,255,0.5)" }}>ทั้งหมด</span>
-          <span style={{ color: "rgba(234,242,255,0.4)" }}>
+          ประเภทอาคาร<span style={{ color: "rgba(var(--text-rgb),0.5)" }}>ทั้งหมด</span>
+          <span style={{ color: "rgba(var(--text-rgb),0.4)" }}>
             <Icon name="chevDown" size={14} />
           </span>
         </button>
@@ -93,7 +93,7 @@ export default function PropertiesPage() {
             gap: 7,
             padding: "9px 15px",
             borderRadius: 11,
-            border: "1px solid rgba(255,255,255,0.28)",
+            border: "1px solid rgba(var(--surface-rgb),0.28)",
             color: "#04121A",
             fontFamily: "inherit",
             fontSize: 12.5,
@@ -109,7 +109,7 @@ export default function PropertiesPage() {
       </div>
 
       {loading ? (
-        <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>กำลังโหลด…</div>
+        <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>กำลังโหลด…</div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 16 }}>
           {properties.map((p) => (
@@ -120,10 +120,10 @@ export default function PropertiesPage() {
                 cursor: "pointer",
                 overflow: "hidden",
                 borderRadius: 22,
-                background: "rgba(255,255,255,0.055)",
+                background: "rgba(var(--surface-rgb),0.055)",
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
-                border: "1px solid rgba(255,255,255,0.12)",
+                border: "1px solid rgba(var(--surface-rgb),0.12)",
                 boxShadow: "0 16px 40px rgba(0,0,0,0.3)",
               }}
             >
@@ -143,9 +143,9 @@ export default function PropertiesPage() {
                   // eslint-disable-next-line @next/next/no-img-element -- reason: in-memory object URL, not next/image-optimizable
                   <img src={p.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
-                  <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(135deg,rgba(255,255,255,0.05) 0 8px,transparent 8px 16px)" }} />
+                  <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(135deg,rgba(var(--surface-rgb),0.05) 0 8px,transparent 8px 16px)" }} />
                 )}
-                <span style={{ position: "relative", fontFamily: "monospace", fontSize: 10.5, color: "rgba(234,242,255,0.5)" }}>{p.imageUrl ? "" : "property photo"}</span>
+                <span style={{ position: "relative", fontFamily: "monospace", fontSize: 10.5, color: "rgba(var(--text-rgb),0.5)" }}>{p.imageUrl ? "" : "property photo"}</span>
                 <span style={{ ...badge(p.status === "ACTIVE" ? "green" : "gray"), position: "relative" }}>{p.status === "ACTIVE" ? "ใช้งานอยู่" : "ปิดใช้งาน"}</span>
               </div>
               <div style={{ padding: "15px 16px 17px" }}>
@@ -153,21 +153,21 @@ export default function PropertiesPage() {
                   <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 16 }}>{p.propertyName}</div>
                   <span style={badge("blue")}>{p.propertyType}</span>
                 </div>
-                <div style={{ fontSize: 12, color: "rgba(234,242,255,0.55)", marginTop: 3 }}>
+                <div style={{ fontSize: 12, color: "rgba(var(--text-rgb),0.55)", marginTop: 3 }}>
                   {p.district ? `${p.district}, ` : ""}
                   {p.province}
                 </div>
                 <div style={{ display: "flex", gap: 8, marginTop: 13 }}>
                   <div style={{ flex: 1, padding: "9px 11px", borderRadius: 12, background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.16)" }}>
-                    <div style={{ fontSize: 10.5, color: "rgba(234,242,255,0.55)" }}>มีผู้เช่า</div>
+                    <div style={{ fontSize: 10.5, color: "rgba(var(--text-rgb),0.55)" }}>มีผู้เช่า</div>
                     <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, fontSize: 14.5, color: "#6EE7B7", marginTop: 2 }}>{p.occupied} ห้อง</div>
                   </div>
                   <div style={{ flex: 1, padding: "9px 11px", borderRadius: 12, background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.2)" }}>
-                    <div style={{ fontSize: 10.5, color: "rgba(234,242,255,0.55)" }}>ห้องว่าง</div>
+                    <div style={{ fontSize: 10.5, color: "rgba(var(--text-rgb),0.55)" }}>ห้องว่าง</div>
                     <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, fontSize: 14.5, color: "#7DD3FC", marginTop: 2 }}>{p.vacant} ห้อง</div>
                   </div>
                 </div>
-                <div style={{ fontSize: 12, color: "rgba(234,242,255,0.6)", marginTop: 12, paddingTop: 11, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+                <div style={{ fontSize: 12, color: "rgba(var(--text-rgb),0.6)", marginTop: 12, paddingTop: 11, borderTop: "1px solid rgba(var(--surface-rgb),0.08)" }}>
                   รายรับเดือนนี้ · {fmtTHB(p.monthlyIncome)}
                 </div>
               </div>

@@ -21,10 +21,10 @@ export function BottomNav() {
         padding: "10px 8px calc(10px + env(safe-area-inset-bottom))",
         justifyContent: "space-around",
         alignItems: "center",
-        background: "rgba(11,16,32,0.82)",
+        background: "rgba(var(--topbar-rgb),0.82)",
         backdropFilter: "blur(24px)",
         WebkitBackdropFilter: "blur(24px)",
-        borderTop: "1px solid rgba(255,255,255,0.12)",
+        borderTop: "1px solid rgba(var(--surface-rgb),0.12)",
       }}
     >
       {BOTTOM_NAV.map((b) => {
@@ -43,7 +43,7 @@ export function BottomNav() {
               background: "none",
               cursor: "pointer",
               fontFamily: "inherit",
-              color: active ? "#7FF0D9" : "rgba(234,242,255,0.55)",
+              color: active ? "var(--pos)" : "rgba(var(--text-rgb),0.55)",
             }}
           >
             <span style={{ display: "flex" }}>

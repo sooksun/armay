@@ -124,15 +124,15 @@ export function AddIncomeModal() {
           width: "100%",
           maxWidth: 560,
           borderRadius: 26,
-          background: "linear-gradient(180deg,rgba(20,28,48,0.96),rgba(12,18,34,0.96))",
+          background: "linear-gradient(180deg,rgba(var(--panel2-rgb),0.96),rgba(var(--panel-rgb),0.96))",
           backdropFilter: "blur(30px)",
           WebkitBackdropFilter: "blur(30px)",
-          border: "1px solid rgba(255,255,255,0.16)",
-          boxShadow: "0 30px 70px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.2)",
+          border: "1px solid rgba(var(--surface-rgb),0.16)",
+          boxShadow: "0 30px 70px rgba(0,0,0,0.5),inset 0 1px 0 rgba(var(--surface-rgb),0.2)",
           overflow: "hidden",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 24px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "20px 24px", borderBottom: "1px solid rgba(var(--surface-rgb),0.1)" }}>
           <span
             style={{
               width: 36,
@@ -149,7 +149,7 @@ export function AddIncomeModal() {
           </span>
           <div>
             <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 17 }}>บันทึกรับเงิน</div>
-            <div style={{ fontSize: 12, color: "rgba(234,242,255,0.5)" }}>แนบสลิปเพื่อยืนยันการโอน</div>
+            <div style={{ fontSize: 12, color: "rgba(var(--text-rgb),0.5)" }}>แนบสลิปเพื่อยืนยันการโอน</div>
           </div>
           <button
             onClick={closeIncome}
@@ -158,9 +158,9 @@ export function AddIncomeModal() {
               width: 34,
               height: 34,
               borderRadius: 10,
-              border: "1px solid rgba(255,255,255,0.14)",
-              background: "rgba(255,255,255,0.05)",
-              color: "#EAF2FF",
+              border: "1px solid rgba(var(--surface-rgb),0.14)",
+              background: "rgba(var(--surface-rgb),0.05)",
+              color: "var(--text)",
               cursor: "pointer",
               fontSize: 16,
             }}
@@ -183,12 +183,12 @@ export function AddIncomeModal() {
               }}
             >
               <div>
-                <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.6)" }}>รายการเช่าที่เลือก</div>
+                <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.6)" }}>รายการเช่าที่เลือก</div>
                 <div style={{ fontSize: 12.5, fontWeight: 600, marginTop: 1 }}>
                   {selectedContract.code} · {selectedContract.tenant} · {selectedContract.room}
                 </div>
               </div>
-              <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 18, color: "#FDA4AF" }}>{selectedContract.due}</div>
+              <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 18, color: "var(--neg)" }}>{selectedContract.due}</div>
             </div>
           )}
 
@@ -228,8 +228,8 @@ export function AddIncomeModal() {
             justifyContent: "flex-end",
             gap: 11,
             padding: "16px 24px",
-            borderTop: "1px solid rgba(255,255,255,0.1)",
-            background: "rgba(255,255,255,0.02)",
+            borderTop: "1px solid rgba(var(--surface-rgb),0.1)",
+            background: "rgba(var(--surface-rgb),0.02)",
           }}
         >
           <button
@@ -237,9 +237,9 @@ export function AddIncomeModal() {
             style={{
               padding: "11px 20px",
               borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.16)",
-              background: "rgba(255,255,255,0.05)",
-              color: "#EAF2FF",
+              border: "1px solid rgba(var(--surface-rgb),0.16)",
+              background: "rgba(var(--surface-rgb),0.05)",
+              color: "var(--text)",
               fontFamily: "inherit",
               fontSize: 13,
               fontWeight: 600,
@@ -254,7 +254,7 @@ export function AddIncomeModal() {
             style={{
               padding: "11px 24px",
               borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.28)",
+              border: "1px solid rgba(var(--surface-rgb),0.28)",
               color: "#04121A",
               fontFamily: "inherit",
               fontSize: 13,

@@ -39,11 +39,11 @@ export const PURPLE_GRADIENT = "linear-gradient(135deg,#A855F7,#38BDF8)";
 export function glass(radius = 22, alpha = 0.055): CSSProperties {
   return {
     borderRadius: radius,
-    background: `rgba(255,255,255,${alpha})`,
+    background: `rgba(var(--surface-rgb),${alpha})`,
     backdropFilter: "blur(22px)",
     WebkitBackdropFilter: "blur(22px)",
-    border: "1px solid rgba(255,255,255,0.12)",
-    boxShadow: "0 18px 44px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.14)",
+    border: "1px solid rgba(var(--surface-rgb),0.12)",
+    boxShadow: "var(--shadow),inset 0 1px 0 rgba(var(--surface-rgb),0.14)",
   };
 }
 
@@ -56,19 +56,19 @@ export type BadgeKind =
   | "gray"
   | "orange";
 
-const BADGE_MAP: Record<BadgeKind, [string, string, string]> = {
-  green: ["rgba(52,211,153,0.16)", "#6EE7B7", "rgba(52,211,153,0.4)"],
-  gold: ["rgba(251,191,36,0.16)", "#FDE68A", "rgba(251,191,36,0.42)"],
-  red: ["rgba(251,113,133,0.16)", "#FDA4AF", "rgba(251,113,133,0.42)"],
-  blue: ["rgba(56,189,248,0.16)", "#7DD3FC", "rgba(56,189,248,0.42)"],
-  purple: ["rgba(168,85,247,0.18)", "#DDD6FE", "rgba(168,85,247,0.42)"],
-  gray: ["rgba(148,163,184,0.16)", "#CBD5E1", "rgba(148,163,184,0.4)"],
-  orange: ["rgba(251,146,60,0.16)", "#FDBA74", "rgba(251,146,60,0.42)"],
+const BADGE_KINDS: Record<BadgeKind, true> = {
+  green: true,
+  gold: true,
+  red: true,
+  blue: true,
+  purple: true,
+  gray: true,
+  orange: true,
 };
 
-/** Pill badge style for statuses (verification / rental / payment / payout). */
+/** Pill badge style for statuses (verification / rental / payment / payout). Theme-aware via CSS vars. */
 export function badge(kind: BadgeKind): CSSProperties {
-  const [bg, color, border] = BADGE_MAP[kind] ?? BADGE_MAP.gray;
+  const k = BADGE_KINDS[kind] ? kind : "gray";
   return {
     display: "inline-flex",
     alignItems: "center",
@@ -78,9 +78,9 @@ export function badge(kind: BadgeKind): CSSProperties {
     padding: "3px 10px",
     borderRadius: 20,
     whiteSpace: "nowrap",
-    background: bg,
-    color,
-    border: `1px solid ${border}`,
+    background: `var(--badge-${k}-bg)`,
+    color: `var(--badge-${k}-fg)`,
+    border: `1px solid var(--badge-${k}-bd)`,
   };
 }
 

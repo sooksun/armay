@@ -33,9 +33,9 @@ export function ImageUpload({
   const chip: React.CSSProperties = {
     padding: "5px 10px",
     borderRadius: 9,
-    border: "1px solid rgba(255,255,255,0.2)",
+    border: "1px solid rgba(var(--surface-rgb),0.2)",
     background: "rgba(4,8,16,0.6)",
-    color: "#EAF2FF",
+    color: "var(--text)",
     fontFamily: "inherit",
     fontSize: 11.5,
     fontWeight: 600,
@@ -44,18 +44,18 @@ export function ImageUpload({
 
   return (
     <div>
-      {label ? <div style={{ fontSize: 12, color: "rgba(234,242,255,0.6)", marginBottom: 6 }}>{label}</div> : null}
+      {label ? <div style={{ fontSize: 12, color: "rgba(var(--text-rgb),0.6)", marginBottom: 6 }}>{label}</div> : null}
       <input ref={inputRef} type="file" accept="image/*" onChange={pick} style={{ display: "none" }} />
 
       {value ? (
-        <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.14)" }}>
+        <div style={{ position: "relative", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(var(--surface-rgb),0.14)" }}>
           {/* eslint-disable-next-line @next/next/no-img-element -- reason: object/data URLs, not next/image-optimizable */}
           <img src={value} alt={label ?? "รูปที่แนบ"} style={{ display: "block", width: "100%", height, objectFit: "cover" }} />
           <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 6 }}>
             <button type="button" onClick={() => inputRef.current?.click()} style={chip}>
               เปลี่ยน
             </button>
-            <button type="button" onClick={() => onChange(null)} style={{ ...chip, color: "#FDA4AF", borderColor: "rgba(251,113,133,0.4)" }}>
+            <button type="button" onClick={() => onChange(null)} style={{ ...chip, color: "var(--neg)", borderColor: "rgba(251,113,133,0.4)" }}>
               ลบ
             </button>
           </div>
@@ -71,7 +71,7 @@ export function ImageUpload({
             borderRadius: 14,
             border: "1.5px dashed rgba(94,234,212,0.4)",
             background: "rgba(94,234,212,0.05)",
-            color: "#EAF2FF",
+            color: "var(--text)",
             fontFamily: "inherit",
             textAlign: "center",
             cursor: "pointer",
@@ -81,11 +81,11 @@ export function ImageUpload({
             justifyContent: "center",
           }}
         >
-          <div style={{ color: "#7FF0D9", display: "flex", justifyContent: "center", marginBottom: 8 }}>
+          <div style={{ color: "var(--pos)", display: "flex", justifyContent: "center", marginBottom: 8 }}>
             <Icon name="upload" size={26} />
           </div>
           <div style={{ fontSize: 13, fontWeight: 600 }}>ลากรูปมาวาง หรืออัปโหลด</div>
-          <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)", marginTop: 3 }}>{hint ?? "รองรับ JPG, PNG · แสดง preview ทันที"}</div>
+          <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)", marginTop: 3 }}>{hint ?? "รองรับ JPG, PNG · แสดง preview ทันที"}</div>
         </button>
       )}
     </div>

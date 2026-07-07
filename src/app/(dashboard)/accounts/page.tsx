@@ -79,7 +79,7 @@ export default function AccountsPage() {
             gap: 7,
             padding: "9px 15px",
             borderRadius: 11,
-            border: "1px solid rgba(255,255,255,0.28)",
+            border: "1px solid rgba(var(--surface-rgb),0.28)",
             color: "#04121A",
             fontFamily: "inherit",
             fontSize: 12.5,
@@ -95,7 +95,7 @@ export default function AccountsPage() {
       </div>
 
       {loading ? (
-        <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>กำลังโหลด…</div>
+        <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>กำลังโหลด…</div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 16 }}>
           {accounts.map((a) => (
@@ -109,7 +109,7 @@ export default function AccountsPage() {
                 background: "linear-gradient(135deg,rgba(94,234,212,0.1),rgba(168,85,247,0.1))",
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
-                border: "1px solid rgba(255,255,255,0.14)",
+                border: "1px solid rgba(var(--surface-rgb),0.14)",
                 boxShadow: "0 16px 40px rgba(0,0,0,0.3)",
               }}
             >
@@ -118,21 +118,21 @@ export default function AccountsPage() {
                 <span style={badge(a.status === "ACTIVE" ? "green" : "gray")}>{a.status === "ACTIVE" ? "ใช้งานอยู่" : "ปิดใช้งาน"}</span>
               </div>
               <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 16, marginTop: 14 }}>{a.accountName}</div>
-              <div style={{ fontSize: 12.5, color: "rgba(234,242,255,0.65)", marginTop: 4 }}>{accountNumberDisplay(a)}</div>
+              <div style={{ fontSize: 12.5, color: "rgba(var(--text-rgb),0.65)", marginTop: 4 }}>{accountNumberDisplay(a)}</div>
               <div
                 style={{
                   marginTop: 14,
                   height: 64,
                   borderRadius: 12,
                   overflow: "hidden",
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "rgba(var(--surface-rgb),0.06)",
+                  border: "1px solid rgba(var(--surface-rgb),0.1)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontFamily: "monospace",
                   fontSize: 10.5,
-                  color: "rgba(234,242,255,0.4)",
+                  color: "rgba(var(--text-rgb),0.4)",
                 }}
               >
                 {a.qrUrl ? (

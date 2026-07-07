@@ -6,7 +6,7 @@ export default function ServicesPage() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
-        <div style={{ fontSize: 13, color: "rgba(234,242,255,0.6)" }}>
+        <div style={{ fontSize: 13, color: "rgba(var(--text-rgb),0.6)" }}>
           ลากการ์ดเพื่อเปลี่ยนสถานะงาน (mockup) · ผูกกับห้องและค่าใช้จ่ายเสมอ
         </div>
         <button
@@ -17,7 +17,7 @@ export default function ServicesPage() {
             gap: 7,
             padding: "9px 15px",
             borderRadius: 11,
-            border: "1px solid rgba(255,255,255,0.28)",
+            border: "1px solid rgba(var(--surface-rgb),0.28)",
             color: "#04121A",
             fontFamily: "inherit",
             fontSize: 12.5,
@@ -40,8 +40,8 @@ export default function ServicesPage() {
               flex: "0 0 268px",
               width: 268,
               borderRadius: 20,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: "rgba(var(--surface-rgb),0.04)",
+              border: "1px solid rgba(var(--surface-rgb),0.1)",
               padding: 14,
               display: "flex",
               flexDirection: "column",
@@ -55,8 +55,8 @@ export default function ServicesPage() {
                 style={{
                   marginLeft: "auto",
                   fontSize: 11.5,
-                  color: "rgba(234,242,255,0.5)",
-                  background: "rgba(255,255,255,0.06)",
+                  color: "rgba(var(--text-rgb),0.5)",
+                  background: "rgba(var(--surface-rgb),0.06)",
                   padding: "1px 8px",
                   borderRadius: 20,
                 }}
@@ -71,8 +71,8 @@ export default function ServicesPage() {
                 style={{
                   padding: 13,
                   borderRadius: 15,
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.11)",
+                  background: "rgba(var(--surface-rgb),0.06)",
+                  border: "1px solid rgba(var(--surface-rgb),0.11)",
                   borderLeft: `3px solid ${tk.color}`,
                   boxShadow: "0 8px 20px rgba(0,0,0,0.22)",
                   cursor: "grab",
@@ -85,7 +85,7 @@ export default function ServicesPage() {
                       style={{
                         marginLeft: "auto",
                         fontSize: 10.5,
-                        color: "rgba(234,242,255,0.5)",
+                        color: "rgba(var(--text-rgb),0.5)",
                         display: "flex",
                         alignItems: "center",
                         gap: 3,
@@ -97,7 +97,7 @@ export default function ServicesPage() {
                   ) : null}
                 </div>
                 <div style={{ fontSize: 13, fontWeight: 600 }}>{tk.title}</div>
-                <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.55)", marginTop: 3 }}>
+                <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.55)", marginTop: 3 }}>
                   {tk.room} · {tk.building}
                 </div>
                 <div
@@ -107,10 +107,10 @@ export default function ServicesPage() {
                     justifyContent: "space-between",
                     marginTop: 11,
                     paddingTop: 10,
-                    borderTop: "1px solid rgba(255,255,255,0.08)",
+                    borderTop: "1px solid rgba(var(--surface-rgb),0.08)",
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "rgba(234,242,255,0.6)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, color: "rgba(var(--text-rgb),0.6)" }}>
                     <span
                       style={{
                         width: 20,
@@ -128,7 +128,7 @@ export default function ServicesPage() {
                     </span>
                     {tk.assignee}
                   </div>
-                  <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, fontSize: 12.5, color: "#FDA4AF" }}>{tk.cost}</div>
+                  <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, fontSize: 12.5, color: "var(--neg)" }}>{tk.cost}</div>
                 </div>
               </div>
             ))}

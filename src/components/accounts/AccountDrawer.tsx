@@ -35,21 +35,21 @@ export function AccountDrawer({
         <img
           src={account.qrUrl}
           alt="QR Code"
-          style={{ display: "block", width: 180, height: 180, objectFit: "contain", margin: "0 auto", borderRadius: 16, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", padding: 8 }}
+          style={{ display: "block", width: 180, height: 180, objectFit: "contain", margin: "0 auto", borderRadius: 16, background: "rgba(var(--surface-rgb),0.06)", border: "1px solid rgba(var(--surface-rgb),0.12)", padding: 8 }}
         />
       ) : (
         <div
           style={{
             height: 140,
             borderRadius: 16,
-            background: "repeating-linear-gradient(135deg,rgba(255,255,255,0.05) 0 8px,transparent 8px 16px)",
-            border: "1px solid rgba(255,255,255,0.09)",
+            background: "repeating-linear-gradient(135deg,rgba(var(--surface-rgb),0.05) 0 8px,transparent 8px 16px)",
+            border: "1px solid rgba(var(--surface-rgb),0.09)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             fontFamily: "monospace",
             fontSize: 11,
-            color: "rgba(234,242,255,0.4)",
+            color: "rgba(var(--text-rgb),0.4)",
           }}
         >
           QR Code (placeholder)
@@ -66,7 +66,7 @@ export function AccountDrawer({
 
       <InfoSection title="ธุรกรรมล่าสุดที่ใช้บัญชีนี้">
         {recentIncome.length === 0 ? (
-          <div style={{ fontSize: 13, color: "rgba(234,242,255,0.5)" }}>ยังไม่มีธุรกรรม</div>
+          <div style={{ fontSize: 13, color: "rgba(var(--text-rgb),0.5)" }}>ยังไม่มีธุรกรรม</div>
         ) : (
           recentIncome.map((r, i) => (
             <div
@@ -76,16 +76,16 @@ export function AccountDrawer({
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "9px 0",
-                borderBottom: "1px solid rgba(255,255,255,0.06)",
+                borderBottom: "1px solid rgba(var(--surface-rgb),0.06)",
               }}
             >
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600 }}>{r.tenant}</div>
-                <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>
+                <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>
                   {r.date} · {r.room}
                 </div>
               </div>
-              <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, color: "#7FF0D9" }}>{r.amount}</div>
+              <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, color: "var(--pos)" }}>{r.amount}</div>
             </div>
           ))
         )}
@@ -100,7 +100,7 @@ export function AccountDrawer({
             borderRadius: 13,
             border: "1px solid rgba(251,113,133,0.35)",
             background: "rgba(251,113,133,0.08)",
-            color: "#FDA4AF",
+            color: "var(--neg)",
             fontFamily: "inherit",
             fontSize: 13,
             fontWeight: 600,
@@ -115,7 +115,7 @@ export function AccountDrawer({
             flex: 1,
             padding: 12,
             borderRadius: 13,
-            border: "1px solid rgba(255,255,255,0.28)",
+            border: "1px solid rgba(var(--surface-rgb),0.28)",
             color: "#04121A",
             fontFamily: "inherit",
             fontSize: 13,

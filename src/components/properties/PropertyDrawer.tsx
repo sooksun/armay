@@ -48,7 +48,7 @@ export function PropertyDrawer({
         <StatBox bg="rgba(56,189,248,0.1)" border="rgba(56,189,248,0.22)" color="#7DD3FC" label="ห้องทั้งหมด" value={`${rooms.length} ห้อง`} />
         <StatBox bg="rgba(52,211,153,0.08)" border="rgba(52,211,153,0.2)" color="#6EE7B7" label="มีผู้เช่า" value={`${occupied} ห้อง`} />
         <StatBox bg="rgba(56,189,248,0.08)" border="rgba(56,189,248,0.2)" color="#7DD3FC" label="ห้องว่าง" value={`${vacant} ห้อง`} />
-        <StatBox bg="rgba(94,234,212,0.09)" border="rgba(94,234,212,0.2)" color="#7FF0D9" label="รายรับเดือนนี้" value={fmtTHB(property.monthlyIncome)} />
+        <StatBox bg="rgba(94,234,212,0.09)" border="rgba(94,234,212,0.2)" color="var(--pos)" label="รายรับเดือนนี้" value={fmtTHB(property.monthlyIncome)} />
       </div>
 
       {tab === 0 ? (
@@ -58,7 +58,7 @@ export function PropertyDrawer({
             <img
               src={property.imageUrl}
               alt={property.propertyName}
-              style={{ display: "block", width: "100%", height: 150, objectFit: "cover", borderRadius: 14, border: "1px solid rgba(255,255,255,0.12)" }}
+              style={{ display: "block", width: "100%", height: 150, objectFit: "cover", borderRadius: 14, border: "1px solid rgba(var(--surface-rgb),0.12)" }}
             />
           ) : null}
           <InfoSection title="ข้อมูลอาคาร">
@@ -88,7 +88,7 @@ export function PropertyDrawer({
                     marginTop: 12,
                     padding: 11,
                     borderRadius: 12,
-                    border: "1px solid rgba(255,255,255,0.28)",
+                    border: "1px solid rgba(var(--surface-rgb),0.28)",
                     color: "#04121A",
                     fontFamily: "inherit",
                     fontSize: 13,
@@ -102,7 +102,7 @@ export function PropertyDrawer({
                 </a>
               </>
             ) : (
-              <div style={{ fontSize: 13, color: "rgba(234,242,255,0.5)" }}>ยังไม่ได้ระบุพิกัด</div>
+              <div style={{ fontSize: 13, color: "rgba(var(--text-rgb),0.5)" }}>ยังไม่ได้ระบุพิกัด</div>
             )}
           </InfoSection>
         </>
@@ -111,7 +111,7 @@ export function PropertyDrawer({
       {tab === 1 ? (
         <InfoSection title={`ห้องทั้งหมด (${rooms.length})`}>
           {rooms.length === 0 ? (
-            <div style={{ fontSize: 13, color: "rgba(234,242,255,0.5)" }}>ยังไม่มีห้องในอาคารนี้</div>
+            <div style={{ fontSize: 13, color: "rgba(var(--text-rgb),0.5)" }}>ยังไม่มีห้องในอาคารนี้</div>
           ) : (
             rooms.map((r) => (
               <div
@@ -121,12 +121,12 @@ export function PropertyDrawer({
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "9px 0",
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  borderBottom: "1px solid rgba(var(--surface-rgb),0.06)",
                 }}
               >
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>{r.no}</div>
-                  <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{r.building}</div>
+                  <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>{r.building}</div>
                 </div>
                 <span style={badge(r.badge)}>{r.status}</span>
               </div>
@@ -152,7 +152,7 @@ export function PropertyDrawer({
             borderRadius: 13,
             border: "1px solid rgba(251,113,133,0.35)",
             background: "rgba(251,113,133,0.08)",
-            color: "#FDA4AF",
+            color: "var(--neg)",
             fontFamily: "inherit",
             fontSize: 13,
             fontWeight: 600,
@@ -167,7 +167,7 @@ export function PropertyDrawer({
             flex: 1,
             padding: 12,
             borderRadius: 13,
-            border: "1px solid rgba(255,255,255,0.28)",
+            border: "1px solid rgba(var(--surface-rgb),0.28)",
             color: "#04121A",
             fontFamily: "inherit",
             fontSize: 13,

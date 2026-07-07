@@ -15,9 +15,9 @@ const softBtn: React.CSSProperties = {
   gap: 7,
   padding: "8px 13px",
   borderRadius: 11,
-  border: "1px solid rgba(255,255,255,0.14)",
-  background: "rgba(255,255,255,0.05)",
-  color: "#EAF2FF",
+  border: "1px solid rgba(var(--surface-rgb),0.14)",
+  background: "rgba(var(--surface-rgb),0.05)",
+  color: "var(--text)",
   fontFamily: "inherit",
   fontSize: 12.5,
   cursor: "pointer",
@@ -67,14 +67,14 @@ export default function ReportsPage() {
           gap: 10,
           padding: "14px 16px",
           borderRadius: 18,
-          background: "rgba(255,255,255,0.055)",
+          background: "rgba(var(--surface-rgb),0.055)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
-          border: "1px solid rgba(255,255,255,0.12)",
+          border: "1px solid rgba(var(--surface-rgb),0.12)",
           boxShadow: "0 12px 30px rgba(0,0,0,0.28)",
         }}
       >
-        <span style={{ fontSize: 12.5, color: "rgba(234,242,255,0.6)", marginRight: 2 }}>ช่วงรายงาน</span>
+        <span style={{ fontSize: 12.5, color: "rgba(var(--text-rgb),0.6)", marginRight: 2 }}>ช่วงรายงาน</span>
         {[
           { label: "เดือน", value: "ก.ค." },
           { label: "ปี", value: "2568" },
@@ -82,8 +82,8 @@ export default function ReportsPage() {
         ].map((f) => (
           <button key={f.label} style={softBtn}>
             {f.label}
-            <span style={{ color: "rgba(234,242,255,0.5)" }}>{f.value}</span>
-            <span style={{ color: "rgba(234,242,255,0.4)" }}>
+            <span style={{ color: "rgba(var(--text-rgb),0.5)" }}>{f.value}</span>
+            <span style={{ color: "rgba(var(--text-rgb),0.4)" }}>
               <Icon name="chevDown" size={14} />
             </span>
           </button>
@@ -111,7 +111,7 @@ export default function ReportsPage() {
       <ListCard title="รายงานแยกตามอาคาร">
         <TableWrap minWidth={720}>
           <thead>
-            <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+            <tr style={{ background: "rgba(var(--surface-rgb),0.04)" }}>
               <Th>อาคาร / โครงการ</Th>
               <Th align="right">รายรับ</Th>
               <Th align="right">รายจ่าย</Th>
@@ -120,11 +120,11 @@ export default function ReportsPage() {
           </thead>
           <tbody>
             {(reports?.byProperty ?? []).map((p) => (
-              <tr key={p.label} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <tr key={p.label} style={{ borderTop: "1px solid rgba(var(--surface-rgb),0.06)" }}>
                 <td style={{ padding: "13px 16px", fontWeight: 600 }}>{p.label}</td>
-                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#7FF0D9" }}>{p.income}</td>
-                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#FDA4AF" }}>{p.expense}</td>
-                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 700, color: p.netNeg ? "#FDA4AF" : "#7FF0D9" }}>{p.net}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "var(--pos)" }}>{p.income}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "var(--neg)" }}>{p.expense}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 700, color: p.netNeg ? "var(--neg)" : "var(--pos)" }}>{p.net}</td>
               </tr>
             ))}
           </tbody>
@@ -135,7 +135,7 @@ export default function ReportsPage() {
       <ListCard title="รายรับ–รายจ่ายย้อนหลัง 6 เดือน">
         <TableWrap minWidth={720}>
           <thead>
-            <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+            <tr style={{ background: "rgba(var(--surface-rgb),0.04)" }}>
               <Th>เดือน</Th>
               <Th align="right">รายรับ</Th>
               <Th align="right">รายจ่าย</Th>
@@ -144,11 +144,11 @@ export default function ReportsPage() {
           </thead>
           <tbody>
             {(reports?.byMonth ?? []).map((m) => (
-              <tr key={m.label} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <tr key={m.label} style={{ borderTop: "1px solid rgba(var(--surface-rgb),0.06)" }}>
                 <td style={{ padding: "13px 16px", fontWeight: 600 }}>{m.label}</td>
-                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#7FF0D9" }}>{m.income}</td>
-                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#FDA4AF" }}>{m.expense}</td>
-                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 700, color: m.netNeg ? "#FDA4AF" : "#7FF0D9" }}>{m.net}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "var(--pos)" }}>{m.income}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "var(--neg)" }}>{m.expense}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 700, color: m.netNeg ? "var(--neg)" : "var(--pos)" }}>{m.net}</td>
               </tr>
             ))}
           </tbody>
@@ -159,7 +159,7 @@ export default function ReportsPage() {
       <ListCard title="รายงานแยกตามเจ้าของ">
         <TableWrap minWidth={720}>
           <thead>
-            <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+            <tr style={{ background: "rgba(var(--surface-rgb),0.04)" }}>
               <Th>เจ้าของ</Th>
               <Th align="right">ห้องในดูแล</Th>
               <Th align="right">จ่ายแล้วสะสม</Th>
@@ -168,11 +168,11 @@ export default function ReportsPage() {
           </thead>
           <tbody>
             {owners.map((o) => (
-              <tr key={o.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <tr key={o.id} style={{ borderTop: "1px solid rgba(var(--surface-rgb),0.06)" }}>
                 <td style={{ padding: "13px 16px", fontWeight: 600 }}>{o.fullName}</td>
                 <td style={{ padding: "13px 16px", textAlign: "right" }}>{o.roomCount} ห้อง</td>
-                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#7FF0D9" }}>{fmtTHB(o.paidPayout)}</td>
-                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 600, color: o.pendingPayout > 0 ? "#FDA4AF" : "rgba(234,242,255,0.4)" }}>{fmtTHB(o.pendingPayout)}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "var(--pos)" }}>{fmtTHB(o.paidPayout)}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 600, color: o.pendingPayout > 0 ? "var(--neg)" : "rgba(var(--text-rgb),0.4)" }}>{fmtTHB(o.pendingPayout)}</td>
               </tr>
             ))}
           </tbody>
@@ -183,7 +183,7 @@ export default function ReportsPage() {
       <ListCard title={`ยอดค้างชำระผู้เช่า (${overdue.length})`}>
         <TableWrap minWidth={720}>
           <thead>
-            <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+            <tr style={{ background: "rgba(var(--surface-rgb),0.04)" }}>
               <Th>ผู้เช่า / ห้อง</Th>
               <Th>รหัสสัญญา</Th>
               <Th align="right">ค้างชำระ</Th>
@@ -192,15 +192,15 @@ export default function ReportsPage() {
           </thead>
           <tbody>
             {overdue.map((r) => (
-              <tr key={r.code} style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: r.badge === "red" ? "rgba(251,113,133,0.06)" : undefined }}>
+              <tr key={r.code} style={{ borderTop: "1px solid rgba(var(--surface-rgb),0.06)", background: r.badge === "red" ? "rgba(251,113,133,0.06)" : undefined }}>
                 <td style={{ padding: "13px 16px" }}>
                   <div style={{ fontWeight: 600 }}>{r.tenant}</div>
-                  <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>
+                  <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>
                     {r.room} · {r.building}
                   </div>
                 </td>
-                <td style={{ padding: "13px 16px", fontFamily: "monospace", fontSize: 12, color: "rgba(234,242,255,0.7)" }}>{r.code}</td>
-                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 600, color: "#FDA4AF" }}>{r.due}</td>
+                <td style={{ padding: "13px 16px", fontFamily: "monospace", fontSize: 12, color: "rgba(var(--text-rgb),0.7)" }}>{r.code}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 600, color: "var(--neg)" }}>{r.due}</td>
                 <td style={{ padding: "13px 16px" }}>
                   <span style={badge(r.badge as BadgeKind)}>{r.status}</span>
                 </td>

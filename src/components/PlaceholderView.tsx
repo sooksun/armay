@@ -19,10 +19,10 @@ export function PlaceholderView() {
           textAlign: "center",
           padding: "44px 48px",
           borderRadius: 26,
-          background: "rgba(255,255,255,0.05)",
+          background: "rgba(var(--surface-rgb),0.05)",
           backdropFilter: "blur(22px)",
           WebkitBackdropFilter: "blur(22px)",
-          border: "1px solid rgba(255,255,255,0.12)",
+          border: "1px solid rgba(var(--surface-rgb),0.12)",
           boxShadow: "0 20px 50px rgba(0,0,0,0.32)",
           maxWidth: 440,
         }}
@@ -37,14 +37,14 @@ export function PlaceholderView() {
             alignItems: "center",
             justifyContent: "center",
             background: "linear-gradient(135deg,rgba(94,234,212,0.25),rgba(168,85,247,0.25))",
-            border: "1px solid rgba(255,255,255,0.2)",
+            border: "1px solid rgba(var(--surface-rgb),0.2)",
             color: "#A7F3E4",
           }}
         >
           <Icon name={icon} size={30} />
         </div>
         <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 19 }}>{title}</div>
-        <div style={{ fontSize: 13.5, color: "rgba(234,242,255,0.55)", marginTop: 8, lineHeight: 1.6 }}>
+        <div style={{ fontSize: 13.5, color: "rgba(var(--text-rgb),0.55)", marginTop: 8, lineHeight: 1.6 }}>
           หน้านี้อยู่ในโครงร่างของระบบ Crystal Ledger
           <br />
           รอการออกแบบละเอียดในเฟสถัดไป ตามสเปกเดียวกับหน้าที่ทำแล้ว
@@ -56,7 +56,7 @@ export function PlaceholderView() {
             marginTop: 20,
             padding: "11px 22px",
             borderRadius: 13,
-            border: "1px solid rgba(255,255,255,0.28)",
+            border: "1px solid rgba(var(--surface-rgb),0.28)",
             color: "#04121A",
             fontFamily: "inherit",
             fontSize: 13,

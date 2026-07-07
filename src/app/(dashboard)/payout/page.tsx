@@ -13,7 +13,7 @@ const th = (align: "left" | "right" = "left"): React.CSSProperties => ({
   textAlign: align,
   padding: "12px 16px",
   fontWeight: 600,
-  color: "rgba(234,242,255,0.6)",
+  color: "rgba(var(--text-rgb),0.6)",
   fontSize: 12,
 });
 
@@ -55,15 +55,15 @@ export default function PayoutPage() {
       <div
         style={{
           borderRadius: 24,
-          background: "rgba(255,255,255,0.055)",
+          background: "rgba(var(--surface-rgb),0.055)",
           backdropFilter: "blur(24px)",
           WebkitBackdropFilter: "blur(24px)",
-          border: "1px solid rgba(255,255,255,0.14)",
+          border: "1px solid rgba(var(--surface-rgb),0.14)",
           boxShadow: "0 22px 54px rgba(0,0,0,0.34)",
           overflow: "hidden",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 22px", borderBottom: createOpen ? "1px solid rgba(255,255,255,0.08)" : "none" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 22px", borderBottom: createOpen ? "1px solid rgba(var(--surface-rgb),0.08)" : "none" }}>
           <span
             style={{
               width: 34,
@@ -73,7 +73,7 @@ export default function PayoutPage() {
               alignItems: "center",
               justifyContent: "center",
               background: "linear-gradient(135deg,rgba(168,85,247,0.3),rgba(56,189,248,0.3))",
-              border: "1px solid rgba(255,255,255,0.2)",
+              border: "1px solid rgba(var(--surface-rgb),0.2)",
               color: "#DDD6FE",
             }}
           >
@@ -81,7 +81,7 @@ export default function PayoutPage() {
           </span>
           <div>
             <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 16 }}>สร้างรายการจ่ายเจ้าของ</div>
-            <div style={{ fontSize: 12, color: "rgba(234,242,255,0.5)" }}>เลือกเจ้าของ → คำนวณรายรับ − ค่านายหน้า − ค่าใช้จ่าย = ยอดสุทธิ</div>
+            <div style={{ fontSize: 12, color: "rgba(var(--text-rgb),0.5)" }}>เลือกเจ้าของ → คำนวณรายรับ − ค่านายหน้า − ค่าใช้จ่าย = ยอดสุทธิ</div>
           </div>
           <button
             onClick={() => setCreateOpen((v) => !v)}
@@ -92,7 +92,7 @@ export default function PayoutPage() {
               gap: 7,
               padding: "9px 16px",
               borderRadius: 11,
-              border: "1px solid rgba(255,255,255,0.28)",
+              border: "1px solid rgba(var(--surface-rgb),0.28)",
               color: "#04121A",
               fontFamily: "inherit",
               fontSize: 12.5,
@@ -123,20 +123,20 @@ export default function PayoutPage() {
         style={{
           borderRadius: 22,
           overflow: "hidden",
-          background: "rgba(255,255,255,0.05)",
+          background: "rgba(var(--surface-rgb),0.05)",
           backdropFilter: "blur(22px)",
           WebkitBackdropFilter: "blur(22px)",
-          border: "1px solid rgba(255,255,255,0.12)",
+          border: "1px solid rgba(var(--surface-rgb),0.12)",
           boxShadow: "0 18px 44px rgba(0,0,0,0.3)",
         }}
       >
-        <div style={{ padding: "15px 18px", borderBottom: "1px solid rgba(255,255,255,0.08)", fontWeight: 600, fontSize: 14.5 }}>
+        <div style={{ padding: "15px 18px", borderBottom: "1px solid rgba(var(--surface-rgb),0.08)", fontWeight: 600, fontSize: 14.5 }}>
           รายการจ่ายเจ้าของล่าสุด
         </div>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 820 }}>
             <thead>
-              <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+              <tr style={{ background: "rgba(var(--surface-rgb),0.04)" }}>
                 <th style={th()}>เจ้าของ / ห้อง</th>
                 <th style={th("right")}>รายรับรวม</th>
                 <th style={th("right")}>รายการหัก</th>
@@ -148,14 +148,14 @@ export default function PayoutPage() {
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                  <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>
                     กำลังโหลด…
                   </td>
                 </tr>
               )}
               {!loading && rows.length === 0 && (
                 <tr>
-                  <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                  <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>
                     ยังไม่มีรายการจ่ายเจ้าของ
                   </td>
                 </tr>
@@ -164,17 +164,17 @@ export default function PayoutPage() {
                 <tr
                   key={r.id ?? i}
                   style={{
-                    borderTop: "1px solid rgba(255,255,255,0.06)",
+                    borderTop: "1px solid rgba(var(--surface-rgb),0.06)",
                     background: r.badge === "red" ? "rgba(251,113,133,0.06)" : undefined,
                   }}
                 >
                   <td style={{ padding: "13px 16px" }}>
                     <div style={{ fontWeight: 600 }}>{r.owner}</div>
-                    <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{r.room}</div>
+                    <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>{r.room}</div>
                   </td>
                   <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 600 }}>{r.income}</td>
-                  <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "#FDA4AF" }}>{r.deduct}</td>
-                  <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 700, color: "#7FF0D9" }}>{r.net}</td>
+                  <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", color: "var(--neg)" }}>{r.deduct}</td>
+                  <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 700, color: "var(--pos)" }}>{r.net}</td>
                   <td style={{ padding: "13px 16px" }}>
                     <span style={badge(r.badge)}>{r.status}</span>
                   </td>
@@ -183,9 +183,9 @@ export default function PayoutPage() {
                       style={{
                         padding: "6px 12px",
                         borderRadius: 9,
-                        border: "1px solid rgba(255,255,255,0.16)",
-                        background: "rgba(255,255,255,0.06)",
-                        color: "#EAF2FF",
+                        border: "1px solid rgba(var(--surface-rgb),0.16)",
+                        background: "rgba(var(--surface-rgb),0.06)",
+                        color: "var(--text)",
                         fontFamily: "inherit",
                         fontSize: 11.5,
                         cursor: "pointer",

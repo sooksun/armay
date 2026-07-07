@@ -33,7 +33,7 @@ export default function AuditPage() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
-        <span style={{ fontSize: 12.5, color: "rgba(234,242,255,0.6)", marginRight: 4 }}>กรองตามการกระทำ</span>
+        <span style={{ fontSize: 12.5, color: "rgba(var(--text-rgb),0.6)", marginRight: 4 }}>กรองตามการกระทำ</span>
         {ACTION_FILTERS.map((a) => {
           const active = filter === a;
           return (
@@ -43,9 +43,9 @@ export default function AuditPage() {
               style={{
                 padding: "7px 13px",
                 borderRadius: 11,
-                border: `1px solid ${active ? "rgba(94,234,212,0.4)" : "rgba(255,255,255,0.14)"}`,
-                background: active ? "linear-gradient(135deg,rgba(94,234,212,0.16),rgba(56,189,248,0.12))" : "rgba(255,255,255,0.05)",
-                color: active ? "#EAF2FF" : "rgba(234,242,255,0.7)",
+                border: `1px solid ${active ? "rgba(94,234,212,0.4)" : "rgba(var(--surface-rgb),0.14)"}`,
+                background: active ? "linear-gradient(135deg,rgba(94,234,212,0.16),rgba(56,189,248,0.12))" : "rgba(var(--surface-rgb),0.05)",
+                color: active ? "var(--text)" : "rgba(var(--text-rgb),0.7)",
                 fontFamily: "inherit",
                 fontSize: 12.5,
                 fontWeight: active ? 600 : 400,
@@ -68,9 +68,9 @@ export default function AuditPage() {
               gap: 7,
               padding: "8px 13px",
               borderRadius: 11,
-              border: "1px solid rgba(255,255,255,0.16)",
-              background: "rgba(255,255,255,0.05)",
-              color: "#EAF2FF",
+              border: "1px solid rgba(var(--surface-rgb),0.16)",
+              background: "rgba(var(--surface-rgb),0.05)",
+              color: "var(--text)",
               fontFamily: "inherit",
               fontSize: 12.5,
               fontWeight: 600,
@@ -84,7 +84,7 @@ export default function AuditPage() {
       >
         <TableWrap minWidth={860}>
           <thead>
-            <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+            <tr style={{ background: "rgba(var(--surface-rgb),0.04)" }}>
               <Th>เวลา</Th>
               <Th>ผู้ใช้งาน</Th>
               <Th>การกระทำ</Th>
@@ -96,27 +96,27 @@ export default function AuditPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>
                   กำลังโหลด…
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                <td colSpan={6} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>
                   ไม่มีประวัติการเปลี่ยนแปลง
                 </td>
               </tr>
             ) : (
               rows.map((r) => (
-                <tr key={r.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                  <td style={{ padding: "13px 16px", whiteSpace: "nowrap", color: "rgba(234,242,255,0.75)", fontSize: 12 }}>{r.time}</td>
+                <tr key={r.id} style={{ borderTop: "1px solid rgba(var(--surface-rgb),0.06)" }}>
+                  <td style={{ padding: "13px 16px", whiteSpace: "nowrap", color: "rgba(var(--text-rgb),0.75)", fontSize: 12 }}>{r.time}</td>
                   <td style={{ padding: "13px 16px", fontWeight: 600, whiteSpace: "nowrap" }}>{r.user}</td>
                   <td style={{ padding: "13px 16px" }}>
                     <span style={badge(r.badge)}>{r.action}</span>
                   </td>
-                  <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.8)", whiteSpace: "nowrap" }}>{r.table}</td>
-                  <td style={{ padding: "13px 16px", fontFamily: "monospace", fontSize: 12, color: "rgba(234,242,255,0.7)", whiteSpace: "nowrap" }}>{r.record}</td>
-                  <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.75)" }}>{r.detail}</td>
+                  <td style={{ padding: "13px 16px", color: "rgba(var(--text-rgb),0.8)", whiteSpace: "nowrap" }}>{r.table}</td>
+                  <td style={{ padding: "13px 16px", fontFamily: "monospace", fontSize: 12, color: "rgba(var(--text-rgb),0.7)", whiteSpace: "nowrap" }}>{r.record}</td>
+                  <td style={{ padding: "13px 16px", color: "rgba(var(--text-rgb),0.75)" }}>{r.detail}</td>
                 </tr>
               ))
             )}

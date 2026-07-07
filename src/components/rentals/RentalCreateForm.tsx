@@ -105,7 +105,7 @@ export function RentalCreateForm({ onClose, onCreated }: { onClose: () => void; 
 
   return (
     <div style={{ padding: "18px 22px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ padding: 20, borderRadius: 18, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}>
+      <div style={{ padding: 20, borderRadius: 18, background: "rgba(var(--surface-rgb),0.04)", border: "1px solid rgba(var(--surface-rgb),0.09)" }}>
         <FieldsGrid>
           <SelectField label="ผู้เช่า" value={draft.tenantId} onChange={(v) => set({ tenantId: v })} options={tenantOptions} />
           <SelectField label="ห้อง (เจ้าของ/อาคารตามห้อง)" value={draft.roomId} onChange={(v) => set({ roomId: v })} options={roomOptions} />
@@ -135,8 +135,8 @@ export function RentalCreateForm({ onClose, onCreated }: { onClose: () => void; 
             justifyContent: "space-between",
           }}
         >
-          <span style={{ fontSize: 13, color: "rgba(234,242,255,0.7)" }}>ยอดรวมสัญญา (ค่าเช่า + ประกัน + ทำความสะอาด + อื่น − ส่วนลด)</span>
-          <span style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 20, color: "#7FF0D9" }}>{fmtTHB(total)}</span>
+          <span style={{ fontSize: 13, color: "rgba(var(--text-rgb),0.7)" }}>ยอดรวมสัญญา (ค่าเช่า + ประกัน + ทำความสะอาด + อื่น − ส่วนลด)</span>
+          <span style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 20, color: "var(--pos)" }}>{fmtTHB(total)}</span>
         </div>
       </div>
 
@@ -146,9 +146,9 @@ export function RentalCreateForm({ onClose, onCreated }: { onClose: () => void; 
           style={{
             padding: "11px 18px",
             borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.16)",
-            background: "rgba(255,255,255,0.05)",
-            color: "#EAF2FF",
+            border: "1px solid rgba(var(--surface-rgb),0.16)",
+            background: "rgba(var(--surface-rgb),0.05)",
+            color: "var(--text)",
             fontFamily: "inherit",
             fontSize: 13,
             fontWeight: 600,
@@ -163,7 +163,7 @@ export function RentalCreateForm({ onClose, onCreated }: { onClose: () => void; 
           style={{
             padding: "11px 22px",
             borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.28)",
+            border: "1px solid rgba(var(--surface-rgb),0.28)",
             color: "#04121A",
             fontFamily: "inherit",
             fontSize: 13,

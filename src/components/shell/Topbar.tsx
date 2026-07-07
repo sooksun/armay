@@ -4,12 +4,14 @@ import { usePathname } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { PAGE_TITLES } from "@/lib/nav";
 import { useUI } from "@/lib/ui-context";
+import { useTheme } from "@/lib/theme-context";
 
 export function Topbar() {
   const pathname = usePathname();
   const id = pathname.split("/")[1] || "dashboard";
   const [title, subtitle] = PAGE_TITLES[id] ?? PAGE_TITLES.dashboard;
   const { openIncome } = useUI();
+  const { theme, toggle } = useTheme();
 
   return (
     <header
@@ -19,8 +21,8 @@ export function Topbar() {
         display: "flex",
         alignItems: "center",
         gap: 18,
-        borderBottom: "1px solid rgba(255,255,255,0.09)",
-        background: "rgba(11,16,32,0.35)",
+        borderBottom: "1px solid rgba(var(--surface-rgb),0.09)",
+        background: "rgba(var(--topbar-rgb),0.35)",
         backdropFilter: "blur(18px)",
         WebkitBackdropFilter: "blur(18px)",
         zIndex: 20,
@@ -31,7 +33,7 @@ export function Topbar() {
         <div
           style={{
             fontSize: 12.5,
-            color: "rgba(234,242,255,0.55)",
+            color: "rgba(var(--text-rgb),0.55)",
             marginTop: 3,
             whiteSpace: "nowrap",
             overflow: "hidden",
@@ -49,7 +51,7 @@ export function Topbar() {
             left: 13,
             top: "50%",
             transform: "translateY(-50%)",
-            color: "rgba(234,242,255,0.45)",
+            color: "rgba(var(--text-rgb),0.45)",
             pointerEvents: "none",
           }}
         >
@@ -61,9 +63,9 @@ export function Topbar() {
             width: "100%",
             padding: "10px 12px 10px 40px",
             borderRadius: 13,
-            border: "1px solid rgba(255,255,255,0.14)",
-            background: "rgba(255,255,255,0.06)",
-            color: "#EAF2FF",
+            border: "1px solid rgba(var(--surface-rgb),0.14)",
+            background: "rgba(var(--surface-rgb),0.06)",
+            color: "var(--text)",
             fontFamily: "inherit",
             fontSize: 13.5,
             outline: "none",
@@ -80,14 +82,14 @@ export function Topbar() {
           gap: 8,
           padding: "10px 16px",
           borderRadius: 13,
-          border: "1px solid rgba(255,255,255,0.28)",
+          border: "1px solid rgba(var(--surface-rgb),0.28)",
           cursor: "pointer",
           fontFamily: "inherit",
           fontSize: 13.5,
           fontWeight: 600,
           color: "#04121A",
           background: "linear-gradient(135deg,#5EEAD4,#38BDF8)",
-          boxShadow: "0 8px 22px rgba(56,189,248,0.4),inset 0 1px 0 rgba(255,255,255,0.55)",
+          boxShadow: "0 8px 22px rgba(56,189,248,0.4),inset 0 1px 0 rgba(var(--surface-rgb),0.55)",
         }}
       >
         <span style={{ display: "flex" }}>
@@ -98,6 +100,9 @@ export function Topbar() {
 
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <button
+          onClick={toggle}
+          aria-label={theme === "dark" ? "สลับเป็นธีมสว่าง" : "สลับเป็นธีมมืด"}
+          title={theme === "dark" ? "โหมดสว่าง" : "โหมดมืด"}
           style={{
             width: 40,
             height: 40,
@@ -105,9 +110,25 @@ export function Topbar() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            border: "1px solid rgba(255,255,255,0.14)",
-            background: "rgba(255,255,255,0.06)",
-            color: "#EAF2FF",
+            border: "1px solid rgba(var(--surface-rgb),0.14)",
+            background: "rgba(var(--surface-rgb),0.06)",
+            color: "var(--text)",
+            cursor: "pointer",
+          }}
+        >
+          <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
+        </button>
+        <button
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "1px solid rgba(var(--surface-rgb),0.14)",
+            background: "rgba(var(--surface-rgb),0.06)",
+            color: "var(--text)",
             cursor: "pointer",
             position: "relative",
           }}
@@ -122,7 +143,7 @@ export function Topbar() {
               height: 7,
               borderRadius: "50%",
               background: "#FB7185",
-              boxShadow: "0 0 0 2px rgba(11,16,32,0.9)",
+              boxShadow: "0 0 0 2px rgba(var(--topbar-rgb),0.9)",
             }}
           />
         </button>
@@ -133,8 +154,8 @@ export function Topbar() {
             gap: 9,
             padding: "5px 10px 5px 6px",
             borderRadius: 13,
-            border: "1px solid rgba(255,255,255,0.12)",
-            background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(var(--surface-rgb),0.12)",
+            background: "rgba(var(--surface-rgb),0.05)",
           }}
         >
           <div
@@ -155,7 +176,7 @@ export function Topbar() {
           </div>
           <div style={{ lineHeight: 1.15 }}>
             <div style={{ fontSize: 12.5, fontWeight: 600 }}>นายหน้า แอดมิน</div>
-            <div style={{ fontSize: 10.5, color: "rgba(234,242,255,0.5)" }}>Admin</div>
+            <div style={{ fontSize: 10.5, color: "rgba(var(--text-rgb),0.5)" }}>Admin</div>
           </div>
         </div>
       </div>

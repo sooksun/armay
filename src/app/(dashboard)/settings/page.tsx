@@ -13,15 +13,15 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
       style={{
         padding: "20px 22px",
         borderRadius: 22,
-        background: "rgba(255,255,255,0.055)",
+        background: "rgba(var(--surface-rgb),0.055)",
         backdropFilter: "blur(22px)",
         WebkitBackdropFilter: "blur(22px)",
-        border: "1px solid rgba(255,255,255,0.12)",
-        boxShadow: "0 18px 44px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.14)",
+        border: "1px solid rgba(var(--surface-rgb),0.12)",
+        boxShadow: "0 18px 44px rgba(0,0,0,0.3),inset 0 1px 0 rgba(var(--surface-rgb),0.14)",
       }}
     >
       <div style={{ fontWeight: 600, fontSize: 15.5 }}>{title}</div>
-      {subtitle ? <div style={{ fontSize: 12, color: "rgba(234,242,255,0.5)", marginTop: 2, marginBottom: 14 }}>{subtitle}</div> : <div style={{ height: 12 }} />}
+      {subtitle ? <div style={{ fontSize: 12, color: "rgba(var(--text-rgb),0.5)", marginTop: 2, marginBottom: 14 }}>{subtitle}</div> : <div style={{ height: 12 }} />}
       {children}
     </div>
   );
@@ -36,9 +36,9 @@ function Chip({ children }: { children: React.ReactNode }) {
         padding: "6px 12px",
         borderRadius: 20,
         fontSize: 12.5,
-        color: "#EAF2FF",
-        background: "rgba(255,255,255,0.06)",
-        border: "1px solid rgba(255,255,255,0.14)",
+        color: "var(--text)",
+        background: "rgba(var(--surface-rgb),0.06)",
+        border: "1px solid rgba(var(--surface-rgb),0.14)",
       }}
     >
       {children}
@@ -49,7 +49,7 @@ function Chip({ children }: { children: React.ReactNode }) {
 const primaryBtn: React.CSSProperties = {
   padding: "10px 20px",
   borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.28)",
+  border: "1px solid rgba(var(--surface-rgb),0.28)",
   color: "#04121A",
   fontFamily: "inherit",
   fontSize: 13,
@@ -116,13 +116,13 @@ export default function SettingsPage() {
                 justifyContent: "space-between",
                 padding: "11px 14px",
                 borderRadius: 12,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.09)",
+                background: "rgba(var(--surface-rgb),0.04)",
+                border: "1px solid rgba(var(--surface-rgb),0.09)",
               }}
             >
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600 }}>{a.accountName}</div>
-                <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{a.bankName || "PromptPay / เงินสด"}</div>
+                <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>{a.bankName || "PromptPay / เงินสด"}</div>
               </div>
               <span style={badge("purple")}>{a.accountType}</span>
             </div>

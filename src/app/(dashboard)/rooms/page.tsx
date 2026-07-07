@@ -52,17 +52,17 @@ export default function RoomsPage() {
               gap: 7,
               padding: "8px 13px",
               borderRadius: 11,
-              border: "1px solid rgba(255,255,255,0.14)",
-              background: "rgba(255,255,255,0.05)",
-              color: "#EAF2FF",
+              border: "1px solid rgba(var(--surface-rgb),0.14)",
+              background: "rgba(var(--surface-rgb),0.05)",
+              color: "var(--text)",
               fontFamily: "inherit",
               fontSize: 12.5,
               cursor: "pointer",
             }}
           >
             {f.label}
-            <span style={{ color: "rgba(234,242,255,0.5)" }}>{f.value}</span>
-            <span style={{ color: "rgba(234,242,255,0.4)" }}>
+            <span style={{ color: "rgba(var(--text-rgb),0.5)" }}>{f.value}</span>
+            <span style={{ color: "rgba(var(--text-rgb),0.4)" }}>
               <Icon name="chevDown" size={14} />
             </span>
           </button>
@@ -70,7 +70,7 @@ export default function RoomsPage() {
       </div>
 
       {loading ? (
-        <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>กำลังโหลด…</div>
+        <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>กำลังโหลด…</div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 16 }}>
           {rooms.map((rm, i) => (
@@ -81,10 +81,10 @@ export default function RoomsPage() {
                 cursor: "pointer",
                 overflow: "hidden",
                 borderRadius: 22,
-                background: "rgba(255,255,255,0.055)",
+                background: "rgba(var(--surface-rgb),0.055)",
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
-                border: "1px solid rgba(255,255,255,0.12)",
+                border: "1px solid rgba(var(--surface-rgb),0.12)",
                 boxShadow: "0 16px 40px rgba(0,0,0,0.3)",
                 borderTop: `3px solid ${rm.statusColor}`,
               }}
@@ -105,28 +105,28 @@ export default function RoomsPage() {
                   // eslint-disable-next-line @next/next/no-img-element -- reason: in-memory object URL, not next/image-optimizable
                   <img src={roomImages[rm.no]} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
-                  <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(135deg,rgba(255,255,255,0.05) 0 8px,transparent 8px 16px)" }} />
+                  <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(135deg,rgba(var(--surface-rgb),0.05) 0 8px,transparent 8px 16px)" }} />
                 )}
-                <span style={{ position: "relative", fontFamily: "monospace", fontSize: 10.5, color: "rgba(234,242,255,0.5)" }}>{roomImages[rm.no] ? "" : "room photo"}</span>
+                <span style={{ position: "relative", fontFamily: "monospace", fontSize: 10.5, color: "rgba(var(--text-rgb),0.5)" }}>{roomImages[rm.no] ? "" : "room photo"}</span>
                 <span style={{ ...badge(rm.badge), position: "relative" }}>{rm.status}</span>
               </div>
               <div style={{ padding: "15px 16px 17px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 17 }}>{rm.no}</div>
-                  <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{rm.building}</div>
+                  <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>{rm.building}</div>
                 </div>
-                <div style={{ fontSize: 12, color: "rgba(234,242,255,0.55)", marginTop: 3 }}>เจ้าของ: {rm.owner}</div>
+                <div style={{ fontSize: 12, color: "rgba(var(--text-rgb),0.55)", marginTop: 3 }}>เจ้าของ: {rm.owner}</div>
                 <div style={{ display: "flex", gap: 8, marginTop: 13 }}>
                   <div style={{ flex: 1, padding: "9px 11px", borderRadius: 12, background: "rgba(56,189,248,0.1)", border: "1px solid rgba(56,189,248,0.2)" }}>
-                    <div style={{ fontSize: 10.5, color: "rgba(234,242,255,0.55)" }}>รายรับเดือนนี้</div>
+                    <div style={{ fontSize: 10.5, color: "rgba(var(--text-rgb),0.55)" }}>รายรับเดือนนี้</div>
                     <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, fontSize: 14.5, color: "#7DD3FC", marginTop: 2 }}>{rm.income}</div>
                   </div>
                   <div style={{ flex: 1, padding: "9px 11px", borderRadius: 12, background: "rgba(251,113,133,0.08)", border: "1px solid rgba(251,113,133,0.16)" }}>
-                    <div style={{ fontSize: 10.5, color: "rgba(234,242,255,0.55)" }}>ค่าใช้จ่าย</div>
-                    <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, fontSize: 14.5, color: "#FDA4AF", marginTop: 2 }}>{rm.expense}</div>
+                    <div style={{ fontSize: 10.5, color: "rgba(var(--text-rgb),0.55)" }}>ค่าใช้จ่าย</div>
+                    <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, fontSize: 14.5, color: "var(--neg)", marginTop: 2 }}>{rm.expense}</div>
                   </div>
                 </div>
-                <div style={{ fontSize: 12, color: "rgba(234,242,255,0.6)", marginTop: 12, paddingTop: 11, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+                <div style={{ fontSize: 12, color: "rgba(var(--text-rgb),0.6)", marginTop: 12, paddingTop: 11, borderTop: "1px solid rgba(var(--surface-rgb),0.08)" }}>
                   {rm.tenantLine}
                 </div>
               </div>

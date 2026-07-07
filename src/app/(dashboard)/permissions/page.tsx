@@ -62,9 +62,9 @@ export default function PermissionsPage() {
   const actionBtn: React.CSSProperties = {
     padding: "6px 12px",
     borderRadius: 9,
-    border: "1px solid rgba(255,255,255,0.16)",
-    background: "rgba(255,255,255,0.06)",
-    color: "#EAF2FF",
+    border: "1px solid rgba(var(--surface-rgb),0.16)",
+    background: "rgba(var(--surface-rgb),0.06)",
+    color: "var(--text)",
     fontFamily: "inherit",
     fontSize: 11.5,
     cursor: "pointer",
@@ -84,7 +84,7 @@ export default function PermissionsPage() {
               gap: 7,
               padding: "8px 15px",
               borderRadius: 11,
-              border: "1px solid rgba(255,255,255,0.28)",
+              border: "1px solid rgba(var(--surface-rgb),0.28)",
               color: "#04121A",
               fontFamily: "inherit",
               fontSize: 12.5,
@@ -101,7 +101,7 @@ export default function PermissionsPage() {
       >
         <TableWrap minWidth={780}>
           <thead>
-            <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+            <tr style={{ background: "rgba(var(--surface-rgb),0.04)" }}>
               <Th>ชื่อ / อีเมล</Th>
               <Th>บทบาท</Th>
               <Th>สถานะ</Th>
@@ -112,30 +112,30 @@ export default function PermissionsPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                <td colSpan={5} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>
                   กำลังโหลด…
                 </td>
               </tr>
             ) : (
               users.map((u) => (
-                <tr key={u.id} style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <tr key={u.id} style={{ borderTop: "1px solid rgba(var(--surface-rgb),0.06)" }}>
                   <td style={{ padding: "13px 16px" }}>
                     <div style={{ fontWeight: 600 }}>{u.fullName}</div>
-                    <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{u.email}</div>
+                    <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>{u.email}</div>
                   </td>
                   <td style={{ padding: "13px 16px" }}>
                     <span style={badge(ROLE_BADGE[u.role])}>{u.role}</span>
-                    <span style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)", marginLeft: 8 }}>{ROLE_LABEL[u.role]}</span>
+                    <span style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)", marginLeft: 8 }}>{ROLE_LABEL[u.role]}</span>
                   </td>
                   <td style={{ padding: "13px 16px" }}>
                     <span style={badge(u.status === "ACTIVE" ? "green" : "gray")}>{u.status === "ACTIVE" ? "ใช้งานอยู่" : "ปิดใช้งาน"}</span>
                   </td>
-                  <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.7)", whiteSpace: "nowrap" }}>{u.lastActive}</td>
+                  <td style={{ padding: "13px 16px", color: "rgba(var(--text-rgb),0.7)", whiteSpace: "nowrap" }}>{u.lastActive}</td>
                   <td style={{ padding: "13px 16px", textAlign: "right", whiteSpace: "nowrap" }}>
                     <button onClick={() => openEdit(u)} style={actionBtn}>
                       แก้ไข
                     </button>
-                    <button onClick={() => handleDelete(u)} style={{ ...actionBtn, marginLeft: 8, color: "#FDA4AF", borderColor: "rgba(251,113,133,0.35)" }}>
+                    <button onClick={() => handleDelete(u)} style={{ ...actionBtn, marginLeft: 8, color: "var(--neg)", borderColor: "rgba(251,113,133,0.35)" }}>
                       ลบ
                     </button>
                   </td>

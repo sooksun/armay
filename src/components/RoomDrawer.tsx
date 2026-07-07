@@ -8,7 +8,7 @@ import type { RoomDTO } from "@/lib/api-types";
 function statBox(bg: string, border: string, color: string, label: string, value: string) {
   return (
     <div style={{ padding: 14, borderRadius: 14, background: bg, border: `1px solid ${border}` }}>
-      <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.55)" }}>{label}</div>
+      <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.55)" }}>{label}</div>
       <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 19, color, marginTop: 3 }}>{value}</div>
     </div>
   );
@@ -48,9 +48,9 @@ export function RoomDrawer({
     width: 34,
     height: 34,
     borderRadius: 10,
-    border: "1px solid rgba(255,255,255,0.14)",
-    background: "rgba(255,255,255,0.05)",
-    color: "#EAF2FF",
+    border: "1px solid rgba(var(--surface-rgb),0.14)",
+    background: "rgba(var(--surface-rgb),0.05)",
+    color: "var(--text)",
     cursor: "pointer",
     fontSize: 16,
   };
@@ -78,16 +78,16 @@ export function RoomDrawer({
           width: "min(460px,94vw)",
           display: "flex",
           flexDirection: "column",
-          background: "linear-gradient(180deg,rgba(20,28,48,0.97),rgba(12,18,34,0.97))",
+          background: "linear-gradient(180deg,rgba(var(--panel2-rgb),0.97),rgba(var(--panel-rgb),0.97))",
           backdropFilter: "blur(30px)",
           WebkitBackdropFilter: "blur(30px)",
-          borderLeft: "1px solid rgba(255,255,255,0.16)",
+          borderLeft: "1px solid rgba(var(--surface-rgb),0.16)",
           boxShadow: "-30px 0 70px rgba(0,0,0,0.5)",
         }}
       >
-        <div style={{ padding: "20px 22px", borderBottom: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "flex-start", gap: 12 }}>
+        <div style={{ padding: "20px 22px", borderBottom: "1px solid rgba(var(--surface-rgb),0.1)", display: "flex", alignItems: "flex-start", gap: 12 }}>
           <div>
-            <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{room.building}</div>
+            <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>{room.building}</div>
             <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 22 }}>ห้อง {room.no}</div>
             <span style={{ ...badge(room.badge), marginTop: 8 }}>{room.status}</span>
           </div>
@@ -107,16 +107,16 @@ export function RoomDrawer({
                   fontSize: 12.5,
                   fontWeight: 600,
                   whiteSpace: "nowrap",
-                  color: "#EAF2FF",
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.12)",
+                  color: "var(--text)",
+                  background: "rgba(var(--surface-rgb),0.08)",
+                  border: "1px solid rgba(var(--surface-rgb),0.12)",
                   borderBottom: "none",
                 }}
               >
                 {label}
               </span>
             ) : (
-              <span key={label} style={{ padding: "8px 13px", fontSize: 12.5, whiteSpace: "nowrap", color: "rgba(234,242,255,0.5)" }}>
+              <span key={label} style={{ padding: "8px 13px", fontSize: 12.5, whiteSpace: "nowrap", color: "rgba(var(--text-rgb),0.5)" }}>
                 {label}
               </span>
             )
@@ -127,12 +127,12 @@ export function RoomDrawer({
           <ImageUpload label="รูปห้อง" value={image} onChange={onImageChange} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {statBox("rgba(56,189,248,0.1)", "rgba(56,189,248,0.22)", "#7DD3FC", "รายรับเดือนนี้", room.income)}
-            {statBox("rgba(251,113,133,0.08)", "rgba(251,113,133,0.18)", "#FDA4AF", "ค่าใช้จ่าย", room.expense)}
-            {statBox("rgba(94,234,212,0.09)", "rgba(94,234,212,0.2)", "#7FF0D9", "กำไรสุทธิของห้อง", "฿" + net.toLocaleString())}
+            {statBox("rgba(251,113,133,0.08)", "rgba(251,113,133,0.18)", "var(--neg)", "ค่าใช้จ่าย", room.expense)}
+            {statBox("rgba(94,234,212,0.09)", "rgba(94,234,212,0.2)", "var(--pos)", "กำไรสุทธิของห้อง", "฿" + net.toLocaleString())}
             {statBox("rgba(168,85,247,0.09)", "rgba(168,85,247,0.2)", "#DDD6FE", "ค่าเช่า / เดือน", room.rent)}
           </div>
 
-          <div style={{ padding: 16, borderRadius: 16, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}>
+          <div style={{ padding: 16, borderRadius: 16, background: "rgba(var(--surface-rgb),0.04)", border: "1px solid rgba(var(--surface-rgb),0.09)" }}>
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>ข้อมูลห้อง</div>
             {info.map((row) => (
               <div
@@ -141,27 +141,27 @@ export function RoomDrawer({
                   display: "flex",
                   justifyContent: "space-between",
                   padding: "7px 0",
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  borderBottom: "1px solid rgba(var(--surface-rgb),0.06)",
                   fontSize: 13,
                 }}
               >
-                <span style={{ color: "rgba(234,242,255,0.55)" }}>{row.k}</span>
+                <span style={{ color: "rgba(var(--text-rgb),0.55)" }}>{row.k}</span>
                 <span style={{ fontWeight: 600 }}>{row.v}</span>
               </div>
             ))}
           </div>
 
-          <div style={{ padding: 16, borderRadius: 16, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}>
+          <div style={{ padding: 16, borderRadius: 16, background: "rgba(var(--surface-rgb),0.04)", border: "1px solid rgba(var(--surface-rgb),0.09)" }}>
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 14 }}>Timeline เหตุการณ์ล่าสุด</div>
             {timeline.map((ev, i) => (
               <div key={i} style={{ display: "flex", gap: 12, paddingBottom: 14, position: "relative" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                   <span style={{ width: 11, height: 11, borderRadius: "50%", background: ev.color, boxShadow: `0 0 8px ${ev.color}`, marginTop: 3 }} />
-                  <span style={{ flex: 1, width: 1.5, background: "rgba(255,255,255,0.1)", marginTop: 3 }} />
+                  <span style={{ flex: 1, width: 1.5, background: "rgba(var(--surface-rgb),0.1)", marginTop: 3 }} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 12.5, fontWeight: 600 }}>{ev.title}</div>
-                  <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)", marginTop: 1 }}>{ev.time}</div>
+                  <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)", marginTop: 1 }}>{ev.time}</div>
                 </div>
               </div>
             ))}
@@ -173,9 +173,9 @@ export function RoomDrawer({
                 flex: 1,
                 padding: 12,
                 borderRadius: 13,
-                border: "1px solid rgba(255,255,255,0.16)",
-                background: "rgba(255,255,255,0.05)",
-                color: "#EAF2FF",
+                border: "1px solid rgba(var(--surface-rgb),0.16)",
+                background: "rgba(var(--surface-rgb),0.05)",
+                color: "var(--text)",
                 fontFamily: "inherit",
                 fontSize: 13,
                 fontWeight: 600,
@@ -189,7 +189,7 @@ export function RoomDrawer({
                 flex: 1,
                 padding: 12,
                 borderRadius: 13,
-                border: "1px solid rgba(255,255,255,0.28)",
+                border: "1px solid rgba(var(--surface-rgb),0.28)",
                 color: "#04121A",
                 fontFamily: "inherit",
                 fontSize: 13,

@@ -39,20 +39,20 @@ export function LineChart({ months, inc, exp }: { months?: string[]; inc?: numbe
         R("stop", { offset: "100%", stopColor: "#FB7185", stopOpacity: 0 }))
     ),
     ...grid.map((g, i) =>
-      R("line", { key: "g" + i, x1: mL, y1: py(g), x2: W - mR, y2: py(g), stroke: "rgba(255,255,255,0.08)", strokeWidth: 1 })
+      R("line", { key: "g" + i, x1: mL, y1: py(g), x2: W - mR, y2: py(g), stroke: "rgba(var(--surface-rgb),0.08)", strokeWidth: 1 })
     ),
     ...grid.map((g, i) =>
-      R("text", { key: "t" + i, x: mL - 7, y: py(g) + 3.5, textAnchor: "end", fontSize: 9.5, fill: "rgba(234,242,255,0.4)" }, compact(g))
+      R("text", { key: "t" + i, x: mL - 7, y: py(g) + 3.5, textAnchor: "end", fontSize: 9.5, fill: "rgba(var(--text-rgb),0.4)" }, compact(g))
     ),
     R("path", { d: area(incArr), fill: "url(#clInc)" }),
     R("path", { d: area(expArr), fill: "url(#clExp)" }),
     R("path", { d: path(expArr), fill: "none", stroke: "#FB7185", strokeWidth: 2.4, strokeLinecap: "round", strokeLinejoin: "round" }),
     R("path", { d: path(incArr), fill: "none", stroke: "#38BDF8", strokeWidth: 2.8, strokeLinecap: "round", strokeLinejoin: "round" }),
     ...incArr.map((v, i) =>
-      R("circle", { key: "d" + i, cx: px(i), cy: py(v), r: i === incArr.length - 1 ? 4 : 2.6, fill: "#0B1020", stroke: "#38BDF8", strokeWidth: 2 })
+      R("circle", { key: "d" + i, cx: px(i), cy: py(v), r: i === incArr.length - 1 ? 4 : 2.6, fill: "var(--panel)", stroke: "#38BDF8", strokeWidth: 2 })
     ),
     ...mo.map((m, i) =>
-      R("text", { key: "m" + i, x: px(i), y: H - 9, textAnchor: "middle", fontSize: 9.5, fill: "rgba(234,242,255,0.45)" }, m)
+      R("text", { key: "m" + i, x: px(i), y: H - 9, textAnchor: "middle", fontSize: 9.5, fill: "rgba(var(--text-rgb),0.45)" }, m)
     )
   );
 }
@@ -86,10 +86,10 @@ export function DonutChart({ data }: { data?: ChartPointDTO[] } = {}) {
     R(
       "svg",
       { viewBox: "0 0 140 140", style: { width: 140, height: 140, flexShrink: 0 } },
-      R("circle", { cx, cy, r, fill: "none", stroke: "rgba(255,255,255,0.06)", strokeWidth: 18 }),
+      R("circle", { cx, cy, r, fill: "none", stroke: "rgba(var(--surface-rgb),0.06)", strokeWidth: 18 }),
       ...segs,
-      R("text", { x: cx, y: cy - 3, textAnchor: "middle", fontSize: 15, fontWeight: 700, fill: "#EAF2FF", style: { fontFamily: "Sora, sans-serif" } }, "฿" + compact(total)),
-      R("text", { x: cx, y: cy + 14, textAnchor: "middle", fontSize: 9.5, fill: "rgba(234,242,255,0.5)" }, "รวมรายจ่าย")
+      R("text", { x: cx, y: cy - 3, textAnchor: "middle", fontSize: 15, fontWeight: 700, fill: "var(--text)", style: { fontFamily: "Sora, sans-serif" } }, "฿" + compact(total)),
+      R("text", { x: cx, y: cy + 14, textAnchor: "middle", fontSize: 9.5, fill: "rgba(var(--text-rgb),0.5)" }, "รวมรายจ่าย")
     ),
     R(
       "div",
@@ -99,7 +99,7 @@ export function DonutChart({ data }: { data?: ChartPointDTO[] } = {}) {
           "div",
           { key: i, style: { display: "flex", alignItems: "center", gap: 8, fontSize: 12 } },
           R("span", { style: { width: 10, height: 10, borderRadius: 3, background: d.color, flexShrink: 0 } }),
-          R("span", { style: { color: "rgba(234,242,255,0.75)", flex: 1 } }, d.label),
+          R("span", { style: { color: "rgba(var(--text-rgb),0.75)", flex: 1 } }, d.label),
           R("span", { style: { fontWeight: 600, fontFamily: "Sora, sans-serif" } }, Math.round((d.value / total) * 100) + "%")
         )
       )
@@ -124,7 +124,7 @@ export function BarChart({ data }: { data?: ChartPointDTO[] } = {}) {
     "svg",
     { viewBox: `0 0 ${W} ${H}`, style: { width: "100%", height: "auto", display: "block" } },
     ...[0, 0.5, 1].map((g) =>
-      R("line", { key: "grid" + g, x1: 0, y1: by(maxV * g), x2: W, y2: by(maxV * g), stroke: "rgba(255,255,255,0.07)", strokeWidth: 1 })
+      R("line", { key: "grid" + g, x1: 0, y1: by(maxV * g), x2: W, y2: by(maxV * g), stroke: "rgba(var(--surface-rgb),0.07)", strokeWidth: 1 })
     ),
     ...rows.map((d, i) => {
       const x = gap + i * (bw + gap), y = by(d.value), h = H - mB - y;
@@ -133,8 +133,8 @@ export function BarChart({ data }: { data?: ChartPointDTO[] } = {}) {
         { key: "bar" + i },
         R("rect", { x, y, width: bw, height: h, rx: 8, fill: d.color, opacity: 0.85 }),
         R("rect", { x, y, width: bw, height: Math.min(h, 10), rx: 8, fill: "#fff", opacity: 0.25 }),
-        R("text", { x: x + bw / 2, y: y - 6, textAnchor: "middle", fontSize: 11, fontWeight: 700, fill: "#EAF2FF", style: { fontFamily: "Sora, sans-serif" } }, compact(d.value)),
-        R("text", { x: x + bw / 2, y: H - 12, textAnchor: "middle", fontSize: 9, fill: "rgba(234,242,255,0.55)" }, d.label)
+        R("text", { x: x + bw / 2, y: y - 6, textAnchor: "middle", fontSize: 11, fontWeight: 700, fill: "var(--text)", style: { fontFamily: "Sora, sans-serif" } }, compact(d.value)),
+        R("text", { x: x + bw / 2, y: H - 12, textAnchor: "middle", fontSize: 9, fill: "rgba(var(--text-rgb),0.55)" }, d.label)
       );
     })
   );
@@ -145,7 +145,7 @@ const DEFAULT_HBAR: ChartPointDTO[] = [
   { label: "B-802 · บ้านสวน พัทยา", value: 32000, color: "#5EEAD4" },
   { label: "A-1204 · เดอะ เครสท์", value: 29500, color: "#A855F7" },
   { label: "C-305 · แฟลตรุ่งเรือง", value: 24000, color: "#FBBF24" },
-  { label: "B-410 · ศุภาลัย เรส", value: 19800, color: "#7FF0D9" },
+  { label: "B-410 · ศุภาลัย เรส", value: 19800, color: "var(--pos)" },
 ];
 
 export function HBarChart({ data }: { data?: ChartPointDTO[] } = {}) {
@@ -161,12 +161,12 @@ export function HBarChart({ data }: { data?: ChartPointDTO[] } = {}) {
         R(
           "div",
           { style: { display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 5 } },
-          R("span", { style: { color: "rgba(234,242,255,0.8)" } }, d.label),
+          R("span", { style: { color: "rgba(var(--text-rgb),0.8)" } }, d.label),
           R("span", { style: { fontWeight: 600, fontFamily: "Sora, sans-serif", color: d.color } }, "฿" + d.value.toLocaleString())
         ),
         R(
           "div",
-          { style: { height: 9, borderRadius: 20, background: "rgba(255,255,255,0.06)", overflow: "hidden" } },
+          { style: { height: 9, borderRadius: 20, background: "rgba(var(--surface-rgb),0.06)", overflow: "hidden" } },
           R("div", { style: { width: (d.value / max) * 100 + "%", height: "100%", borderRadius: 20, background: `linear-gradient(90deg, ${d.color}, ${d.color}cc)`, boxShadow: `0 0 12px ${d.color}66` } })
         )
       )

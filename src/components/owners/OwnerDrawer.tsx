@@ -41,7 +41,7 @@ export function OwnerDrawer({
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
         <StatBox bg="rgba(56,189,248,0.1)" border="rgba(56,189,248,0.22)" color="#7DD3FC" label="ห้องทั้งหมด" value={`${owner.roomCount} ห้อง`} />
         <StatBox bg="rgba(251,191,36,0.08)" border="rgba(251,191,36,0.2)" color="#FDE68A" label="ยอดรอจ่าย" value={fmtTHB(owner.pendingPayout)} />
-        <StatBox bg="rgba(94,234,212,0.09)" border="rgba(94,234,212,0.2)" color="#7FF0D9" label="จ่ายแล้วสะสม" value={fmtTHB(owner.paidPayout)} />
+        <StatBox bg="rgba(94,234,212,0.09)" border="rgba(94,234,212,0.2)" color="var(--pos)" label="จ่ายแล้วสะสม" value={fmtTHB(owner.paidPayout)} />
         <StatBox bg="rgba(168,85,247,0.09)" border="rgba(168,85,247,0.2)" color="#DDD6FE" label="รายรับรวม" value={fmtTHB(owner.monthlyIncome)} />
       </div>
 
@@ -62,7 +62,7 @@ export function OwnerDrawer({
       {tab === 1 ? (
         <InfoSection title={`ห้องในความดูแล (${owner.rooms.length})`}>
           {owner.rooms.length === 0 ? (
-            <div style={{ fontSize: 13, color: "rgba(234,242,255,0.5)" }}>ยังไม่มีห้องผูกกับเจ้าของรายนี้</div>
+            <div style={{ fontSize: 13, color: "rgba(var(--text-rgb),0.5)" }}>ยังไม่มีห้องผูกกับเจ้าของรายนี้</div>
           ) : (
             owner.rooms.map((r) => (
               <div
@@ -72,12 +72,12 @@ export function OwnerDrawer({
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "9px 0",
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  borderBottom: "1px solid rgba(var(--surface-rgb),0.06)",
                 }}
               >
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>{r.no}</div>
-                  <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{r.building}</div>
+                  <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>{r.building}</div>
                 </div>
                 <span style={badge(r.badge)}>{r.status}</span>
               </div>
@@ -89,7 +89,7 @@ export function OwnerDrawer({
       {tab === 2 ? (
         <InfoSection title="ประวัติจ่ายเงิน">
           {owner.payouts.length === 0 ? (
-            <div style={{ fontSize: 13, color: "rgba(234,242,255,0.5)" }}>ยังไม่มีประวัติการจ่ายเงิน</div>
+            <div style={{ fontSize: 13, color: "rgba(var(--text-rgb),0.5)" }}>ยังไม่มีประวัติการจ่ายเงิน</div>
           ) : (
             owner.payouts.map((p, i) => (
               <div
@@ -99,17 +99,17 @@ export function OwnerDrawer({
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "9px 0",
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  borderBottom: "1px solid rgba(var(--surface-rgb),0.06)",
                 }}
               >
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>{p.room}</div>
-                  <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>
+                  <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>
                     รายรับ {p.income} · หัก {p.deduct}
                   </div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, color: "#7FF0D9" }}>{p.net}</div>
+                  <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, color: "var(--pos)" }}>{p.net}</div>
                   <span style={badge(p.badge)}>{p.status}</span>
                 </div>
               </div>
@@ -127,7 +127,7 @@ export function OwnerDrawer({
             borderRadius: 13,
             border: "1px solid rgba(251,113,133,0.35)",
             background: "rgba(251,113,133,0.08)",
-            color: "#FDA4AF",
+            color: "var(--neg)",
             fontFamily: "inherit",
             fontSize: 13,
             fontWeight: 600,
@@ -142,7 +142,7 @@ export function OwnerDrawer({
             flex: 1,
             padding: 12,
             borderRadius: 13,
-            border: "1px solid rgba(255,255,255,0.28)",
+            border: "1px solid rgba(var(--surface-rgb),0.28)",
             color: "#04121A",
             fontFamily: "inherit",
             fontSize: 13,

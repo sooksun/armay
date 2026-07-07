@@ -4,7 +4,7 @@ import { EXPENSE_TYPE } from "@/lib/labels";
 import type { DashboardDTO, UrgentTaskDTO, DashboardChartsDTO, ChartPointDTO } from "@/lib/api-types";
 
 const TH_MONTHS = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-const PALETTE = ["#38BDF8", "#5EEAD4", "#A855F7", "#FBBF24", "#FB7185", "#7FF0D9", "#818CF8"];
+const PALETTE = ["#38BDF8", "#5EEAD4", "#A855F7", "#FBBF24", "#FB7185", "var(--pos)", "#818CF8"];
 
 function monthBounds(now: Date) {
   const y = now.getUTCFullYear();

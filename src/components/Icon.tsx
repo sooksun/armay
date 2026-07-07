@@ -31,7 +31,9 @@ export type IconName =
   | "upload"
   | "image"
   | "chevDown"
-  | "clock";
+  | "clock"
+  | "sun"
+  | "moon";
 
 export function Icon({
   name,
@@ -112,6 +114,11 @@ export function Icon({
     image: [Rc(3, 4, 18, 16, 3), C(8.5, 9.5, 1.8), P("M3 17l5-4 4 3 3-2 6 5")],
     chevDown: [P("M6 9l6 6 6-6")],
     clock: [C(12, 12, 9), P("M12 7v5l3 2")],
+    sun: [
+      C(12, 12, 4.2),
+      P("M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M17.4 6.6l1.7-1.7M4.9 19.1l1.7-1.7"),
+    ],
+    moon: [P("M20.5 14.8A8.5 8.5 0 1 1 9.2 3.5a6.6 6.6 0 0 0 11.3 11.3z")],
   };
 
   const els = sets[name] ?? sets.dashboard;

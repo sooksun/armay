@@ -57,7 +57,7 @@ export function TenantDrawer({
       {tab === 1 ? (
         <InfoSection title={`ประวัติการเช่า (${rentals.length})`}>
           {rentals.length === 0 ? (
-            <div style={{ fontSize: 13, color: "rgba(234,242,255,0.5)" }}>ยังไม่มีประวัติการเช่า</div>
+            <div style={{ fontSize: 13, color: "rgba(var(--text-rgb),0.5)" }}>ยังไม่มีประวัติการเช่า</div>
           ) : (
             rentals.map((r) => (
               <div
@@ -67,14 +67,14 @@ export function TenantDrawer({
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "9px 0",
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  borderBottom: "1px solid rgba(var(--surface-rgb),0.06)",
                 }}
               >
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>
                     {r.room} · {r.building}
                   </div>
-                  <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>
+                  <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>
                     {r.code} · {r.period}
                   </div>
                 </div>
@@ -95,11 +95,11 @@ export function TenantDrawer({
                 alignItems: "center",
                 gap: 8,
                 padding: "9px 0",
-                borderBottom: "1px solid rgba(255,255,255,0.06)",
+                borderBottom: "1px solid rgba(var(--surface-rgb),0.06)",
                 fontSize: 13,
               }}
             >
-              <span style={{ color: "rgba(234,242,255,0.5)" }}>📎</span>
+              <span style={{ color: "rgba(var(--text-rgb),0.5)" }}>📎</span>
               {f}
             </div>
           ))}
@@ -115,7 +115,7 @@ export function TenantDrawer({
             borderRadius: 13,
             border: "1px solid rgba(251,113,133,0.35)",
             background: "rgba(251,113,133,0.08)",
-            color: "#FDA4AF",
+            color: "var(--neg)",
             fontFamily: "inherit",
             fontSize: 13,
             fontWeight: 600,
@@ -130,7 +130,7 @@ export function TenantDrawer({
             flex: 1,
             padding: 12,
             borderRadius: 13,
-            border: "1px solid rgba(255,255,255,0.28)",
+            border: "1px solid rgba(var(--surface-rgb),0.28)",
             color: "#04121A",
             fontFamily: "inherit",
             fontSize: 13,

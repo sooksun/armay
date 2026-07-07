@@ -93,7 +93,7 @@ export default function ExpensesPage() {
               gap: 7,
               padding: "8px 15px",
               borderRadius: 11,
-              border: "1px solid rgba(255,255,255,0.28)",
+              border: "1px solid rgba(var(--surface-rgb),0.28)",
               color: "#04121A",
               fontFamily: "inherit",
               fontSize: 12.5,
@@ -110,7 +110,7 @@ export default function ExpensesPage() {
       >
         <TableWrap minWidth={980}>
           <thead>
-            <tr style={{ background: "rgba(255,255,255,0.04)" }}>
+            <tr style={{ background: "rgba(var(--surface-rgb),0.04)" }}>
               <Th>วันที่</Th>
               <Th>ห้อง</Th>
               <Th>ประเภท / รายละเอียด</Th>
@@ -124,14 +124,14 @@ export default function ExpensesPage() {
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>
                   กำลังโหลด…
                 </td>
               </tr>
             )}
             {!loading && rows.length === 0 && (
               <tr>
-                <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(234,242,255,0.5)" }}>
+                <td colSpan={8} style={{ padding: "28px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>
                   ยังไม่มีรายการค่าใช้จ่าย
                 </td>
               </tr>
@@ -140,24 +140,24 @@ export default function ExpensesPage() {
               <tr
                 key={r.id}
                 style={{
-                  borderTop: "1px solid rgba(255,255,255,0.06)",
+                  borderTop: "1px solid rgba(var(--surface-rgb),0.06)",
                   background: r.badge === "red" ? "rgba(251,113,133,0.06)" : undefined,
                 }}
               >
-                <td style={{ padding: "13px 16px", whiteSpace: "nowrap", color: "rgba(234,242,255,0.85)" }}>{r.date}</td>
+                <td style={{ padding: "13px 16px", whiteSpace: "nowrap", color: "rgba(var(--text-rgb),0.85)" }}>{r.date}</td>
                 <td style={{ padding: "13px 16px" }}>
                   <div style={{ fontWeight: 600 }}>{r.room}</div>
-                  <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{r.building}</div>
+                  <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>{r.building}</div>
                 </td>
                 <td style={{ padding: "13px 16px" }}>
-                  <div style={{ color: "rgba(234,242,255,0.85)" }}>{r.description}</div>
-                  <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{r.expenseType}</div>
+                  <div style={{ color: "rgba(var(--text-rgb),0.85)" }}>{r.description}</div>
+                  <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)" }}>{r.expenseType}</div>
                 </td>
-                <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.8)" }}>{r.payeeName}</td>
-                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 600, color: "#FDA4AF", whiteSpace: "nowrap" }}>
+                <td style={{ padding: "13px 16px", color: "rgba(var(--text-rgb),0.8)" }}>{r.payeeName}</td>
+                <td style={{ padding: "13px 16px", textAlign: "right", fontFamily: "Sora,sans-serif", fontWeight: 600, color: "var(--neg)", whiteSpace: "nowrap" }}>
                   {r.amount}
                 </td>
-                <td style={{ padding: "13px 16px", color: "rgba(234,242,255,0.75)", whiteSpace: "nowrap" }}>{r.responsibility}</td>
+                <td style={{ padding: "13px 16px", color: "rgba(var(--text-rgb),0.75)", whiteSpace: "nowrap" }}>{r.responsibility}</td>
                 <td style={{ padding: "13px 16px" }}>
                   <span style={badge(r.badge)}>{r.status}</span>
                 </td>
@@ -167,9 +167,9 @@ export default function ExpensesPage() {
                     style={{
                       padding: "6px 12px",
                       borderRadius: 9,
-                      border: "1px solid rgba(255,255,255,0.16)",
-                      background: "rgba(255,255,255,0.06)",
-                      color: "#EAF2FF",
+                      border: "1px solid rgba(var(--surface-rgb),0.16)",
+                      background: "rgba(var(--surface-rgb),0.06)",
+                      color: "var(--text)",
                       fontFamily: "inherit",
                       fontSize: 11.5,
                       cursor: "pointer",

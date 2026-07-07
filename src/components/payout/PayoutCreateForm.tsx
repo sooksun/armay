@@ -105,18 +105,18 @@ export function PayoutCreateForm({ onClose, onCreated }: { onClose: () => void; 
         justifyContent: "space-between",
         padding: "13px 16px",
         fontSize: 13.5,
-        borderTop: opts.top ? "1px solid rgba(255,255,255,0.1)" : undefined,
-        background: opts.bold ? "rgba(94,234,212,0.09)" : "rgba(255,255,255,0.02)",
+        borderTop: opts.top ? "1px solid rgba(var(--surface-rgb),0.1)" : undefined,
+        background: opts.bold ? "rgba(94,234,212,0.09)" : "rgba(var(--surface-rgb),0.02)",
       }}
     >
-      <span style={{ color: "rgba(234,242,255,0.75)" }}>{label}</span>
-      <span style={{ fontFamily: "Sora,sans-serif", fontWeight: opts.bold ? 700 : 600, color: opts.bold ? "#7FF0D9" : opts.neg ? "#FDA4AF" : "#EAF2FF", fontSize: opts.bold ? 17 : 13.5 }}>{value}</span>
+      <span style={{ color: "rgba(var(--text-rgb),0.75)" }}>{label}</span>
+      <span style={{ fontFamily: "Sora,sans-serif", fontWeight: opts.bold ? 700 : 600, color: opts.bold ? "var(--pos)" : opts.neg ? "var(--neg)" : "var(--text)", fontSize: opts.bold ? 17 : 13.5 }}>{value}</span>
     </div>
   );
 
   return (
     <div style={{ padding: "18px 22px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
-      <div style={{ padding: 20, borderRadius: 18, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)" }}>
+      <div style={{ padding: 20, borderRadius: 18, background: "rgba(var(--surface-rgb),0.04)", border: "1px solid rgba(var(--surface-rgb),0.09)" }}>
         <FieldsGrid>
           <SelectField
             label="เจ้าของ"
@@ -142,7 +142,7 @@ export function PayoutCreateForm({ onClose, onCreated }: { onClose: () => void; 
               borderRadius: 11,
               border: "1px solid rgba(168,85,247,0.4)",
               background: "linear-gradient(135deg,rgba(168,85,247,0.2),rgba(56,189,248,0.14))",
-              color: "#EAF2FF",
+              color: "var(--text)",
               fontFamily: "inherit",
               fontSize: 12.5,
               fontWeight: 600,
@@ -163,8 +163,8 @@ export function PayoutCreateForm({ onClose, onCreated }: { onClose: () => void; 
             </div>
 
             <div style={{ marginTop: 14 }}>
-              <div style={{ fontSize: 12.5, color: "rgba(234,242,255,0.6)", marginBottom: 8 }}>รายการหักค่าใช้จ่าย (ความรับผิดชอบเจ้าของ)</div>
-              {lines.length === 0 && <div style={{ fontSize: 12.5, color: "rgba(234,242,255,0.45)" }}>ไม่มีค่าใช้จ่ายเจ้าของที่ยังไม่ถูกหัก</div>}
+              <div style={{ fontSize: 12.5, color: "rgba(var(--text-rgb),0.6)", marginBottom: 8 }}>รายการหักค่าใช้จ่าย (ความรับผิดชอบเจ้าของ)</div>
+              {lines.length === 0 && <div style={{ fontSize: 12.5, color: "rgba(var(--text-rgb),0.45)" }}>ไม่มีค่าใช้จ่ายเจ้าของที่ยังไม่ถูกหัก</div>}
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {lines.map((l) => (
                   <label
@@ -175,20 +175,20 @@ export function PayoutCreateForm({ onClose, onCreated }: { onClose: () => void; 
                       gap: 10,
                       padding: "10px 13px",
                       borderRadius: 11,
-                      background: l.checked ? "rgba(251,113,133,0.08)" : "rgba(255,255,255,0.03)",
-                      border: `1px solid ${l.checked ? "rgba(251,113,133,0.28)" : "rgba(255,255,255,0.1)"}`,
+                      background: l.checked ? "rgba(251,113,133,0.08)" : "rgba(var(--surface-rgb),0.03)",
+                      border: `1px solid ${l.checked ? "rgba(251,113,133,0.28)" : "rgba(var(--surface-rgb),0.1)"}`,
                       cursor: "pointer",
                     }}
                   >
                     <input type="checkbox" checked={l.checked} onChange={() => toggleLine(l.sourceId)} />
                     <span style={{ flex: 1, fontSize: 13 }}>{l.label}</span>
-                    <span style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, color: "#FDA4AF" }}>−{fmtTHB(l.amount)}</span>
+                    <span style={{ fontFamily: "Sora,sans-serif", fontWeight: 600, color: "var(--neg)" }}>−{fmtTHB(l.amount)}</span>
                   </label>
                 ))}
               </div>
             </div>
 
-            <div style={{ marginTop: 16, borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.1)" }}>
+            <div style={{ marginTop: 16, borderRadius: 14, overflow: "hidden", border: "1px solid rgba(var(--surface-rgb),0.1)" }}>
               {calcRow("รายรับรวม", fmtTHB(num(gross)))}
               {calcRow("หัก ค่านายหน้า", `−${fmtTHB(num(commission))}`, { neg: true, top: true })}
               {calcRow("หัก ค่าใช้จ่ายเจ้าของ", `−${fmtTHB(deductChecked)}`, { neg: true, top: true })}
@@ -213,9 +213,9 @@ export function PayoutCreateForm({ onClose, onCreated }: { onClose: () => void; 
           style={{
             padding: "11px 18px",
             borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.16)",
-            background: "rgba(255,255,255,0.05)",
-            color: "#EAF2FF",
+            border: "1px solid rgba(var(--surface-rgb),0.16)",
+            background: "rgba(var(--surface-rgb),0.05)",
+            color: "var(--text)",
             fontFamily: "inherit",
             fontSize: 13,
             fontWeight: 600,
@@ -230,7 +230,7 @@ export function PayoutCreateForm({ onClose, onCreated }: { onClose: () => void; 
           style={{
             padding: "11px 22px",
             borderRadius: 12,
-            border: "1px solid rgba(255,255,255,0.28)",
+            border: "1px solid rgba(var(--surface-rgb),0.28)",
             color: "#04121A",
             fontFamily: "inherit",
             fontSize: 13,

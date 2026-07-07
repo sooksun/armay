@@ -5,7 +5,6 @@ import { Sidebar } from "@/components/shell/Sidebar";
 import { Topbar } from "@/components/shell/Topbar";
 import { BottomNav } from "@/components/shell/BottomNav";
 import { AddIncomeModal } from "@/components/AddIncomeModal";
-import { APP_BACKGROUND } from "@/lib/theme";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,10 +13,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         style={{
           minHeight: "100vh",
           display: "flex",
-          color: "#EAF2FF",
+          color: "var(--text)",
           position: "relative",
           overflow: "hidden",
-          background: APP_BACKGROUND,
+          background: "var(--bg)",
         }}
       >
         <Sidebar />
