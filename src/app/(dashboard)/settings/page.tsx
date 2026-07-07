@@ -1,5 +1,141 @@
-import { PlaceholderView } from "@/components/PlaceholderView";
+"use client";
+
+import { useState } from "react";
+import { TextField } from "@/components/shared/FormModal";
+import { badge } from "@/lib/theme";
+import { PAYMENT_ACCOUNTS, EXPENSE_TYPE_OPTIONS } from "@/lib/mock";
+
+const INCOME_TYPES = ["ค่าเช่า", "เงินประกัน", "ค่าทำความสะอาด", "ค่าน้ำ", "ค่าไฟ", "ค่าปรับ", "อื่นๆ"];
+
+function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        padding: "20px 22px",
+        borderRadius: 22,
+        background: "rgba(255,255,255,0.055)",
+        backdropFilter: "blur(22px)",
+        WebkitBackdropFilter: "blur(22px)",
+        border: "1px solid rgba(255,255,255,0.12)",
+        boxShadow: "0 18px 44px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.14)",
+      }}
+    >
+      <div style={{ fontWeight: 600, fontSize: 15.5 }}>{title}</div>
+      {subtitle ? <div style={{ fontSize: 12, color: "rgba(234,242,255,0.5)", marginTop: 2, marginBottom: 14 }}>{subtitle}</div> : <div style={{ height: 12 }} />}
+      {children}
+    </div>
+  );
+}
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        padding: "6px 12px",
+        borderRadius: 20,
+        fontSize: 12.5,
+        color: "#EAF2FF",
+        background: "rgba(255,255,255,0.06)",
+        border: "1px solid rgba(255,255,255,0.14)",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+const primaryBtn: React.CSSProperties = {
+  padding: "10px 20px",
+  borderRadius: 12,
+  border: "1px solid rgba(255,255,255,0.28)",
+  color: "#04121A",
+  fontFamily: "inherit",
+  fontSize: 13,
+  fontWeight: 700,
+  cursor: "pointer",
+  background: "linear-gradient(135deg,#5EEAD4,#38BDF8)",
+  boxShadow: "0 6px 16px rgba(56,189,248,0.4)",
+};
 
 export default function SettingsPage() {
-  return <PlaceholderView />;
+  const [company, setCompany] = useState({ name: "บจ. คริสตัล เลดเจอร์", phone: "088-123-4567", address: "88 ถ.สุขุมวิท กรุงเทพฯ" });
+  const [thresholds, setThresholds] = useState({ vacantDays: "30", contractEndDays: "7", overdueDays: "15" });
+  const [saved, setSaved] = useState(false);
+
+  function save() {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 1800);
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      <Section title="ข้อมูลกิจการ" subtitle="แสดงในหัวรายงานและเอกสาร">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 13 }}>
+          <TextField label="ชื่อกิจการ/นายหน้า" value={company.name} onChange={(v) => setCompany({ ...company, name: v })} />
+          <TextField label="เบอร์ติดต่อ" value={company.phone} onChange={(v) => setCompany({ ...company, phone: v })} />
+        </div>
+        <div style={{ marginTop: 13 }}>
+          <TextField label="ที่อยู่" value={company.address} onChange={(v) => setCompany({ ...company, address: v })} />
+        </div>
+      </Section>
+
+      <Section title="เกณฑ์การแจ้งเตือน" subtitle="ระบบจะแจ้งเตือนบน Dashboard เมื่อถึงเกณฑ์">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 13 }}>
+          <TextField label="ห้องว่างเกิน (วัน)" value={thresholds.vacantDays} onChange={(v) => setThresholds({ ...thresholds, vacantDays: v.replace(/\D/g, "") })} />
+          <TextField label="สัญญาใกล้หมดภายใน (วัน)" value={thresholds.contractEndDays} onChange={(v) => setThresholds({ ...thresholds, contractEndDays: v.replace(/\D/g, "") })} />
+          <TextField label="ค้างชำระเกิน (วัน)" value={thresholds.overdueDays} onChange={(v) => setThresholds({ ...thresholds, overdueDays: v.replace(/\D/g, "") })} />
+        </div>
+      </Section>
+
+      <Section title="ประเภทรายรับ" subtitle="ใช้ตอนบันทึกรายรับ">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {INCOME_TYPES.map((t) => (
+            <Chip key={t}>{t}</Chip>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="ประเภทรายจ่าย" subtitle="ใช้ตอนบันทึกค่าใช้จ่ายห้อง">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {EXPENSE_TYPE_OPTIONS.map((t) => (
+            <Chip key={t}>{t}</Chip>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="บัญชีรับ–จ่ายเริ่มต้น" subtitle="เลือกไว้ล่วงหน้าเมื่อบันทึกรายรับ/จ่ายเจ้าของ">
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {PAYMENT_ACCOUNTS.map((a) => (
+            <div
+              key={a.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "11px 14px",
+                borderRadius: 12,
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.09)",
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>{a.accountName}</div>
+                <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)" }}>{a.bankName || "PromptPay / เงินสด"}</div>
+              </div>
+              <span style={badge("purple")}>{a.accountType}</span>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 12 }}>
+        {saved ? <span style={{ fontSize: 13, color: "#6EE7B7" }}>บันทึกการตั้งค่าแล้ว</span> : null}
+        <button onClick={save} style={primaryBtn}>
+          บันทึกการตั้งค่า
+        </button>
+      </div>
+    </div>
+  );
 }

@@ -760,3 +760,101 @@ export function incomeRowsByChannel(account: PaymentAccountRecord): IncomeRow[] 
   if (account.promptpayId && !account.bankName) return INCOME_ROWS.filter((r) => r.channel === "PromptPay");
   return INCOME_ROWS.filter((r) => r.channel === "โอนธนาคาร");
 }
+
+// ---------- EXPENSES ----------
+export type Responsibility = "นายหน้า" | "เจ้าของ" | "ผู้เช่า";
+export const EXPENSE_TYPE_OPTIONS = ["ค่าทำความสะอาด", "ค่าช่างซ่อม", "ค่าวัสดุ", "ค่าน้ำ", "ค่าไฟ", "ค่าส่วนกลาง", "ค่าเดินทาง", "ค่าอื่นๆ"];
+export const RESPONSIBILITY_OPTIONS: Responsibility[] = ["นายหน้า", "เจ้าของ", "ผู้เช่า"];
+
+export type ExpenseRow = {
+  id: number;
+  expenseCode: string;
+  date: string;
+  room: string;
+  building: string;
+  expenseType: string;
+  description: string;
+  payeeName: string;
+  amount: string;
+  responsibility: Responsibility;
+  status: string;
+  badge: BadgeKind;
+  beforeUrl: string | null;
+  afterUrl: string | null;
+};
+
+export const EXPENSE_ROWS: ExpenseRow[] = [
+  { id: 1, expenseCode: "EXP-2568-0091", date: "6 ก.ค. 2568", room: "A-1105", building: "เดอะ เครสท์", expenseType: "ค่าช่างซ่อม", description: "เปลี่ยนก๊อกน้ำห้องน้ำ", payeeName: "คุณช่างเอก", amount: "฿1,300", responsibility: "เจ้าของ", status: "จ่ายแล้ว", badge: "green", beforeUrl: null, afterUrl: null },
+  { id: 2, expenseCode: "EXP-2568-0090", date: "6 ก.ค. 2568", room: "A-1105", building: "เดอะ เครสท์", expenseType: "ค่าทำความสะอาด", description: "ทำความสะอาดรายเดือน", payeeName: "คุณแม่บ้านนก", amount: "฿800", responsibility: "เจ้าของ", status: "จ่ายแล้ว", badge: "green", beforeUrl: null, afterUrl: null },
+  { id: 3, expenseCode: "EXP-2568-0088", date: "5 ก.ค. 2568", room: "C-208", building: "แฟลตรุ่งเรือง", expenseType: "ค่าช่างซ่อม", description: "รีโนเวทห้องน้ำ", payeeName: "คุณช่างสมพร", amount: "฿8,400", responsibility: "เจ้าของ", status: "รอตรวจสอบ", badge: "gold", beforeUrl: null, afterUrl: null },
+  { id: 4, expenseCode: "EXP-2568-0086", date: "4 ก.ค. 2568", room: "B-802", building: "บ้านสวน พัทยา", expenseType: "ค่าทำความสะอาด", description: "ทำความสะอาดรายเดือน", payeeName: "คุณแม่บ้านนก", amount: "฿1,200", responsibility: "นายหน้า", status: "จ่ายแล้ว", badge: "green", beforeUrl: null, afterUrl: null },
+  { id: 5, expenseCode: "EXP-2568-0083", date: "3 ก.ค. 2568", room: "A-902", building: "เดอะ เครสท์", expenseType: "ค่าช่างซ่อม", description: "เปลี่ยนหลอดไฟ + ปลั๊ก", payeeName: "คุณช่างเอก", amount: "฿650", responsibility: "นายหน้า", status: "จ่ายแล้ว", badge: "green", beforeUrl: null, afterUrl: null },
+  { id: 6, expenseCode: "EXP-2568-0080", date: "2 ก.ค. 2568", room: "A-1204", building: "เดอะ เครสท์", expenseType: "ค่าทำความสะอาด", description: "ทำความสะอาด Big Cleaning", payeeName: "คุณแม่บ้านนก", amount: "฿2,400", responsibility: "ผู้เช่า", status: "รอจ่าย", badge: "gold", beforeUrl: null, afterUrl: null },
+  { id: 7, expenseCode: "EXP-2568-0078", date: "1 ก.ค. 2568", room: "C-305", building: "แฟลตรุ่งเรือง", expenseType: "ค่าไฟ", description: "ค่าไฟส่วนกลาง มิ.ย.", payeeName: "การไฟฟ้า", amount: "฿850", responsibility: "ผู้เช่า", status: "มีปัญหา", badge: "red", beforeUrl: null, afterUrl: null },
+  { id: 8, expenseCode: "EXP-2568-0075", date: "30 มิ.ย. 2568", room: "B-1105", building: "บ้านสวน พัทยา", expenseType: "ค่าช่างซ่อม", description: "ซ่อมประตูห้อง", payeeName: "คุณช่างสมพร", amount: "฿480", responsibility: "เจ้าของ", status: "จ่ายแล้ว", badge: "green", beforeUrl: null, afterUrl: null },
+];
+
+export const EXPENSE_KPIS: MiniKpi[] = [
+  { label: "รายจ่ายเดือนนี้", icon: "expense", color: "#FB7185", value: "฿386,200" },
+  { label: "ค่าซ่อม/แม่บ้าน", icon: "service", color: "#FBBF24", value: "฿94,600" },
+  { label: "รอตรวจสอบ", icon: "audit", color: "#A855F7", value: "฿10,800" },
+  { label: "มีปัญหา", icon: "alert", color: "#FB7185", value: "1 รายการ" },
+];
+
+// ---------- USERS & ROLES ----------
+export type UserRole = "ADMIN" | "STAFF" | "VIEWER";
+export type UserStatus = "ACTIVE" | "INACTIVE";
+export const ROLE_OPTIONS: UserRole[] = ["ADMIN", "STAFF", "VIEWER"];
+export const ROLE_LABEL: Record<UserRole, string> = { ADMIN: "ผู้ดูแลระบบ", STAFF: "พนักงาน/ผู้ช่วย", VIEWER: "ผู้ดูรายงาน" };
+export const ROLE_BADGE: Record<UserRole, BadgeKind> = { ADMIN: "purple", STAFF: "blue", VIEWER: "gray" };
+
+export type UserRecord = {
+  id: number;
+  fullName: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+  lastActive: string;
+};
+
+export const USERS: UserRecord[] = [
+  { id: 1, fullName: "นายหน้า แอดมิน", email: "admin@armay.local", role: "ADMIN", status: "ACTIVE", lastActive: "วันนี้ 09:12" },
+  { id: 2, fullName: "คุณสมหญิง ผู้ช่วย", email: "somying@armay.local", role: "STAFF", status: "ACTIVE", lastActive: "วันนี้ 08:40" },
+  { id: 3, fullName: "คุณวิชัย บันทึกข้อมูล", email: "wichai@armay.local", role: "STAFF", status: "ACTIVE", lastActive: "เมื่อวาน 17:20" },
+  { id: 4, fullName: "คุณเจ้าของ ดูรายงาน", email: "viewer@armay.local", role: "VIEWER", status: "ACTIVE", lastActive: "3 ก.ค. 2568" },
+  { id: 5, fullName: "คุณอดีต พนักงาน", email: "former@armay.local", role: "STAFF", status: "INACTIVE", lastActive: "20 มิ.ย. 2568" },
+];
+
+// ---------- AUDIT LOG ----------
+export type AuditAction = "สร้าง" | "แก้ไข" | "ลบ" | "อนุมัติ" | "ยกเลิก" | "เข้าสู่ระบบ";
+export const AUDIT_ACTION_BADGE: Record<AuditAction, BadgeKind> = {
+  "สร้าง": "green",
+  "แก้ไข": "blue",
+  "ลบ": "red",
+  "อนุมัติ": "purple",
+  "ยกเลิก": "orange",
+  "เข้าสู่ระบบ": "gray",
+};
+
+export type AuditLogRow = {
+  id: number;
+  time: string;
+  user: string;
+  action: AuditAction;
+  table: string;
+  record: string;
+  detail: string;
+};
+
+export const AUDIT_LOGS: AuditLogRow[] = [
+  { id: 1, time: "6 ก.ค. 2568 · 10:24", user: "นายหน้า แอดมิน", action: "อนุมัติ", table: "รายรับ", record: "INC-2569-07-0001", detail: "อนุมัติรายรับ ฿12,500" },
+  { id: 2, time: "6 ก.ค. 2568 · 10:05", user: "คุณสมหญิง ผู้ช่วย", action: "สร้าง", table: "รายรับ", record: "INC-2569-07-0001", detail: "บันทึกค่าเช่า A-1105" },
+  { id: 3, time: "6 ก.ค. 2568 · 09:12", user: "นายหน้า แอดมิน", action: "เข้าสู่ระบบ", table: "ผู้ใช้งาน", record: "admin@armay.local", detail: "เข้าสู่ระบบสำเร็จ" },
+  { id: 4, time: "5 ก.ค. 2568 · 16:48", user: "คุณวิชัย บันทึกข้อมูล", action: "สร้าง", table: "รายจ่าย", record: "EXP-2568-0088", detail: "ค่ารีโนเวทห้องน้ำ C-208 ฿8,400" },
+  { id: 5, time: "5 ก.ค. 2568 · 15:30", user: "นายหน้า แอดมิน", action: "แก้ไข", table: "ห้อง", record: "C-208", detail: "เปลี่ยนสถานะเป็น ปิดปรับปรุง" },
+  { id: 6, time: "5 ก.ค. 2568 · 11:02", user: "คุณสมหญิง ผู้ช่วย", action: "สร้าง", table: "รายการเช่า", record: "RN-2568-0142", detail: "สร้างสัญญาเช่า A-1105" },
+  { id: 7, time: "4 ก.ค. 2568 · 14:15", user: "นายหน้า แอดมิน", action: "อนุมัติ", table: "จ่ายเจ้าของ", record: "คุณอนุชา เดชา", detail: "อนุมัติจ่ายสุทธิ ฿9,800" },
+  { id: 8, time: "4 ก.ค. 2568 · 09:50", user: "คุณวิชัย บันทึกข้อมูล", action: "แก้ไข", table: "ผู้เช่า", record: "TNT-0004", detail: "ติดสถานะ Blacklist" },
+  { id: 9, time: "3 ก.ค. 2568 · 17:40", user: "นายหน้า แอดมิน", action: "ยกเลิก", table: "รายรับ", record: "INC-2568-0140", detail: "ยกเลิกรายการซ้ำ" },
+  { id: 10, time: "3 ก.ค. 2568 · 10:08", user: "คุณสมหญิง ผู้ช่วย", action: "ลบ", table: "เอกสารแนบ", record: "slip-0140.jpg", detail: "ลบสลิปที่อัปโหลดผิด" },
+];
