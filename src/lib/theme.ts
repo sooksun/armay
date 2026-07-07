@@ -104,3 +104,18 @@ export function iconChip(hex: string, size = 38): CSSProperties {
 export function fmtTHB(n: number): string {
   return "฿" + n.toLocaleString("en-US");
 }
+
+/** Parses a Thai-baht display string like "฿12,500" or "−฿1,750" into a signed integer. */
+export function parseAmount(display: string): number {
+  const normalized = display.replace(/−/g, "-");
+  const digits = normalized.replace(/[^\d-]/g, "");
+  const n = parseInt(digits, 10);
+  return Number.isNaN(n) ? 0 : n;
+}
+
+/** Masks the middle dash-separated group(s) of an account number, keeping the first and last visible. */
+export function maskAccountNumber(num: string): string {
+  const parts = num.split("-");
+  if (parts.length < 3) return num;
+  return parts.map((p, i) => (i === 0 || i === parts.length - 1 ? p : "•".repeat(p.length))).join("-");
+}

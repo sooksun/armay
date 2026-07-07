@@ -1,4 +1,5 @@
 import type { IconName } from "@/components/Icon";
+import { parseAmount } from "@/lib/theme";
 import type { BadgeKind } from "@/lib/theme";
 
 /** Mock data ported verbatim from the Crystal Ledger design comp. */
@@ -343,4 +344,399 @@ export const KANBAN_COLUMNS: KanbanColumn[] = [
 
 export function initials(name: string): string {
   return name.replace("คุณ", "").charAt(0);
+}
+
+// ---------- OWNERS ----------
+export type OwnerStatus = "ACTIVE" | "INACTIVE";
+
+export type Owner = {
+  id: number;
+  ownerCode: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  lineId: string;
+  address: string;
+  bankName: string;
+  bankAccountNumber: string;
+  bankAccountName: string;
+  promptpayId: string;
+  note: string;
+  status: OwnerStatus;
+};
+
+export const OWNERS: Owner[] = [
+  {
+    id: 1,
+    ownerCode: "OWN-0001",
+    fullName: "คุณสมชาย วัฒนโสภณ",
+    phone: "081-111-2222",
+    email: "somchai.w@email.com",
+    lineId: "somchai_w",
+    address: "99/1 ถ.สุขุมวิท แขวงคลองตัน เขตคลองเตย กรุงเทพฯ 10110",
+    bankName: "KBank",
+    bankAccountNumber: "123-4-56789",
+    bankAccountName: "สมชาย วัฒนโสภณ",
+    promptpayId: "081-111-2222",
+    note: "",
+    status: "ACTIVE",
+  },
+  {
+    id: 2,
+    ownerCode: "OWN-0002",
+    fullName: "คุณพิมพ์ใจ ธีรกุล",
+    phone: "082-222-3333",
+    email: "pimjai.t@email.com",
+    lineId: "pimjai_t",
+    address: "45 ซ.สุขุมวิท 71 แขวงพระโขนงเหนือ เขตวัฒนา กรุงเทพฯ 10110",
+    bankName: "SCB",
+    bankAccountNumber: "234-5-67890",
+    bankAccountName: "พิมพ์ใจ ธีรกุล",
+    promptpayId: "082-222-3333",
+    note: "",
+    status: "ACTIVE",
+  },
+  {
+    id: 3,
+    ownerCode: "OWN-0003",
+    fullName: "คุณอนุชา เดชา",
+    phone: "083-333-4444",
+    email: "anucha.d@email.com",
+    lineId: "anucha_d",
+    address: "12 หมู่ 4 ต.หนองปรือ อ.บางละมุง จ.ชลบุรี 20150",
+    bankName: "BBL",
+    bankAccountNumber: "345-6-78901",
+    bankAccountName: "อนุชา เดชา",
+    promptpayId: "083-333-4444",
+    note: "",
+    status: "ACTIVE",
+  },
+  {
+    id: 4,
+    ownerCode: "OWN-0004",
+    fullName: "คุณวีระ สุขสันต์",
+    phone: "084-444-5555",
+    email: "weera.s@email.com",
+    lineId: "weera_s",
+    address: "78 ถ.รังสิต-นครนายก ต.ประชาธิปัตย์ อ.ธัญบุรี จ.ปทุมธานี 12130",
+    bankName: "KTB",
+    bankAccountNumber: "456-7-89012",
+    bankAccountName: "วีระ สุขสันต์",
+    promptpayId: "084-444-5555",
+    note: "ติดต่อยากช่วงเย็น",
+    status: "ACTIVE",
+  },
+];
+
+// TODO(backend): these relation helpers match by Thai name string because the mock
+// arrays share names, not ids. When this moves to Prisma, key on ownerId/propertyId/
+// tenantId foreign keys instead — otherwise editing a record's name silently detaches
+// its rooms/payouts/rentals AND disables the name-based delete guards.
+export function roomsByOwner(ownerName: string): Room[] {
+  return ROOMS.filter((r) => r.owner === ownerName);
+}
+
+export function monthlyIncomeByOwner(ownerName: string): number {
+  return roomsByOwner(ownerName).reduce((sum, r) => sum + parseAmount(r.income), 0);
+}
+
+export function payoutsByOwner(ownerName: string): PayoutRow[] {
+  return PAYOUT_ROWS.filter((r) => r.owner === ownerName);
+}
+
+export function pendingPayoutTotal(ownerName: string): number {
+  return payoutsByOwner(ownerName)
+    .filter((r) => r.status !== "จ่ายแล้ว")
+    .reduce((sum, r) => sum + parseAmount(r.net), 0);
+}
+
+export function paidPayoutTotal(ownerName: string): number {
+  return payoutsByOwner(ownerName)
+    .filter((r) => r.status === "จ่ายแล้ว")
+    .reduce((sum, r) => sum + parseAmount(r.net), 0);
+}
+
+// ---------- PROPERTIES ----------
+export type PropertyStatus = "ACTIVE" | "INACTIVE";
+
+export type Property = {
+  id: number;
+  propertyCode: string;
+  propertyName: string;
+  propertyType: string;
+  address: string;
+  province: string;
+  district: string;
+  subdistrict: string;
+  contactName: string;
+  contactPhone: string;
+  note: string;
+  monthlyIncome: number;
+  status: PropertyStatus;
+};
+
+export const PROPERTY_TYPE_OPTIONS = ["คอนโด", "แฟลต", "บ้านพัก", "อาคารพาณิชย์", "หอพัก", "อื่นๆ"];
+
+// propertyName MUST match ROOMS[].building exactly — roomsByProperty() filters on it.
+export const PROPERTIES: Property[] = [
+  {
+    id: 1,
+    propertyCode: "PPT-0001",
+    propertyName: "เดอะ เครสท์",
+    propertyType: "คอนโด",
+    address: "88 ถ.สุขุมวิท",
+    province: "กรุงเทพมหานคร",
+    district: "วัฒนา",
+    subdistrict: "คลองตันเหนือ",
+    contactName: "ฝ่ายนิติบุคคล เดอะ เครสท์",
+    contactPhone: "02-111-2222",
+    note: "",
+    monthlyIncome: 468000,
+    status: "ACTIVE",
+  },
+  {
+    id: 2,
+    propertyCode: "PPT-0002",
+    propertyName: "บ้านสวน พัทยา",
+    propertyType: "บ้านพัก",
+    address: "12 หมู่ 4",
+    province: "ชลบุรี",
+    district: "บางละมุง",
+    subdistrict: "หนองปรือ",
+    contactName: "คุณอนุชา เดชา",
+    contactPhone: "083-333-4444",
+    note: "",
+    monthlyIncome: 352000,
+    status: "ACTIVE",
+  },
+  {
+    id: 3,
+    propertyCode: "PPT-0003",
+    propertyName: "แฟลตรุ่งเรือง",
+    propertyType: "แฟลต",
+    address: "23 ถ.รุ่งเรือง",
+    province: "กรุงเทพมหานคร",
+    district: "บางกะปิ",
+    subdistrict: "คลองจั่น",
+    contactName: "คุณวีระ สุขสันต์",
+    contactPhone: "084-444-5555",
+    note: "",
+    monthlyIncome: 246000,
+    status: "ACTIVE",
+  },
+  {
+    id: 4,
+    propertyCode: "PPT-0004",
+    propertyName: "ศุภาลัย เรส",
+    propertyType: "คอนโด",
+    address: "56 ถ.ศรีนครินทร์",
+    province: "กรุงเทพมหานคร",
+    district: "สวนหลวง",
+    subdistrict: "สวนหลวง",
+    contactName: "ฝ่ายนิติบุคคล ศุภาลัย",
+    contactPhone: "02-222-3333",
+    note: "",
+    monthlyIncome: 182000,
+    status: "ACTIVE",
+  },
+];
+
+export function roomsByProperty(propertyName: string): Room[] {
+  return ROOMS.filter((r) => r.building === propertyName);
+}
+
+// ---------- TENANTS ----------
+export type TenantStatus = "ACTIVE" | "INACTIVE";
+
+export type Tenant = {
+  id: number;
+  tenantCode: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  lineId: string;
+  idCardOrPassport: string;
+  nationality: string;
+  address: string;
+  note: string;
+  blacklist: boolean;
+  status: TenantStatus;
+};
+
+// fullName MUST match RENTAL_ROWS[].tenant exactly — rentalsByTenant() filters on it.
+export const TENANTS: Tenant[] = [
+  {
+    id: 1,
+    tenantCode: "TNT-0001",
+    fullName: "คุณกิตติพงษ์ ใจดี",
+    phone: "081-234-5678",
+    email: "kitti@email.com",
+    lineId: "kitti_jaidee",
+    idCardOrPassport: "1-2345-67890-12-3",
+    nationality: "ไทย",
+    address: "A-1105 เดอะ เครสท์",
+    note: "",
+    blacklist: false,
+    status: "ACTIVE",
+  },
+  {
+    id: 2,
+    tenantCode: "TNT-0002",
+    fullName: "คุณศิริพร มงคล",
+    phone: "082-345-6789",
+    email: "siriporn@email.com",
+    lineId: "siriporn_m",
+    idCardOrPassport: "1-3456-78901-23-4",
+    nationality: "ไทย",
+    address: "A-1204 เดอะ เครสท์",
+    note: "",
+    blacklist: false,
+    status: "ACTIVE",
+  },
+  {
+    id: 3,
+    tenantCode: "TNT-0003",
+    fullName: "คุณมณีรัตน์ ทองดี",
+    phone: "083-456-7890",
+    email: "maneerat@email.com",
+    lineId: "maneerat_t",
+    idCardOrPassport: "1-4567-89012-34-5",
+    nationality: "ไทย",
+    address: "A-902 เดอะ เครสท์",
+    note: "ค้างชำระเดือน ก.ค.",
+    blacklist: false,
+    status: "ACTIVE",
+  },
+  {
+    id: 4,
+    tenantCode: "TNT-0004",
+    fullName: "คุณสุดา แสงทอง",
+    phone: "084-567-8901",
+    email: "suda@email.com",
+    lineId: "suda_s",
+    idCardOrPassport: "1-5678-90123-45-6",
+    nationality: "ไทย",
+    address: "C-305 แฟลตรุ่งเรือง",
+    note: "ค้างชำระเกิน 15 วัน",
+    blacklist: true,
+    status: "ACTIVE",
+  },
+  {
+    id: 5,
+    tenantCode: "TNT-0005",
+    fullName: "คุณธนา รุ่งเรือง",
+    phone: "085-678-9012",
+    email: "thana@email.com",
+    lineId: "thana_r",
+    idCardOrPassport: "1-6789-01234-56-7",
+    nationality: "ไทย",
+    address: "B-802 บ้านสวน พัทยา",
+    note: "",
+    blacklist: false,
+    status: "ACTIVE",
+  },
+  {
+    id: 6,
+    tenantCode: "TNT-0006",
+    fullName: "คุณสมพงษ์ เจริญสุข",
+    phone: "086-789-0123",
+    email: "sompong@email.com",
+    lineId: "sompong_c",
+    idCardOrPassport: "1-7890-12345-67-8",
+    nationality: "ไทย",
+    address: "B-1105 บ้านสวน พัทยา",
+    note: "",
+    blacklist: false,
+    status: "ACTIVE",
+  },
+  {
+    id: 7,
+    tenantCode: "TNT-0007",
+    fullName: "คุณกาญจนา ศรีสุข",
+    phone: "087-890-1234",
+    email: "kanjana@email.com",
+    lineId: "kanjana_s",
+    idCardOrPassport: "1-8901-23456-78-9",
+    nationality: "ไทย",
+    address: "C-208 แฟลตรุ่งเรือง",
+    note: "",
+    blacklist: false,
+    status: "ACTIVE",
+  },
+];
+
+export function rentalsByTenant(tenantName: string): RentalRow[] {
+  return RENTAL_ROWS.filter((r) => r.tenant === tenantName);
+}
+
+export function latestRentalByTenant(tenantName: string): RentalRow | undefined {
+  return rentalsByTenant(tenantName)[0];
+}
+
+// ---------- PAYMENT ACCOUNTS ----------
+export type AccountType = "รับผู้เช่า" | "จ่ายเจ้าของ" | "ส่วนตัว" | "เงินสด";
+export type AccountStatus = "ACTIVE" | "INACTIVE";
+
+export type PaymentAccountRecord = {
+  id: number;
+  accountName: string;
+  bankName: string;
+  accountNumber: string;
+  accountHolderName: string;
+  promptpayId: string;
+  accountType: AccountType;
+  status: AccountStatus;
+};
+
+export const ACCOUNT_TYPE_OPTIONS: AccountType[] = ["รับผู้เช่า", "จ่ายเจ้าของ", "ส่วนตัว", "เงินสด"];
+
+export const PAYMENT_ACCOUNTS: PaymentAccountRecord[] = [
+  {
+    id: 1,
+    accountName: "บัญชีรับเงินผู้เช่า",
+    bankName: "KBank",
+    accountNumber: "123-4-56789",
+    accountHolderName: "บจ. คริสตัล เลดเจอร์",
+    promptpayId: "088-123-4567",
+    accountType: "รับผู้เช่า",
+    status: "ACTIVE",
+  },
+  {
+    id: 2,
+    accountName: "บัญชีจ่ายเจ้าของ",
+    bankName: "KBank",
+    accountNumber: "123-4-56789",
+    accountHolderName: "บจ. คริสตัล เลดเจอร์",
+    promptpayId: "",
+    accountType: "จ่ายเจ้าของ",
+    status: "ACTIVE",
+  },
+  {
+    id: 3,
+    accountName: "PromptPay ธุรกิจ",
+    bankName: "",
+    accountNumber: "",
+    accountHolderName: "บจ. คริสตัล เลดเจอร์",
+    promptpayId: "088-123-4567",
+    accountType: "รับผู้เช่า",
+    status: "ACTIVE",
+  },
+  {
+    id: 4,
+    accountName: "เงินสดสำนักงาน",
+    bankName: "",
+    accountNumber: "",
+    accountHolderName: "",
+    promptpayId: "",
+    accountType: "เงินสด",
+    status: "ACTIVE",
+  },
+];
+
+// Matches by accountType/promptpayId/bankName rather than accountName — accountName is
+// free-text and "เงินสดสำนักงาน" !== "เงินสด", so name-equality would silently mis-bucket it.
+export function incomeRowsByChannel(account: PaymentAccountRecord): IncomeRow[] {
+  if (account.accountType === "เงินสด") return INCOME_ROWS.filter((r) => r.channel === "เงินสด");
+  if (account.promptpayId && !account.bankName) return INCOME_ROWS.filter((r) => r.channel === "PromptPay");
+  return INCOME_ROWS.filter((r) => r.channel === "โอนธนาคาร");
 }
