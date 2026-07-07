@@ -1,6 +1,7 @@
 "use client";
 
 import { badge } from "@/lib/theme";
+import { ImageUpload } from "@/components/shared/ImageUpload";
 import { ROOM_BADGE_KIND, ROOM_DRAWER_TABS, type Room } from "@/lib/mock";
 
 function statBox(bg: string, border: string, color: string, label: string, value: string) {
@@ -12,7 +13,17 @@ function statBox(bg: string, border: string, color: string, label: string, value
   );
 }
 
-export function RoomDrawer({ room, onClose }: { room: Room | null; onClose: () => void }) {
+export function RoomDrawer({
+  room,
+  onClose,
+  image,
+  onImageChange,
+}: {
+  room: Room | null;
+  onClose: () => void;
+  image: string | null;
+  onImageChange: (url: string | null) => void;
+}) {
   if (!room) return null;
 
   const net = (parseInt(room.income.replace(/\D/g, "")) || 0) - (parseInt(room.expense.replace(/\D/g, "")) || 0);
@@ -112,6 +123,7 @@ export function RoomDrawer({ room, onClose }: { room: Room | null; onClose: () =
         </div>
 
         <div style={{ flex: 1, overflowY: "auto", padding: "18px 22px 30px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <ImageUpload label="รูปห้อง" value={image} onChange={onImageChange} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {statBox("rgba(56,189,248,0.1)", "rgba(56,189,248,0.22)", "#7DD3FC", "รายรับเดือนนี้", room.income)}
             {statBox("rgba(251,113,133,0.08)", "rgba(251,113,133,0.18)", "#FDA4AF", "ค่าใช้จ่าย", room.expense)}

@@ -8,6 +8,21 @@ import { ROOMS, ROOM_FILTERS, ROOM_STATUS_COLOR, ROOM_BADGE_KIND, ROOM_PHOTO_BGS
 
 export default function RoomsPage() {
   const [selected, setSelected] = useState<number | null>(null);
+  // per-room photo, keyed by room number (in-memory, no backend)
+  const [roomImages, setRoomImages] = useState<Record<string, string>>({});
+
+  const selectedRoom = selected != null ? ROOMS[selected] : null;
+
+  function setRoomImage(roomNo: string, url: string | null) {
+    setRoomImages((m) => {
+      if (url === null) {
+        const next = { ...m };
+        delete next[roomNo];
+        return next;
+      }
+      return { ...m, [roomNo]: url };
+    });
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -80,6 +95,7 @@ export default function RoomsPage() {
               style={{
                 height: 104,
                 position: "relative",
+                overflow: "hidden",
                 background: ROOM_PHOTO_BGS[i % ROOM_PHOTO_BGS.length],
                 display: "flex",
                 alignItems: "flex-end",
@@ -87,17 +103,22 @@ export default function RoomsPage() {
                 padding: 12,
               }}
             >
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: "repeating-linear-gradient(135deg,rgba(255,255,255,0.05) 0 8px,transparent 8px 16px)",
-                }}
-              />
+              {roomImages[rm.no] ? (
+                // eslint-disable-next-line @next/next/no-img-element -- reason: in-memory object URL, not next/image-optimizable
+                <img src={roomImages[rm.no]} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "repeating-linear-gradient(135deg,rgba(255,255,255,0.05) 0 8px,transparent 8px 16px)",
+                  }}
+                />
+              )}
               <span style={{ position: "relative", fontFamily: "monospace", fontSize: 10.5, color: "rgba(234,242,255,0.5)" }}>
-                room photo
+                {roomImages[rm.no] ? "" : "room photo"}
               </span>
-              <span style={badge(ROOM_BADGE_KIND[rm.status])}>{rm.status}</span>
+              <span style={{ ...badge(ROOM_BADGE_KIND[rm.status]), position: "relative" }}>{rm.status}</span>
             </div>
             <div style={{ padding: "15px 16px 17px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -135,7 +156,12 @@ export default function RoomsPage() {
         ))}
       </div>
 
-      <RoomDrawer room={selected != null ? ROOMS[selected] : null} onClose={() => setSelected(null)} />
+      <RoomDrawer
+        room={selectedRoom}
+        image={selectedRoom ? roomImages[selectedRoom.no] ?? null : null}
+        onImageChange={(url) => selectedRoom && setRoomImage(selectedRoom.no, url)}
+        onClose={() => setSelected(null)}
+      />
     </div>
   );
 }

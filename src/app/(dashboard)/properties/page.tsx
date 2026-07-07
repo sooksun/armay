@@ -133,6 +133,7 @@ export default function PropertiesPage() {
                 style={{
                   height: 88,
                   position: "relative",
+                  overflow: "hidden",
                   background: "linear-gradient(135deg,#0e2a3a,#123)",
                   display: "flex",
                   alignItems: "flex-end",
@@ -140,9 +141,14 @@ export default function PropertiesPage() {
                   padding: 12,
                 }}
               >
-                <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(135deg,rgba(255,255,255,0.05) 0 8px,transparent 8px 16px)" }} />
-                <span style={{ position: "relative", fontFamily: "monospace", fontSize: 10.5, color: "rgba(234,242,255,0.5)" }}>property photo</span>
-                <span style={badge(p.status === "ACTIVE" ? "green" : "gray")}>{p.status === "ACTIVE" ? "ใช้งานอยู่" : "ปิดใช้งาน"}</span>
+                {p.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- reason: in-memory object URL, not next/image-optimizable
+                  <img src={p.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(135deg,rgba(255,255,255,0.05) 0 8px,transparent 8px 16px)" }} />
+                )}
+                <span style={{ position: "relative", fontFamily: "monospace", fontSize: 10.5, color: "rgba(234,242,255,0.5)" }}>{p.imageUrl ? "" : "property photo"}</span>
+                <span style={{ ...badge(p.status === "ACTIVE" ? "green" : "gray"), position: "relative" }}>{p.status === "ACTIVE" ? "ใช้งานอยู่" : "ปิดใช้งาน"}</span>
               </div>
               <div style={{ padding: "15px 16px 17px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

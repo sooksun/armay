@@ -53,6 +53,14 @@ export function PropertyDrawer({
 
       {tab === 0 ? (
         <>
+          {property.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- reason: in-memory object URL, not next/image-optimizable
+            <img
+              src={property.imageUrl}
+              alt={property.propertyName}
+              style={{ display: "block", width: "100%", height: 150, objectFit: "cover", borderRadius: 14, border: "1px solid rgba(255,255,255,0.12)" }}
+            />
+          ) : null}
           <InfoSection title="ข้อมูลอาคาร">
             <InfoRow k="ประเภทอาคาร" v={property.propertyType} />
             <InfoRow k="ที่อยู่" v={property.address} />
@@ -63,22 +71,40 @@ export function PropertyDrawer({
             <InfoRow k="เบอร์โทร" v={property.contactPhone} />
             {property.note ? <InfoRow k="หมายเหตุ" v={property.note} /> : null}
           </InfoSection>
-          <div
-            style={{
-              height: 100,
-              borderRadius: 14,
-              background: "repeating-linear-gradient(135deg,rgba(255,255,255,0.05) 0 8px,transparent 8px 16px)",
-              border: "1px solid rgba(255,255,255,0.09)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontFamily: "monospace",
-              fontSize: 11,
-              color: "rgba(234,242,255,0.4)",
-            }}
-          >
-            แผนที่ (placeholder)
-          </div>
+          <InfoSection title="พิกัด / แผนที่">
+            {property.latitude && property.longitude ? (
+              <>
+                <InfoRow k="ละติจูด" v={property.latitude} />
+                <InfoRow k="ลองจิจูด" v={property.longitude} />
+                <a
+                  href={`https://www.google.com/maps?q=${property.latitude},${property.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    marginTop: 12,
+                    padding: 11,
+                    borderRadius: 12,
+                    border: "1px solid rgba(255,255,255,0.28)",
+                    color: "#04121A",
+                    fontFamily: "inherit",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    textDecoration: "none",
+                    background: "linear-gradient(135deg,#5EEAD4,#38BDF8)",
+                    boxShadow: "0 6px 16px rgba(56,189,248,0.4)",
+                  }}
+                >
+                  เปิดใน Google Maps
+                </a>
+              </>
+            ) : (
+              <div style={{ fontSize: 13, color: "rgba(234,242,255,0.5)" }}>ยังไม่ได้ระบุพิกัด</div>
+            )}
+          </InfoSection>
         </>
       ) : null}
 

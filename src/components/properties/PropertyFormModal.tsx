@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { FormModal, FieldsGrid, TextField, TextAreaField, SelectField, ToggleField } from "@/components/shared/FormModal";
+import { ImageUpload } from "@/components/shared/ImageUpload";
 import { PROPERTY_TYPE_OPTIONS, type Property, type PropertyStatus } from "@/lib/mock";
 
 export type PropertyDraft = {
@@ -17,6 +18,9 @@ export type PropertyDraft = {
   note: string;
   monthlyIncome: number;
   status: PropertyStatus;
+  latitude: string;
+  longitude: string;
+  imageUrl: string | null;
 };
 
 const BLANK_DRAFT: PropertyDraft = {
@@ -31,6 +35,9 @@ const BLANK_DRAFT: PropertyDraft = {
   note: "",
   monthlyIncome: 0,
   status: "ACTIVE",
+  latitude: "",
+  longitude: "",
+  imageUrl: null,
 };
 
 export function PropertyFormModal({
@@ -62,6 +69,9 @@ export function PropertyFormModal({
             note: editing.note,
             monthlyIncome: editing.monthlyIncome,
             status: editing.status,
+            latitude: editing.latitude,
+            longitude: editing.longitude,
+            imageUrl: editing.imageUrl,
           }
         : BLANK_DRAFT
     );
@@ -101,6 +111,11 @@ export function PropertyFormModal({
         <TextField label="ผู้ติดต่ออาคาร" value={draft.contactName} onChange={(v) => setDraft({ ...draft, contactName: v })} />
         <TextField label="เบอร์โทร" value={draft.contactPhone} onChange={(v) => setDraft({ ...draft, contactPhone: v })} />
       </FieldsGrid>
+      <FieldsGrid>
+        <TextField label="ละติจูด (latitude)" value={draft.latitude} onChange={(v) => setDraft({ ...draft, latitude: v })} placeholder="13.7398" />
+        <TextField label="ลองจิจูด (longitude)" value={draft.longitude} onChange={(v) => setDraft({ ...draft, longitude: v })} placeholder="100.5804" />
+      </FieldsGrid>
+      <ImageUpload label="รูปอาคาร" value={draft.imageUrl} onChange={(url) => setDraft({ ...draft, imageUrl: url })} />
       <TextAreaField label="หมายเหตุ" value={draft.note} onChange={(v) => setDraft({ ...draft, note: v })} />
       <ToggleField
         label="สถานะการใช้งาน"

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { FormModal, FieldsGrid, TextField, SelectField, ToggleField } from "@/components/shared/FormModal";
+import { ImageUpload } from "@/components/shared/ImageUpload";
 import { ACCOUNT_TYPE_OPTIONS, type AccountType, type PaymentAccountRecord, type AccountStatus } from "@/lib/mock";
 
 export type AccountDraft = {
@@ -13,6 +14,7 @@ export type AccountDraft = {
   promptpayId: string;
   accountType: AccountType;
   status: AccountStatus;
+  qrUrl: string | null;
 };
 
 const BLANK_DRAFT: AccountDraft = {
@@ -23,6 +25,7 @@ const BLANK_DRAFT: AccountDraft = {
   promptpayId: "",
   accountType: ACCOUNT_TYPE_OPTIONS[0],
   status: "ACTIVE",
+  qrUrl: null,
 };
 
 export function AccountFormModal({
@@ -50,6 +53,7 @@ export function AccountFormModal({
             promptpayId: editing.promptpayId,
             accountType: editing.accountType,
             status: editing.status,
+            qrUrl: editing.qrUrl,
           }
         : BLANK_DRAFT
     );
@@ -78,25 +82,13 @@ export function AccountFormModal({
         <TextField label="ชื่อเจ้าของบัญชี" value={draft.accountHolderName} onChange={(v) => setDraft({ ...draft, accountHolderName: v })} />
         <TextField label="PromptPay ID" value={draft.promptpayId} onChange={(v) => setDraft({ ...draft, promptpayId: v })} />
       </FieldsGrid>
-      <div>
-        <div style={{ fontSize: 12, color: "rgba(234,242,255,0.6)", marginBottom: 6 }}>แนบ QR Code</div>
-        <div
-          style={{
-            padding: 22,
-            borderRadius: 14,
-            border: "1.5px dashed rgba(94,234,212,0.4)",
-            background: "rgba(94,234,212,0.05)",
-            textAlign: "center",
-            cursor: "pointer",
-          }}
-        >
-          <div style={{ color: "#7FF0D9", display: "flex", justifyContent: "center", marginBottom: 8 }}>
-            <Icon name="upload" size={26} />
-          </div>
-          <div style={{ fontSize: 13, fontWeight: 600 }}>ลากรูป QR มาวาง หรืออัปโหลด</div>
-          <div style={{ fontSize: 11.5, color: "rgba(234,242,255,0.5)", marginTop: 3 }}>รองรับ JPG, PNG</div>
-        </div>
-      </div>
+      <ImageUpload
+        label="แนบ QR Code"
+        aspect="square"
+        value={draft.qrUrl}
+        onChange={(url) => setDraft({ ...draft, qrUrl: url })}
+        hint="รองรับ JPG, PNG · แสดง preview ทันที"
+      />
       <ToggleField
         label="สถานะการใช้งาน"
         checked={draft.status === "ACTIVE"}
