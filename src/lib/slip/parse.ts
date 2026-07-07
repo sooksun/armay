@@ -96,16 +96,21 @@ export function parseSlipText(raw: string): SlipData {
  */
 export function refFromQrPayload(payload: string): string | undefined {
   const values: string[] = [];
-  function walk(s: string, depth: number) {
+  /** Fully parse `s` as TLV; push only leaf values. Returns false when not TLV-shaped. */
+  function walk(s: string, depth: number): boolean {
     let i = 0;
+    const children: string[] = [];
     while (i + 4 <= s.length) {
       const len = parseInt(s.slice(i + 2, i + 4), 10);
-      if (Number.isNaN(len) || i + 4 + len > s.length) return; // not TLV-shaped
-      const value = s.slice(i + 4, i + 4 + len);
-      values.push(value);
-      if (depth < 2) walk(value, depth + 1);
+      if (Number.isNaN(len) || i + 4 + len > s.length) return false;
+      children.push(s.slice(i + 4, i + 4 + len));
       i += 4 + len;
     }
+    if (i !== s.length) return false; // trailing junk -> not TLV
+    for (const v of children) {
+      if (depth >= 3 || !walk(v, depth + 1)) values.push(v); // leaf only
+    }
+    return true;
   }
   walk(payload, 1);
   const candidates = values
