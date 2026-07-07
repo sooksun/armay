@@ -1,7 +1,9 @@
 # syntax=docker/dockerfile:1
 # Next.js 16 (App Router, full-stack) + Prisma + MySQL — production image.
-# Multi-stage: install deps -> build standalone -> slim runner that runs
-# `prisma migrate deploy` on boot then serves on :3000.
+# Multi-stage: install deps -> build standalone -> slim runner that serves :3000.
+# Migrations/seed run in a SEPARATE service off the `build` stage (which keeps
+# the full node_modules incl. the prisma CLI). The runtime image only needs the
+# generated client + query engine, so it never carries the fragile CLI closure.
 
 # ---------- base ----------
 # bookworm-slim => OpenSSL 3.0.x, matches prisma binaryTarget debian-openssl-3.0.x
@@ -19,12 +21,14 @@ COPY prisma ./prisma
 RUN npm ci
 RUN npx prisma generate
 
-# ---------- build (produces .next/standalone) ----------
+# ---------- build (produces .next/standalone; keeps full node_modules) ----------
+# Also the image used by the `migrate` and `seed` compose services — it has the
+# prisma CLI + tsx + every transitive dep, so migrate/seed can never miss a module.
 FROM deps AS build
 COPY . .
 RUN npm run build
 
-# ---------- runner (slim) ----------
+# ---------- runner (slim; serves only) ----------
 FROM base AS runner
 ENV NODE_ENV=production
 ENV PORT=3000
@@ -37,25 +41,16 @@ COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
 
-# Prisma bits needed at runtime: schema + migrations (for `migrate deploy`),
-# the CLI, the schema/query engines, and the generated client (overlay onto the
-# standalone node_modules so the trace can never miss the engine binary).
-COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/node_modules/prisma ./node_modules/prisma
-COPY --from=build /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
-COPY --from=build /app/node_modules/@prisma/engines-version ./node_modules/@prisma/engines-version
+# Overlay the generated client + query engine so the runtime trace can never
+# miss the engine binary. (No prisma CLI here — migrations run elsewhere.)
 COPY --from=build /app/node_modules/@prisma/client ./node_modules/@prisma/client
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 
-COPY docker-entrypoint.sh ./docker-entrypoint.sh
-RUN chmod +x ./docker-entrypoint.sh \
-  && mkdir -p /app/uploads \
-  && chown -R nextjs:nodejs /app
+RUN mkdir -p /app/uploads && chown -R nextjs:nodejs /app
 
 USER nextjs
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["node", "server.js"]

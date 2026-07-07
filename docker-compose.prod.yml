@@ -3,10 +3,27 @@
 # the external MariaDB on the host LAN. No DB service here (would collide with
 # the host's :3306). Deploy path on the server: /DATA/AppData/www/armay
 #
-#   docker compose -f docker-compose.prod.yml up -d --build          # start
+#   docker compose -f docker-compose.prod.yml up -d --build          # migrate + start
 #   docker compose -f docker-compose.prod.yml --profile seed run --rm seed
 #   docker compose -f docker-compose.prod.yml logs -f web
 services:
+  # Applies pending migrations, then exits. Runs on `up` before web starts.
+  # Uses the build stage (full node_modules incl. the prisma CLI + all deps),
+  # so `migrate deploy` can never miss a transitive module.
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
+    command: ["npx", "prisma", "migrate", "deploy"]
+    env_file:
+      - .env.production
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - armay-net
+    restart: "no"
+
   web:
     build:
       context: .
@@ -14,6 +31,9 @@ services:
     image: armay-web:latest
     container_name: armay-web
     restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     env_file:
       - .env.production
     ports:
@@ -25,8 +45,8 @@ services:
     networks:
       - armay-net
 
-  # One-off seeder (admin user + demo data). Runs the build stage, which still
-  # has tsx + the prisma CLI. Use ONCE on a fresh DB:
+  # One-off seeder (admin user + demo data). Reuses the build stage (has tsx).
+  # Destructive: wipes then reseeds — run ONCE on a fresh DB.
   #   docker compose -f docker-compose.prod.yml --profile seed run --rm seed
   seed:
     build:

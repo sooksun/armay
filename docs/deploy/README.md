@@ -48,8 +48,8 @@ cp .env.production.example .env.production
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
-บน boot container จะรัน `prisma migrate deploy` เอง (สร้าง/อัปเดตตาราง) แล้วเสิร์ฟที่ `:3000` (map เป็น `9960` บนโฮสต์)
-ถ้า DB ต่อไม่ได้ container จะ exit แล้ว restart เอง (จะได้ไม่เสิร์ฟบน schema ที่ยังไม่ migrate)
+ตอน `up` service `migrate` จะรัน `prisma migrate deploy` ให้ก่อน (จาก build image ที่มี prisma CLI + deps ครบ) แล้ว `web` ถึงจะ start เสิร์ฟที่ `:3000` (map เป็น `9960` บนโฮสต์)
+ถ้า migrate ล้มเหลว (เช่น DB ต่อไม่ได้/รหัสผิด) `web` จะไม่ start — ดู log ด้วย `docker compose -f docker-compose.prod.yml logs migrate`
 
 ## 4. Seed ข้อมูลเริ่มต้น (ครั้งเดียว บน DB ว่าง)
 
@@ -90,8 +90,8 @@ docker compose -f docker-compose.prod.yml logs -f web
 # recreate เฉพาะ web
 docker compose -f docker-compose.prod.yml up -d --force-recreate web
 
-# รัน migration เอง (ปกติ auto บน boot อยู่แล้ว)
-docker compose -f docker-compose.prod.yml exec web node node_modules/prisma/build/index.js migrate deploy
+# รัน migration เอง (ปกติ auto ตอน up อยู่แล้ว)
+docker compose -f docker-compose.prod.yml run --rm migrate
 
 # หยุด
 docker compose -f docker-compose.prod.yml down
