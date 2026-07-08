@@ -135,6 +135,23 @@ export type RoomDTO = {
   imageUrl: string | null;
 };
 
+export type ServiceTaskDTO = {
+  id: number;
+  type: string; // Thai label ของ expenseType
+  typeBadge: BadgeKind;
+  title: string;
+  room: string;
+  building: string;
+  assignee: string;
+  cost: string; // "฿1,300" หรือ "฿—" เมื่อ 0
+  color: string; // สีตาม serviceStatus
+  photos: boolean;
+  serviceStatus: string; // enum value
+};
+
+export type ServiceColumnDTO = { title: string; status: string; color: string; tasks: ServiceTaskDTO[] };
+export type ServiceBoardDTO = ServiceColumnDTO[];
+
 // ---------- TRANSACTIONS (read models) ----------
 
 export type IncomeDTO = {
