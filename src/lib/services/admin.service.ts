@@ -218,20 +218,44 @@ async function generateBatch(tx: Tx, adminId: number | null): Promise<DemoCounts
   return c;
 }
 
-/** Add one batch of demo data without touching existing rows. */
-export async function addDemoData(session: Session): Promise<DemoCounts> {
+const EMPTY: DemoCounts = { owners: 0, properties: 0, rooms: 0, tenants: 0, contracts: 0, incomes: 0, expenses: 0, payouts: 0 };
+const addCounts = (a: DemoCounts, b: DemoCounts): DemoCounts => ({
+  owners: a.owners + b.owners,
+  properties: a.properties + b.properties,
+  rooms: a.rooms + b.rooms,
+  tenants: a.tenants + b.tenants,
+  contracts: a.contracts + b.contracts,
+  incomes: a.incomes + b.incomes,
+  expenses: a.expenses + b.expenses,
+  payouts: a.payouts + b.payouts,
+});
+const clampBatches = (n: number) => Math.min(Math.max(Math.floor(n) || 1, 1), 10);
+
+async function runBatches(tx: Tx, adminId: number | null, batches: number): Promise<DemoCounts> {
+  let total = EMPTY;
+  for (let i = 0; i < batches; i++) total = addCounts(total, await generateBatch(tx, adminId));
+  return total;
+}
+
+/**
+ * Add demo data without touching existing rows. One click seeds `batches`
+ * coherent sets (default 3 ≈ a full trial dataset); click again for more.
+ */
+export async function addDemoData(session: Session, batches = 3): Promise<DemoCounts> {
+  const n = clampBatches(batches);
   return prisma.$transaction(
     async (tx) => {
-      const counts = await generateBatch(tx, session.userId);
+      const counts = await runBatches(tx, session.userId, n);
       await writeAudit({ userId: session.userId, action: "CREATE", tableName: "demo_data", newValue: counts }, tx);
       return counts;
     },
-    { timeout: 30000 }
+    { timeout: 120000 }
   );
 }
 
-/** Wipe all business data (users + payment accounts kept), then seed one fresh batch. */
-export async function resetData(session: Session): Promise<DemoCounts> {
+/** Wipe all business data (users + payment accounts kept), then seed a fresh trial set. */
+export async function resetData(session: Session, batches = 3): Promise<DemoCounts> {
+  const n = clampBatches(batches);
   return prisma.$transaction(
     async (tx) => {
       await tx.payoutItem.deleteMany();
@@ -245,10 +269,10 @@ export async function resetData(session: Session): Promise<DemoCounts> {
       await tx.owner.deleteMany();
       await tx.codeSequence.deleteMany();
       await tx.auditLog.deleteMany();
-      const counts = await generateBatch(tx, session.userId);
+      const counts = await runBatches(tx, session.userId, n);
       await writeAudit({ userId: session.userId, action: "DELETE", tableName: "reset_data", newValue: counts }, tx);
       return counts;
     },
-    { timeout: 60000 }
+    { timeout: 120000 }
   );
 }
