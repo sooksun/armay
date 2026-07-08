@@ -4,11 +4,22 @@ import { generateCode } from "@/lib/codegen";
 import { writeAudit } from "@/lib/services/audit.service";
 import { decToNumber, fmtTHB } from "@/lib/money";
 import { formatBEDate } from "@/lib/date";
-import { EXPENSE_TYPE, RESPONSIBILITY, VERIFICATION_STATUS, VERIFICATION_BADGE, fromThai } from "@/lib/labels";
+import {
+  EXPENSE_TYPE,
+  RESPONSIBILITY,
+  VERIFICATION_STATUS,
+  VERIFICATION_BADGE,
+  fromThai,
+  SERVICE_STATUS,
+  SERVICE_STATUS_ORDER,
+  SERVICE_STATUS_COLOR,
+  SERVICE_TYPE_BADGE,
+} from "@/lib/labels";
 import { ApiError } from "@/lib/api/response";
 import type { Session } from "@/lib/auth/session";
-import type { ExpenseDTO, ExpenseListDTO, ExpenseSummaryDTO } from "@/lib/api-types";
+import type { ExpenseDTO, ExpenseListDTO, ExpenseSummaryDTO, ServiceBoardDTO, ServiceTaskDTO } from "@/lib/api-types";
 import type { ExpenseCreateInput, ExpenseUpdateInput } from "@/lib/validation/expense.schema";
+import type { ServiceTaskCreateInput, ServiceStatusUpdateInput } from "@/lib/validation/service-task.schema";
 
 const INCLUDE = { room: true, property: true } satisfies Prisma.ExpenseTransactionInclude;
 type ExpenseWithRelations = Prisma.ExpenseTransactionGetPayload<{ include: typeof INCLUDE }>;
@@ -62,7 +73,7 @@ function summarize(rows: ExpenseWithRelations[]): ExpenseSummaryDTO {
   let pendingReview = 0;
   let problem = 0;
   for (const t of rows) {
-    if (t.verificationStatus === "CANCELLED") continue; // never count cancelled in summary totals
+    if (t.verificationStatus === "CANCELLED" || t.verificationStatus === "DRAFT") continue; // ร่าง/ยกเลิก ไม่นับในยอดรวม
     const amt = decToNumber(t.amount);
     const d = t.expenseDate;
     if (`${d.getUTCFullYear()}-${d.getUTCMonth()}` === monthKey) month += amt;
@@ -142,4 +153,82 @@ export async function deleteExpense(id: number, session: Session): Promise<boole
   await prisma.expenseTransaction.delete({ where: { id } });
   await writeAudit({ userId: session.userId, action: "DELETE", tableName: "expense_transactions", recordId: id });
   return true;
+}
+
+// ---------- SERVICE BOARD (งานแม่บ้าน/งานซ่อม) ----------
+
+function toServiceTaskDTO(t: ExpenseWithRelations): ServiceTaskDTO {
+  const status = t.serviceStatus ?? "NEW";
+  const amt = decToNumber(t.amount);
+  return {
+    id: t.id,
+    type: EXPENSE_TYPE[t.expenseType] ?? t.expenseType,
+    typeBadge: SERVICE_TYPE_BADGE[t.expenseType] ?? "gray",
+    title: t.description ?? "",
+    room: t.room.roomNumber,
+    building: t.property?.propertyName ?? "",
+    assignee: t.payeeName ?? "",
+    cost: amt > 0 ? fmtTHB(amt) : "฿—",
+    color: SERVICE_STATUS_COLOR[status] ?? "#94A3B8",
+    photos: Boolean(t.beforeImageUrl || t.afterImageUrl),
+    serviceStatus: status,
+  };
+}
+
+export async function listServiceBoard(): Promise<ServiceBoardDTO> {
+  const rows = await prisma.expenseTransaction.findMany({
+    where: { serviceStatus: { not: null } },
+    orderBy: { updatedAt: "desc" },
+    include: INCLUDE,
+  });
+  return SERVICE_STATUS_ORDER.map((status) => ({
+    title: SERVICE_STATUS[status],
+    status,
+    color: SERVICE_STATUS_COLOR[status],
+    tasks: rows.filter((r) => r.serviceStatus === status).map(toServiceTaskDTO),
+  }));
+}
+
+export async function createServiceTask(input: ServiceTaskCreateInput, session: Session): Promise<number> {
+  const room = await resolveRoom(input.room);
+  const expenseCode = await generateCode("EXPENSE", "EXP");
+  const created = await prisma.expenseTransaction.create({
+    data: {
+      expenseCode,
+      expenseDate: new Date(),
+      roomId: room.id,
+      ownerId: room.ownerId,
+      propertyId: room.propertyId,
+      expenseType: input.expenseType,
+      description: input.title,
+      payeeName: input.payeeName || null,
+      amount: input.amount,
+      paymentMethod: "CASH",
+      responsibilityType: "BROKER",
+      verificationStatus: "DRAFT",
+      serviceStatus: "NEW",
+    },
+  });
+  await writeAudit({ userId: session.userId, action: "CREATE", tableName: "expense_transactions", recordId: created.id, newValue: input });
+  return created.id;
+}
+
+export async function updateServiceStatus(
+  id: number,
+  status: ServiceStatusUpdateInput["serviceStatus"],
+  session: Session
+): Promise<number> {
+  const existing = await prisma.expenseTransaction.findUnique({ where: { id } });
+  if (!existing) throw new ApiError("NOT_FOUND", "ไม่พบงานนี้", 404);
+  if (existing.serviceStatus === null) throw new ApiError("NOT_A_SERVICE_TASK", "รายการนี้ไม่ใช่งานบนบอร์ด", 400);
+  await prisma.expenseTransaction.update({ where: { id }, data: { serviceStatus: status } });
+  await writeAudit({
+    userId: session.userId,
+    action: "UPDATE",
+    tableName: "expense_transactions",
+    recordId: id,
+    oldValue: { serviceStatus: existing.serviceStatus },
+    newValue: { serviceStatus: status },
+  });
+  return id;
 }
