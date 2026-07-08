@@ -51,6 +51,8 @@ docker compose -f docker-compose.prod.yml up -d --build
 ตอน `up` service `migrate` จะรัน `prisma migrate deploy` ให้ก่อน (จาก build image ที่มี prisma CLI + deps ครบ) แล้ว `web` ถึงจะ start เสิร์ฟที่ `:3000` (map เป็น `9960` บนโฮสต์)
 ถ้า migrate ล้มเหลว (เช่น DB ต่อไม่ได้/รหัสผิด) `web` จะไม่ start — ดู log ด้วย `docker compose -f docker-compose.prod.yml logs migrate`
 
+> **เข้าผ่าน HTTP (ยังไม่มี SSL)?** ต้องตั้ง `SESSION_COOKIE_SECURE="false"` ใน `.env.production` ไม่งั้น login จะเด้งกลับ (browser ทิ้ง Secure cookie บน HTTP) เมื่อวาง NPM + HTTPS แล้วให้ลบบรรทัดนี้ออก (cookie จะ Secure ตามปกติ)
+
 ## 4. Seed ข้อมูลเริ่มต้น (ครั้งเดียว บน DB ว่าง)
 
 สร้าง admin + demo data (`admin@armay.local` / `owner123!`):

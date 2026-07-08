@@ -48,6 +48,18 @@ export async function getSession(): Promise<Session | null> {
   return verifySessionToken(store.get(COOKIE)?.value);
 }
 
+/**
+ * Cookie `Secure` flag. Defaults on in production, but overridable via
+ * SESSION_COOKIE_SECURE so an HTTP-only LAN deploy (no TLS in front) can still
+ * hold the session cookie. Behind an HTTPS reverse proxy, leave it unset/true.
+ */
+function cookieSecure(): boolean {
+  const v = process.env.SESSION_COOKIE_SECURE;
+  if (v === "true") return true;
+  if (v === "false") return false;
+  return process.env.NODE_ENV === "production";
+}
+
 export async function setSessionCookie(token: string): Promise<void> {
   const store = await cookies();
   store.set(COOKIE, token, {
@@ -55,7 +67,7 @@ export async function setSessionCookie(token: string): Promise<void> {
     sameSite: "lax",
     path: "/",
     maxAge: MAX_AGE,
-    secure: process.env.NODE_ENV === "production",
+    secure: cookieSecure(),
   });
 }
 
