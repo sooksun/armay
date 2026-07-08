@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { FormModal, FieldsGrid, TextField, TextAreaField, SelectField } from "@/components/shared/FormModal";
 import { ImageUpload } from "@/components/shared/ImageUpload";
+import { GoogleMapPicker } from "@/components/shared/GoogleMapPicker";
 import { ROOM_STATUS } from "@/lib/labels";
 import { apiGet } from "@/lib/api-client";
 import type { RoomDTO, PropertyDTO, OwnerDTO } from "@/lib/api-types";
@@ -18,6 +19,8 @@ export type RoomDraft = {
   roomNumber: string;
   floor: string;
   roomType: string;
+  latitude: string;
+  longitude: string;
   roomSize: string;
   defaultRentPrice: string;
   defaultDeposit: string;
@@ -35,6 +38,8 @@ function blankDraft(): RoomDraft {
     roomNumber: "",
     floor: "",
     roomType: "",
+    latitude: "",
+    longitude: "",
     roomSize: "",
     defaultRentPrice: "",
     defaultDeposit: "",
@@ -71,6 +76,7 @@ export function RoomFormModal({
   const [draft, setDraft] = useState<RoomDraft>(blankDraft);
   const [properties, setProperties] = useState<PropertyDTO[]>([]);
   const [owners, setOwners] = useState<OwnerDTO[]>([]);
+  const [locating, setLocating] = useState(false);
   const lastAutoOwner = useRef("");
   const lastAutoFloor = useRef("");
   const lastAutoDeposit = useRef("");
@@ -99,6 +105,8 @@ export function RoomFormModal({
             roomNumber: editing.no,
             floor: editing.floor,
             roomType: editing.roomType,
+            latitude: editing.latitude,
+            longitude: editing.longitude,
             roomSize: editing.roomSize,
             defaultRentPrice: editing.rentValue ? String(editing.rentValue) : "",
             defaultDeposit: editing.depositValue ? String(editing.depositValue) : "",
@@ -116,6 +124,26 @@ export function RoomFormModal({
   const ownerOptions = [{ value: "", label: "— เลือกเจ้าของ —" }, ...owners.map((o) => ({ value: String(o.id), label: `${o.fullName} · ${o.ownerCode}` }))];
 
   const set = (patch: Partial<RoomDraft>) => setDraft((d) => ({ ...d, ...patch }));
+
+  /** auto: fill lat/long from the device's current position */
+  function useCurrentLocation() {
+    if (!navigator.geolocation) {
+      alert("เบราว์เซอร์นี้ไม่รองรับการอ่านพิกัด");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        set({ latitude: pos.coords.latitude.toFixed(7), longitude: pos.coords.longitude.toFixed(7) });
+        setLocating(false);
+      },
+      (err) => {
+        alert(`อ่านพิกัดไม่สำเร็จ: ${err.message}`);
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
 
   /** auto: choosing a property fills the owner from another room in that same property */
   function handlePropertyChange(v: string) {
@@ -182,6 +210,40 @@ export function RoomFormModal({
         <TextField label="ค่านายหน้า/เดือน (บาท)" value={draft.defaultCommission} onChange={(v) => set({ defaultCommission: digits(v) })} placeholder="0" />
       </FieldsGrid>
       <SelectField label="สถานะห้อง" value={draft.status} onChange={(v) => set({ status: v as RoomStatus })} options={STATUS_OPTIONS} />
+      <FieldsGrid>
+        <TextField label="ละติจูด (latitude)" value={draft.latitude} onChange={(v) => set({ latitude: v })} placeholder="13.7398" />
+        <TextField label="ลองจิจูด (longitude)" value={draft.longitude} onChange={(v) => set({ longitude: v })} placeholder="100.5804" />
+      </FieldsGrid>
+      <button
+        type="button"
+        onClick={useCurrentLocation}
+        disabled={locating}
+        style={{
+          alignSelf: "flex-start",
+          display: "flex",
+          alignItems: "center",
+          gap: 7,
+          padding: "9px 14px",
+          borderRadius: 11,
+          border: "1px solid rgba(94,234,212,0.4)",
+          background: "rgba(94,234,212,0.08)",
+          color: "var(--text)",
+          fontFamily: "inherit",
+          fontSize: 12.5,
+          fontWeight: 600,
+          cursor: locating ? "wait" : "pointer",
+        }}
+      >
+        <span style={{ color: "var(--pos)", display: "flex" }}>
+          <Icon name="search" size={15} />
+        </span>
+        {locating ? "กำลังอ่านพิกัด…" : "ใช้พิกัดปัจจุบันของเครื่อง"}
+      </button>
+      <GoogleMapPicker
+        lat={draft.latitude}
+        lng={draft.longitude}
+        onPick={(latitude, longitude) => set({ latitude, longitude })}
+      />
       <ImageUpload label="รูปห้อง" value={draft.imageUrl} onChange={(url) => set({ imageUrl: url })} />
       <TextAreaField label="หมายเหตุ" value={draft.note} onChange={(v) => set({ note: v })} />
     </FormModal>

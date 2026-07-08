@@ -58,6 +58,8 @@ function toDTO(r: RoomWithRelations): RoomDTO {
     ownerId: r.ownerId,
     floor: r.floor ?? "",
     roomType: r.roomType ?? "",
+    latitude: r.latitude?.toString() ?? "",
+    longitude: r.longitude?.toString() ?? "",
     roomSize: size,
     rentValue: decToNumber(r.defaultRentPrice),
     depositValue: decToNumber(r.defaultDeposit),
@@ -91,6 +93,8 @@ function writeData(input: RoomCreateInput) {
     roomNumber: input.roomNumber,
     floor: input.floor || null,
     roomType: input.roomType || null,
+    latitude: input.latitude ? input.latitude : null,
+    longitude: input.longitude ? input.longitude : null,
     roomSize: input.roomSize,
     defaultRentPrice: input.defaultRentPrice,
     defaultDeposit: input.defaultDeposit,
@@ -133,6 +137,8 @@ export async function patchRoom(id: number, input: RoomUpdateInput, session: Ses
   if (input.roomNumber != null) data.roomNumber = input.roomNumber;
   if (input.floor != null) data.floor = input.floor || null;
   if (input.roomType != null) data.roomType = input.roomType || null;
+  if (input.latitude !== undefined) data.latitude = input.latitude ? input.latitude : null;
+  if (input.longitude !== undefined) data.longitude = input.longitude ? input.longitude : null;
   if (input.roomSize !== undefined) data.roomSize = input.roomSize;
   if (input.defaultRentPrice != null) data.defaultRentPrice = input.defaultRentPrice;
   if (input.defaultDeposit != null) data.defaultDeposit = input.defaultDeposit;

@@ -221,6 +221,8 @@ model Room {
   floor              String?
   roomSize           Decimal?   @map("room_size") @db.Decimal(8, 2)
   roomType           String?    @map("room_type")
+  latitude           Decimal?   @db.Decimal(10, 7)
+  longitude          Decimal?   @db.Decimal(10, 7)
   defaultRentPrice   Decimal    @default(0) @map("default_rent_price") @db.Decimal(12, 2)
   defaultDeposit     Decimal    @default(0) @map("default_deposit") @db.Decimal(12, 2)
   defaultCleaningFee Decimal    @default(0) @map("default_cleaning_fee") @db.Decimal(12, 2)

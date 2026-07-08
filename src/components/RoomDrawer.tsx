@@ -125,6 +125,42 @@ export function RoomDrawer({
             ))}
           </div>
 
+          {room.latitude && room.longitude ? (
+            <div style={{ padding: 16, borderRadius: 16, background: "rgba(var(--surface-rgb),0.04)", border: "1px solid rgba(var(--surface-rgb),0.09)" }}>
+              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>พิกัด / แผนที่</div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid rgba(var(--surface-rgb),0.06)", fontSize: 13 }}>
+                <span style={{ color: "rgba(var(--text-rgb),0.55)" }}>ละติจูด</span>
+                <span style={{ fontWeight: 600 }}>{room.latitude}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", fontSize: 13 }}>
+                <span style={{ color: "rgba(var(--text-rgb),0.55)" }}>ลองจิจูด</span>
+                <span style={{ fontWeight: 600 }}>{room.longitude}</span>
+              </div>
+              <a
+                href={`https://www.google.com/maps?q=${room.latitude},${room.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  marginTop: 10,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 7,
+                  padding: "9px 14px",
+                  borderRadius: 11,
+                  border: "1px solid rgba(56,189,248,0.4)",
+                  background: "rgba(56,189,248,0.08)",
+                  color: "var(--text)",
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  textDecoration: "none",
+                }}
+              >
+                <Icon name="search" size={15} />
+                เปิดใน Google Maps
+              </a>
+            </div>
+          ) : null}
+
           {room.note ? (
             <div style={{ padding: 16, borderRadius: 16, background: "rgba(var(--surface-rgb),0.04)", border: "1px solid rgba(var(--surface-rgb),0.09)" }}>
               <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>หมายเหตุ</div>

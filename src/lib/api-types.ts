@@ -123,6 +123,8 @@ export type RoomDTO = {
   ownerId: number;
   floor: string;
   roomType: string;
+  latitude: string;
+  longitude: string;
   roomSize: string; // digits, "" when unset
   rentValue: number;
   depositValue: number;
