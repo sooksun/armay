@@ -100,7 +100,9 @@ export async function approvePayout(id: number, session: Session): Promise<numbe
 export async function deletePayout(id: number, session: Session): Promise<boolean> {
   const p = await prisma.ownerPayout.findUnique({ where: { id } });
   if (!p) throw new ApiError("NOT_FOUND", "ไม่พบรายการจ่ายเจ้าของนี้", 404);
-  if (p.payoutStatus === "PAID") throw new ApiError("PAID_LOCK", "ลบไม่ได้ — รายการที่จ่ายแล้วต้องเก็บไว้เป็นหลักฐาน", 409);
+  // any disbursed amount (PAID or PARTIAL) must be kept as a record of money already sent
+  if (decToNumber(p.paidAmount) > 0)
+    throw new ApiError("PAID_LOCK", "ลบไม่ได้ — มีการจ่ายเงินให้เจ้าของไปแล้ว ต้องเก็บไว้เป็นหลักฐาน", 409);
   await prisma.ownerPayout.delete({ where: { id } }); // payout_items cascade-delete, freeing their expense sources
   await writeAudit({ userId: session.userId, action: "DELETE", tableName: "owner_payouts", recordId: id });
   return true;

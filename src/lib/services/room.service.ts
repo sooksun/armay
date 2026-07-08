@@ -110,20 +110,23 @@ export async function createRoom(input: RoomCreateInput, session: Session): Prom
   return created.id;
 }
 
-export async function updateRoom(id: number, input: RoomCreateInput, session: Session): Promise<number> {
-  const existing = await prisma.room.findUnique({ where: { id } });
-  if (!existing) throw new ApiError("NOT_FOUND", "ไม่พบห้องนี้", 404);
-  await assertRefs(input.propertyId, input.ownerId);
-  await prisma.room.update({ where: { id }, data: writeData(input) });
-  await writeAudit({ userId: session.userId, action: "UPDATE", tableName: "rooms", recordId: id, oldValue: existing, newValue: input });
-  return id;
-}
-
-/** Partial patch — used for lightweight updates such as persisting a room photo. */
+/**
+ * Merge-patch a room: only keys present in `input` are written; absent keys keep
+ * their current value. Both the full edit form (all keys present) and a lightweight
+ * patch (e.g. only `imageUrl`) go through here — the update schema carries NO field
+ * defaults, so absence is meaningful. Each FK is validated only when it is being changed.
+ */
 export async function patchRoom(id: number, input: RoomUpdateInput, session: Session): Promise<number> {
   const existing = await prisma.room.findUnique({ where: { id } });
   if (!existing) throw new ApiError("NOT_FOUND", "ไม่พบห้องนี้", 404);
-  if (input.propertyId != null && input.ownerId != null) await assertRefs(input.propertyId, input.ownerId);
+  if (input.propertyId != null) {
+    const property = await prisma.property.findUnique({ where: { id: input.propertyId } });
+    if (!property) throw new ApiError("PROPERTY_NOT_FOUND", "ไม่พบอาคาร/โครงการที่เลือก", 400);
+  }
+  if (input.ownerId != null) {
+    const owner = await prisma.owner.findUnique({ where: { id: input.ownerId } });
+    if (!owner) throw new ApiError("OWNER_NOT_FOUND", "ไม่พบเจ้าของที่เลือก", 400);
+  }
   const data: Prisma.RoomUncheckedUpdateInput = {};
   if (input.propertyId != null) data.propertyId = input.propertyId;
   if (input.ownerId != null) data.ownerId = input.ownerId;

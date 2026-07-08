@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FieldsGrid, SelectField, TextField, TextAreaField } from "@/components/shared/FormModal";
-import { fmtTHB, parseAmount } from "@/lib/theme";
+import { fmtTHB } from "@/lib/theme";
 import { todayBEDate, parseThaiBEDate, formatBEDate } from "@/lib/date";
 import { apiGet, apiSend } from "@/lib/api-client";
 import type { TenantDTO, RoomDTO, RentalDetailDTO } from "@/lib/api-types";
@@ -59,6 +59,8 @@ function blankDraft(): RentalDraft {
 
 const num = (s: string) => Number(s || "0") || 0;
 
+const numStr = (n: number) => (n ? String(n) : "");
+
 function draftFromDetail(d: RentalDetailDTO): RentalDraft {
   return {
     tenantId: String(d.tenantId),
@@ -66,11 +68,12 @@ function draftFromDetail(d: RentalDetailDTO): RentalDraft {
     rentalType: d.rentalTypeValue,
     startDate: d.startDate,
     endDate: d.endDate,
-    rentAmount: String(parseAmount(d.rent)),
-    depositAmount: String(parseAmount(d.deposit)),
-    cleaningFee: String(parseAmount(d.cleaningFee)),
-    otherFee: String(parseAmount(d.otherFee)),
-    discountAmount: String(parseAmount(d.discount)),
+    // use raw numeric values — parsing fmtTHB() strings drops the decimal point (e.g. ฿12,500.50 → 1250050)
+    rentAmount: numStr(d.rentValue),
+    depositAmount: numStr(d.depositValue),
+    cleaningFee: numStr(d.cleaningValue),
+    otherFee: numStr(d.otherValue),
+    discountAmount: numStr(d.discountValue),
     bookingChannel: d.bookingChannel,
     note: d.note,
   };
@@ -119,7 +122,7 @@ export function RentalCreateForm({
     const rm = rooms.find((r) => String(r.id) === v);
     setDraft((prev) => {
       const next = { ...prev, roomId: v };
-      const rent = rm ? parseAmount(rm.rent) : 0;
+      const rent = rm ? rm.rentValue : 0;
       const untouched = prev.rentAmount === "" || prev.rentAmount === lastAutoRent.current;
       if (rent > 0 && untouched) {
         next.rentAmount = String(rent);

@@ -135,29 +135,31 @@ export function IncomeDrawer({
               >
                 ลบรายการ
               </button>
-              <button
-                onClick={() => onEdit(detail.id)}
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 7,
-                  padding: 12,
-                  borderRadius: 13,
-                  border: "1px solid rgba(var(--surface-rgb),0.28)",
-                  color: "#04121A",
-                  fontFamily: "inherit",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  background: "linear-gradient(135deg,#5EEAD4,#38BDF8)",
-                  boxShadow: "0 6px 16px rgba(56,189,248,0.4)",
-                }}
-              >
-                <Icon name="settings" size={15} />
-                แก้ไขรายการ
-              </button>
+              {detail.verificationStatus !== "CANCELLED" ? (
+                <button
+                  onClick={() => onEdit(detail.id)}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 7,
+                    padding: 12,
+                    borderRadius: 13,
+                    border: "1px solid rgba(var(--surface-rgb),0.28)",
+                    color: "#04121A",
+                    fontFamily: "inherit",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    background: "linear-gradient(135deg,#5EEAD4,#38BDF8)",
+                    boxShadow: "0 6px 16px rgba(56,189,248,0.4)",
+                  }}
+                >
+                  <Icon name="settings" size={15} />
+                  แก้ไขรายการ
+                </button>
+              ) : null}
             </div>
           )}
         </>

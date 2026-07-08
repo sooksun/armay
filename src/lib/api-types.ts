@@ -218,10 +218,15 @@ export type RentalDetailDTO = {
   building: string;
   owner: string;
   rentalType: string; // Thai label
-  // raw editable fields (for the edit form prefill)
+  // raw editable fields (for the edit form prefill — avoid parsing formatted money)
   tenantId: number;
   roomId: number;
   rentalTypeValue: "DAILY" | "MONTHLY" | "YEARLY";
+  rentValue: number;
+  depositValue: number;
+  cleaningValue: number;
+  otherValue: number;
+  discountValue: number;
   period: string;
   startDate: string;
   endDate: string;

@@ -164,6 +164,9 @@ export async function updateIncome(id: number, input: IncomeUpdateInput, session
   const existing = await prisma.incomeTransaction.findUnique({ where: { id } });
   if (!existing) throw new ApiError("NOT_FOUND", "ไม่พบรายการรับเงินนี้", 404);
   assertMutable(existing.verificationStatus);
+  // a cancelled income is terminal — editing would resurrect it into dashboard/report totals
+  if (existing.verificationStatus === "CANCELLED")
+    throw new ApiError("CANCELLED", "รายการที่ยกเลิกแล้วแก้ไขไม่ได้ — สร้างรายการใหม่แทน", 409);
 
   const contract = await prisma.rentalContract.findUnique({ where: { id: input.contractId } });
   if (!contract) throw new ApiError("CONTRACT_NOT_FOUND", "ไม่พบรายการเช่าที่เลือก", 400);

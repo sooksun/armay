@@ -39,6 +39,7 @@ export function PayoutDrawer({
   if (payoutId == null) return null;
 
   const isPaid = detail?.statusValue === "PAID";
+  const isPartial = detail?.statusValue === "PARTIAL";
   const isCancelled = detail?.statusValue === "CANCELLED";
 
   async function handleApprove() {
@@ -136,25 +137,27 @@ export function PayoutDrawer({
             </div>
           ) : (
             <div style={{ display: "flex", gap: 10 }}>
-              <button
-                onClick={handleDelete}
-                disabled={busy}
-                style={{
-                  flex: 1,
-                  padding: 12,
-                  borderRadius: 13,
-                  border: "1px solid rgba(251,113,133,0.4)",
-                  background: "rgba(251,113,133,0.08)",
-                  color: "var(--neg)",
-                  fontFamily: "inherit",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: busy ? "wait" : "pointer",
-                  opacity: busy ? 0.7 : 1,
-                }}
-              >
-                ลบรายการ
-              </button>
+              {!isPartial ? (
+                <button
+                  onClick={handleDelete}
+                  disabled={busy}
+                  style={{
+                    flex: 1,
+                    padding: 12,
+                    borderRadius: 13,
+                    border: "1px solid rgba(251,113,133,0.4)",
+                    background: "rgba(251,113,133,0.08)",
+                    color: "var(--neg)",
+                    fontFamily: "inherit",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: busy ? "wait" : "pointer",
+                    opacity: busy ? 0.7 : 1,
+                  }}
+                >
+                  ลบรายการ
+                </button>
+              ) : null}
               {!isCancelled ? (
                 <button
                   onClick={handleApprove}

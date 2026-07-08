@@ -1,7 +1,7 @@
 import { withAuth } from "@/lib/api/handler";
 import { ApiError } from "@/lib/api/response";
-import { updateRoom, patchRoom, deleteRoom } from "@/lib/services/room.service";
-import { roomCreateSchema, roomUpdateSchema } from "@/lib/validation/room.schema";
+import { patchRoom, deleteRoom } from "@/lib/services/room.service";
+import { roomUpdateSchema } from "@/lib/validation/room.schema";
 
 function idOf(params: Record<string, string>): number {
   const id = parseInt(params.id, 10);
@@ -9,12 +9,12 @@ function idOf(params: Record<string, string>): number {
   return id;
 }
 
+// Merge-patch: the full edit form sends every key; a lightweight change (e.g. the
+// room photo) sends only what it touches. Both go through patchRoom — the update
+// schema has no field defaults, so omitted keys leave existing values untouched.
 export const PATCH = withAuth(["ADMIN", "STAFF"], async (req, { session, params }) => {
-  const body = await req.json();
-  // full form submit carries all required fields; a lightweight patch (e.g. only imageUrl) does not
-  const isFull = body && typeof body === "object" && "propertyId" in body && "roomNumber" in body;
-  if (isFull) return { id: await updateRoom(idOf(params), roomCreateSchema.parse(body), session) };
-  return { id: await patchRoom(idOf(params), roomUpdateSchema.parse(body), session) };
+  const input = roomUpdateSchema.parse(await req.json());
+  return { id: await patchRoom(idOf(params), input, session) };
 });
 
 export const DELETE = withAuth(["ADMIN"], async (_req, { session, params }) => {
