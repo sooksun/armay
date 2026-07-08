@@ -108,6 +108,15 @@ enum ExpenseType {
   OTHER
 }
 
+enum ServiceStatus {
+  NEW
+  PENDING
+  IN_PROGRESS
+  DONE
+  REVIEW
+  CLOSED
+}
+
 enum PaymentMethod {
   CASH
   BANK_TRANSFER
@@ -371,6 +380,7 @@ model ExpenseTransaction {
   beforeImageUrl     String?            @map("before_image_url")
   afterImageUrl      String?            @map("after_image_url")
   verificationStatus VerificationStatus @default(DRAFT) @map("verification_status")
+  serviceStatus      ServiceStatus?     @map("service_status")
   recordedBy         Int?               @map("recorded_by")
   approvedBy         Int?               @map("approved_by")
   approvedAt         DateTime?          @map("approved_at")
@@ -391,6 +401,7 @@ model ExpenseTransaction {
   @@index([expenseDate])
   @@index([verificationStatus])
   @@index([responsibilityType])
+  @@index([serviceStatus])
   @@map("expense_transactions")
 }
 
