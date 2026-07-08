@@ -1,46 +1,82 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { badge } from "@/lib/theme";
-import { KANBAN_COLUMNS, initials, type KanbanTask } from "@/lib/mock";
-
-type BoardTask = KanbanTask & { uid: string };
-type BoardColumn = { title: string; color: string; tasks: BoardTask[] };
-
-function initialBoard(): BoardColumn[] {
-  return KANBAN_COLUMNS.map((col, ci) => ({
-    title: col.title,
-    color: col.color,
-    tasks: col.tasks.map((tk, ti) => ({ ...tk, uid: `${ci}-${ti}` })),
-  }));
-}
+import { initials } from "@/lib/mock";
+import { ServiceTaskFormModal, type ServiceTaskDraft } from "@/components/services/ServiceTaskFormModal";
+import { apiGet, apiSend } from "@/lib/api-client";
+import type { ServiceBoardDTO, RoomDTO } from "@/lib/api-types";
 
 export default function ServicesPage() {
-  const [columns, setColumns] = useState<BoardColumn[]>(initialBoard);
-  const [dragUid, setDragUid] = useState<string | null>(null);
-  const [overCol, setOverCol] = useState<number | null>(null);
+  const [columns, setColumns] = useState<ServiceBoardDTO>([]);
+  const [rooms, setRooms] = useState<RoomDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [formOpen, setFormOpen] = useState(false);
+  const [dragId, setDragId] = useState<number | null>(null);
+  const [overStatus, setOverStatus] = useState<string | null>(null);
 
-  function moveTask(uid: string, toCol: number) {
-    setColumns((prev) => {
-      const from = prev.findIndex((c) => c.tasks.some((t) => t.uid === uid));
-      if (from === -1 || from === toCol) return prev;
-      const task = prev[from].tasks.find((t) => t.uid === uid)!;
-      return prev.map((col, ci) => {
-        if (ci === from) return { ...col, tasks: col.tasks.filter((t) => t.uid !== uid) };
-        if (ci === toCol) return { ...col, tasks: [...col.tasks, task] };
-        return col;
+  const load = useCallback(async () => {
+    try {
+      setColumns(await apiGet<ServiceBoardDTO>("/api/service-tasks"));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
+  useEffect(() => {
+    apiGet<RoomDTO[]>("/api/rooms").then(setRooms).catch(console.error);
+  }, []);
+
+  async function moveTask(id: number, toStatus: string) {
+    const from = columns.find((c) => c.tasks.some((t) => t.id === id));
+    if (!from || from.status === toStatus) return;
+    const task = from.tasks.find((t) => t.id === id)!;
+    const target = columns.find((c) => c.status === toStatus);
+    const prev = columns;
+    setColumns((cols) =>
+      cols.map((c) => {
+        if (c.status === from.status) return { ...c, tasks: c.tasks.filter((t) => t.id !== id) };
+        if (c.status === toStatus) return { ...c, tasks: [...c.tasks, { ...task, color: target?.color ?? task.color, serviceStatus: toStatus }] };
+        return c;
+      })
+    );
+    try {
+      await apiSend(`/api/service-tasks/${id}`, "PATCH", { serviceStatus: toStatus });
+    } catch (e) {
+      setColumns(prev);
+      alert(e instanceof Error ? e.message : "ย้ายงานไม่สำเร็จ");
+    }
+  }
+
+  async function handleCreate(draft: ServiceTaskDraft) {
+    try {
+      await apiSend("/api/service-tasks", "POST", {
+        expenseType: draft.expenseType,
+        title: draft.title,
+        room: draft.room,
+        payeeName: draft.payeeName,
+        amount: draft.amount === "" ? 0 : Number(draft.amount),
       });
-    });
+      setFormOpen(false);
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "สร้างงานไม่สำเร็จ");
+    }
   }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
         <div style={{ fontSize: 13, color: "rgba(var(--text-rgb),0.6)" }}>
-          ลากการ์ดเพื่อเปลี่ยนสถานะงาน (mockup) · ผูกกับห้องและค่าใช้จ่ายเสมอ
+          ลากการ์ดเพื่อเปลี่ยนสถานะงาน · ผูกกับห้องและค่าใช้จ่ายเสมอ
         </div>
         <button
+          onClick={() => setFormOpen(true)}
           style={{
             marginLeft: "auto",
             display: "flex",
@@ -63,31 +99,34 @@ export default function ServicesPage() {
         </button>
       </div>
 
+      {loading && <div style={{ fontSize: 13, color: "rgba(var(--text-rgb),0.5)" }}>กำลังโหลด…</div>}
+
       <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingBottom: 8 }}>
-        {columns.map((col, ci) => (
+        {columns.map((col) => (
           <div
-            key={col.title}
+            key={col.status}
             onDragOver={(e) => {
               e.preventDefault();
-              if (overCol !== ci) setOverCol(ci);
+              if (overStatus !== col.status) setOverStatus(col.status);
             }}
             onDragLeave={(e) => {
-              if (!e.currentTarget.contains(e.relatedTarget as Node)) setOverCol((c) => (c === ci ? null : c));
+              if (!e.currentTarget.contains(e.relatedTarget as Node)) setOverStatus((s) => (s === col.status ? null : s));
             }}
             onDrop={(e) => {
               e.preventDefault();
-              const uid = e.dataTransfer.getData("text/plain") || dragUid;
-              if (uid) moveTask(uid, ci);
-              setDragUid(null);
-              setOverCol(null);
+              const raw = e.dataTransfer.getData("text/plain");
+              const id = raw ? Number(raw) : dragId;
+              if (id != null && Number.isInteger(id)) void moveTask(id, col.status);
+              setDragId(null);
+              setOverStatus(null);
             }}
             style={{
               flex: "0 0 268px",
               width: 268,
               borderRadius: 20,
-              background: overCol === ci ? "rgba(var(--surface-rgb),0.09)" : "rgba(var(--surface-rgb),0.04)",
-              border: `1px solid rgba(var(--surface-rgb),${overCol === ci ? 0.28 : 0.1})`,
-              outline: overCol === ci ? `2px dashed ${col.color}` : "none",
+              background: overStatus === col.status ? "rgba(var(--surface-rgb),0.09)" : "rgba(var(--surface-rgb),0.04)",
+              border: `1px solid rgba(var(--surface-rgb),${overStatus === col.status ? 0.28 : 0.1})`,
+              outline: overStatus === col.status ? `2px dashed ${col.color}` : "none",
               outlineOffset: -2,
               padding: 14,
               display: "flex",
@@ -115,16 +154,16 @@ export default function ServicesPage() {
 
             {col.tasks.map((tk) => (
               <div
-                key={tk.uid}
+                key={tk.id}
                 draggable
                 onDragStart={(e) => {
-                  setDragUid(tk.uid);
+                  setDragId(tk.id);
                   e.dataTransfer.effectAllowed = "move";
-                  e.dataTransfer.setData("text/plain", tk.uid);
+                  e.dataTransfer.setData("text/plain", String(tk.id));
                 }}
                 onDragEnd={() => {
-                  setDragUid(null);
-                  setOverCol(null);
+                  setDragId(null);
+                  setOverStatus(null);
                 }}
                 style={{
                   padding: 13,
@@ -134,7 +173,7 @@ export default function ServicesPage() {
                   borderLeft: `3px solid ${tk.color}`,
                   boxShadow: "0 8px 20px rgba(0,0,0,0.22)",
                   cursor: "grab",
-                  opacity: dragUid === tk.uid ? 0.4 : 1,
+                  opacity: dragId === tk.id ? 0.4 : 1,
                   transition: "opacity 0.12s",
                 }}
               >
@@ -195,6 +234,13 @@ export default function ServicesPage() {
           </div>
         ))}
       </div>
+
+      <ServiceTaskFormModal
+        open={formOpen}
+        rooms={rooms.map((r) => ({ no: r.no, building: r.building }))}
+        onClose={() => setFormOpen(false)}
+        onSubmit={handleCreate}
+      />
     </div>
   );
 }
