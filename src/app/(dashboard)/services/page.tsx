@@ -1,8 +1,39 @@
+"use client";
+
+import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { badge } from "@/lib/theme";
-import { KANBAN_COLUMNS, initials } from "@/lib/mock";
+import { KANBAN_COLUMNS, initials, type KanbanTask } from "@/lib/mock";
+
+type BoardTask = KanbanTask & { uid: string };
+type BoardColumn = { title: string; color: string; tasks: BoardTask[] };
+
+function initialBoard(): BoardColumn[] {
+  return KANBAN_COLUMNS.map((col, ci) => ({
+    title: col.title,
+    color: col.color,
+    tasks: col.tasks.map((tk, ti) => ({ ...tk, uid: `${ci}-${ti}` })),
+  }));
+}
 
 export default function ServicesPage() {
+  const [columns, setColumns] = useState<BoardColumn[]>(initialBoard);
+  const [dragUid, setDragUid] = useState<string | null>(null);
+  const [overCol, setOverCol] = useState<number | null>(null);
+
+  function moveTask(uid: string, toCol: number) {
+    setColumns((prev) => {
+      const from = prev.findIndex((c) => c.tasks.some((t) => t.uid === uid));
+      if (from === -1 || from === toCol) return prev;
+      const task = prev[from].tasks.find((t) => t.uid === uid)!;
+      return prev.map((col, ci) => {
+        if (ci === from) return { ...col, tasks: col.tasks.filter((t) => t.uid !== uid) };
+        if (ci === toCol) return { ...col, tasks: [...col.tasks, task] };
+        return col;
+      });
+    });
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10 }}>
@@ -33,19 +64,36 @@ export default function ServicesPage() {
       </div>
 
       <div style={{ display: "flex", gap: 14, overflowX: "auto", paddingBottom: 8 }}>
-        {KANBAN_COLUMNS.map((col) => (
+        {columns.map((col, ci) => (
           <div
             key={col.title}
+            onDragOver={(e) => {
+              e.preventDefault();
+              if (overCol !== ci) setOverCol(ci);
+            }}
+            onDragLeave={(e) => {
+              if (!e.currentTarget.contains(e.relatedTarget as Node)) setOverCol((c) => (c === ci ? null : c));
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              const uid = e.dataTransfer.getData("text/plain") || dragUid;
+              if (uid) moveTask(uid, ci);
+              setDragUid(null);
+              setOverCol(null);
+            }}
             style={{
               flex: "0 0 268px",
               width: 268,
               borderRadius: 20,
-              background: "rgba(var(--surface-rgb),0.04)",
-              border: "1px solid rgba(var(--surface-rgb),0.1)",
+              background: overCol === ci ? "rgba(var(--surface-rgb),0.09)" : "rgba(var(--surface-rgb),0.04)",
+              border: `1px solid rgba(var(--surface-rgb),${overCol === ci ? 0.28 : 0.1})`,
+              outline: overCol === ci ? `2px dashed ${col.color}` : "none",
+              outlineOffset: -2,
               padding: 14,
               display: "flex",
               flexDirection: "column",
               gap: 11,
+              transition: "background 0.12s, border-color 0.12s",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -65,9 +113,19 @@ export default function ServicesPage() {
               </span>
             </div>
 
-            {col.tasks.map((tk, i) => (
+            {col.tasks.map((tk) => (
               <div
-                key={i}
+                key={tk.uid}
+                draggable
+                onDragStart={(e) => {
+                  setDragUid(tk.uid);
+                  e.dataTransfer.effectAllowed = "move";
+                  e.dataTransfer.setData("text/plain", tk.uid);
+                }}
+                onDragEnd={() => {
+                  setDragUid(null);
+                  setOverCol(null);
+                }}
                 style={{
                   padding: 13,
                   borderRadius: 15,
@@ -76,6 +134,8 @@ export default function ServicesPage() {
                   borderLeft: `3px solid ${tk.color}`,
                   boxShadow: "0 8px 20px rgba(0,0,0,0.22)",
                   cursor: "grab",
+                  opacity: dragUid === tk.uid ? 0.4 : 1,
+                  transition: "opacity 0.12s",
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 8 }}>
