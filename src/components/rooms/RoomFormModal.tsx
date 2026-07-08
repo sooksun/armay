@@ -80,12 +80,25 @@ export function RoomFormModal({
   const lastAutoOwner = useRef("");
   const lastAutoFloor = useRef("");
   const lastAutoDeposit = useRef("");
+  const lastAutoLat = useRef("");
+  const lastAutoLng = useRef("");
 
   const loadOptions = useCallback(async () => {
     try {
       const [p, o] = await Promise.all([apiGet<PropertyDTO[]>("/api/properties"), apiGet<OwnerDTO[]>("/api/owners")]);
       setProperties(p);
       setOwners(o);
+      // auto: a room with no coordinates inherits its building's location (edit case, after properties load)
+      setDraft((prev) => {
+        if (!prev.propertyId || (prev.latitude && prev.longitude)) return prev;
+        const prop = p.find((x) => String(x.id) === prev.propertyId);
+        if (prop?.latitude && prop?.longitude) {
+          lastAutoLat.current = prop.latitude;
+          lastAutoLng.current = prop.longitude;
+          return { ...prev, latitude: prop.latitude, longitude: prop.longitude };
+        }
+        return prev;
+      });
     } catch (e) {
       console.error(e);
     }
@@ -96,6 +109,8 @@ export function RoomFormModal({
     lastAutoOwner.current = "";
     lastAutoFloor.current = "";
     lastAutoDeposit.current = "";
+    lastAutoLat.current = "";
+    lastAutoLng.current = "";
     void loadOptions();
     setDraft(
       editing
@@ -145,8 +160,9 @@ export function RoomFormModal({
     );
   }
 
-  /** auto: choosing a property fills the owner from another room in that same property */
+  /** auto: choosing a property fills the owner (from a sibling room) and the map location (from the building) */
   function handlePropertyChange(v: string) {
+    const prop = properties.find((p) => String(p.id) === v);
     setDraft((prev) => {
       const next = { ...prev, propertyId: v };
       const sibling = rooms.find((r) => String(r.propertyId) === v);
@@ -154,6 +170,14 @@ export function RoomFormModal({
       if (sibling && ownerUntouched) {
         next.ownerId = String(sibling.ownerId);
         lastAutoOwner.current = next.ownerId;
+      }
+      const latUntouched = prev.latitude === "" || prev.latitude === lastAutoLat.current;
+      const lngUntouched = prev.longitude === "" || prev.longitude === lastAutoLng.current;
+      if (prop?.latitude && prop?.longitude && latUntouched && lngUntouched) {
+        next.latitude = prop.latitude;
+        next.longitude = prop.longitude;
+        lastAutoLat.current = prop.latitude;
+        lastAutoLng.current = prop.longitude;
       }
       return next;
     });
