@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { FormModal, FieldsGrid, TextField, TextAreaField, SelectField, ToggleField } from "@/components/shared/FormModal";
 import { ImageUpload } from "@/components/shared/ImageUpload";
+import { GoogleMapPicker } from "@/components/shared/GoogleMapPicker";
 import { PROPERTY_TYPE_OPTIONS, type PropertyStatus } from "@/lib/mock";
 import type { PropertyDTO } from "@/lib/api-types";
 
@@ -166,6 +167,11 @@ export function PropertyFormModal({
         </span>
         {locating ? "กำลังอ่านพิกัด…" : "ใช้พิกัดปัจจุบันของเครื่อง"}
       </button>
+      <GoogleMapPicker
+        lat={draft.latitude}
+        lng={draft.longitude}
+        onPick={(latitude, longitude) => setDraft((prev) => ({ ...prev, latitude, longitude }))}
+      />
       <ImageUpload label="รูปอาคาร" value={draft.imageUrl} onChange={(url) => setDraft({ ...draft, imageUrl: url })} />
       <TextAreaField label="หมายเหตุ" value={draft.note} onChange={(v) => setDraft({ ...draft, note: v })} />
       <ToggleField
