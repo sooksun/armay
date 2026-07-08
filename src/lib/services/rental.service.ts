@@ -15,7 +15,7 @@ import {
 import { ApiError } from "@/lib/api/response";
 import type { Session } from "@/lib/auth/session";
 import type { RentalDTO, RentalDetailDTO } from "@/lib/api-types";
-import type { RentalCreateInput } from "@/lib/validation/rental.schema";
+import type { RentalCreateInput, RentalUpdateInput } from "@/lib/validation/rental.schema";
 
 const RENTAL_TYPE_LABEL: Record<string, string> = { DAILY: "รายวัน", MONTHLY: "รายเดือน", YEARLY: "รายปี" };
 
@@ -46,6 +46,9 @@ export async function getRentalDetail(id: number): Promise<RentalDetailDTO> {
     building: c.property.propertyName,
     owner: c.owner.fullName,
     rentalType: RENTAL_TYPE_LABEL[c.rentalType] ?? c.rentalType,
+    tenantId: c.tenantId,
+    roomId: c.roomId,
+    rentalTypeValue: c.rentalType,
     period: `${formatBEDate(c.startDate)} – ${formatBEDate(c.endDate)}`,
     startDate: formatBEDate(c.startDate),
     endDate: formatBEDate(c.endDate),
@@ -140,4 +143,52 @@ export async function createRental(input: RentalCreateInput, session: Session): 
   });
   await writeAudit({ userId: session.userId, action: "CREATE", tableName: "rental_contracts", recordId: created.id, newValue: input });
   return created.id;
+}
+
+export async function updateRental(id: number, input: RentalUpdateInput, session: Session): Promise<number> {
+  const existing = await prisma.rentalContract.findUnique({ where: { id } });
+  if (!existing) throw new ApiError("NOT_FOUND", "ไม่พบรายการเช่านี้", 404);
+  const room = await prisma.room.findUnique({ where: { id: input.roomId } });
+  if (!room) throw new ApiError("ROOM_NOT_FOUND", "ไม่พบห้องที่เลือก", 400);
+  const tenant = await prisma.tenant.findUnique({ where: { id: input.tenantId } });
+  if (!tenant) throw new ApiError("TENANT_NOT_FOUND", "ไม่พบผู้เช่าที่เลือก", 400);
+
+  const totalAmount = input.rentAmount + input.depositAmount + input.cleaningFee + input.otherFee - input.discountAmount;
+  await prisma.rentalContract.update({
+    where: { id },
+    data: {
+      tenantId: tenant.id,
+      roomId: room.id,
+      ownerId: room.ownerId,
+      propertyId: room.propertyId,
+      rentalType: input.rentalType as Prisma.RentalContractCreateInput["rentalType"],
+      startDate: parseThaiBEDate(input.startDate),
+      endDate: parseThaiBEDate(input.endDate),
+      rentAmount: input.rentAmount,
+      depositAmount: input.depositAmount,
+      cleaningFee: input.cleaningFee,
+      otherFee: input.otherFee,
+      discountAmount: input.discountAmount,
+      totalAmount,
+      bookingChannel: input.bookingChannel || null,
+      note: input.note || null,
+    },
+  });
+  await writeAudit({ userId: session.userId, action: "UPDATE", tableName: "rental_contracts", recordId: id, oldValue: existing, newValue: input });
+  return id;
+}
+
+export async function deleteRental(id: number, session: Session): Promise<boolean> {
+  const existing = await prisma.rentalContract.findUnique({ where: { id } });
+  if (!existing) throw new ApiError("NOT_FOUND", "ไม่พบรายการเช่านี้", 404);
+  const [incomes, payouts, expenses] = await Promise.all([
+    prisma.incomeTransaction.count({ where: { contractId: id } }),
+    prisma.ownerPayout.count({ where: { contractId: id } }),
+    prisma.expenseTransaction.count({ where: { contractId: id } }),
+  ]);
+  if (incomes > 0) throw new ApiError("HAS_DEPENDENTS", `ลบไม่ได้ — รายการเช่านี้มีรายรับผูกอยู่ ${incomes} รายการ`, 409);
+  if (payouts > 0 || expenses > 0) throw new ApiError("HAS_DEPENDENTS", "ลบไม่ได้ — รายการเช่านี้มีการจ่ายเจ้าของ/ค่าใช้จ่ายผูกอยู่", 409);
+  await prisma.rentalContract.delete({ where: { id } });
+  await writeAudit({ userId: session.userId, action: "DELETE", tableName: "rental_contracts", recordId: id });
+  return true;
 }

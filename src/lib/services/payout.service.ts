@@ -3,11 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { generateCode } from "@/lib/codegen";
 import { writeAudit } from "@/lib/services/audit.service";
 import { decToNumber, fmtTHB } from "@/lib/money";
-import { parseThaiBEDate } from "@/lib/date";
-import { PAYOUT_STATUS, PAYOUT_STATUS_BADGE, EXPENSE_TYPE } from "@/lib/labels";
+import { parseThaiBEDate, formatBEDate } from "@/lib/date";
+import { PAYOUT_STATUS, PAYOUT_STATUS_BADGE, EXPENSE_TYPE, PAYMENT_METHOD } from "@/lib/labels";
 import { ApiError } from "@/lib/api/response";
 import type { Session } from "@/lib/auth/session";
-import type { PayoutDTO, PayoutListDTO, PayoutSummaryDTO, PayoutPreviewDTO } from "@/lib/api-types";
+import type { PayoutDTO, PayoutListDTO, PayoutSummaryDTO, PayoutPreviewDTO, PayoutDetailDTO } from "@/lib/api-types";
 import type { PayoutCreateInput } from "@/lib/validation/payout.schema";
 
 const INCLUDE = { owner: true, room: true, property: true } satisfies Prisma.OwnerPayoutInclude;
@@ -55,6 +55,55 @@ function summarize(rows: PayoutWithRelations[]): PayoutSummaryDTO {
 export async function listPayouts(): Promise<PayoutListDTO> {
   const rows = await prisma.ownerPayout.findMany({ orderBy: { payoutDate: "desc" }, include: INCLUDE });
   return { rows: rows.map(toDTO), summary: summarize(rows) };
+}
+
+const DETAIL_INCLUDE = { owner: true, room: true, property: true, items: { orderBy: { id: "asc" } } } satisfies Prisma.OwnerPayoutInclude;
+
+export async function getPayoutDetail(id: number): Promise<PayoutDetailDTO> {
+  const p = await prisma.ownerPayout.findUnique({ where: { id }, include: DETAIL_INCLUDE });
+  if (!p) throw new ApiError("NOT_FOUND", "ไม่พบรายการจ่ายเจ้าของนี้", 404);
+  return {
+    id: p.id,
+    payoutCode: p.payoutCode,
+    owner: p.owner.fullName,
+    ownerBankAccount: p.ownerBankAccount ?? "",
+    room: `${p.room?.roomNumber ?? "—"} · ${p.property?.propertyName ?? ""}`,
+    payoutDate: formatBEDate(p.payoutDate),
+    gross: fmtTHB(decToNumber(p.grossIncomeAmount)),
+    deduction: fmtTHB(decToNumber(p.deductionAmount)),
+    net: fmtTHB(decToNumber(p.netPayoutAmount)),
+    paid: fmtTHB(decToNumber(p.paidAmount)),
+    paymentMethod: p.paymentMethod ? PAYMENT_METHOD[p.paymentMethod] ?? p.paymentMethod : "—",
+    transactionReference: p.transactionReference ?? "",
+    status: PAYOUT_STATUS[p.payoutStatus] ?? p.payoutStatus,
+    badge: PAYOUT_STATUS_BADGE[p.payoutStatus] ?? "gray",
+    statusValue: p.payoutStatus,
+    note: p.note ?? "",
+    items: p.items.map((it) => ({ label: it.label, amount: fmtTHB(decToNumber(it.amount)), sourceType: it.sourceType })),
+  };
+}
+
+/** Mark a payout as fully paid (approved). ADMIN-gated at the route. */
+export async function approvePayout(id: number, session: Session): Promise<number> {
+  const p = await prisma.ownerPayout.findUnique({ where: { id } });
+  if (!p) throw new ApiError("NOT_FOUND", "ไม่พบรายการจ่ายเจ้าของนี้", 404);
+  if (p.payoutStatus === "PAID") throw new ApiError("ALREADY_PAID", "รายการนี้จ่ายครบแล้ว", 409);
+  if (p.payoutStatus === "CANCELLED") throw new ApiError("CANCELLED", "รายการนี้ถูกยกเลิกแล้ว", 409);
+  await prisma.ownerPayout.update({
+    where: { id },
+    data: { payoutStatus: "PAID", paidAmount: p.netPayoutAmount, verificationStatus: "VERIFIED" },
+  });
+  await writeAudit({ userId: session.userId, action: "APPROVE", tableName: "owner_payouts", recordId: id, oldValue: p });
+  return id;
+}
+
+export async function deletePayout(id: number, session: Session): Promise<boolean> {
+  const p = await prisma.ownerPayout.findUnique({ where: { id } });
+  if (!p) throw new ApiError("NOT_FOUND", "ไม่พบรายการจ่ายเจ้าของนี้", 404);
+  if (p.payoutStatus === "PAID") throw new ApiError("PAID_LOCK", "ลบไม่ได้ — รายการที่จ่ายแล้วต้องเก็บไว้เป็นหลักฐาน", 409);
+  await prisma.ownerPayout.delete({ where: { id } }); // payout_items cascade-delete, freeing their expense sources
+  await writeAudit({ userId: session.userId, action: "DELETE", tableName: "owner_payouts", recordId: id });
+  return true;
 }
 
 /** Suggest gross income + owner-responsibility expense deductions for a payout. */

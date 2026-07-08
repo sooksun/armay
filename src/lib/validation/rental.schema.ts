@@ -17,4 +17,7 @@ export const rentalCreateSchema = z.object({
   note: z.string().optional().default(""),
 });
 
+export const rentalUpdateSchema = rentalCreateSchema;
+
 export type RentalCreateInput = z.infer<typeof rentalCreateSchema>;
+export type RentalUpdateInput = z.infer<typeof rentalUpdateSchema>;

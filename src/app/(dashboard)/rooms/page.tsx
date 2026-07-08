@@ -3,16 +3,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { RoomDrawer } from "@/components/RoomDrawer";
+import { RoomFormModal, type RoomDraft } from "@/components/rooms/RoomFormModal";
 import { badge } from "@/lib/theme";
 import { ROOM_FILTERS } from "@/lib/mock";
-import { apiGet } from "@/lib/api-client";
+import { apiGet, apiSend } from "@/lib/api-client";
 import type { RoomDTO } from "@/lib/api-types";
 
 export default function RoomsPage() {
   const [rooms, setRooms] = useState<RoomDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<number | null>(null);
-  const [roomImages, setRoomImages] = useState<Record<string, string>>({});
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -28,16 +30,50 @@ export default function RoomsPage() {
   }, [load]);
 
   const selectedRoom = rooms.find((r) => r.id === selected) ?? null;
+  const editing = rooms.find((r) => r.id === editingId) ?? null;
 
-  function setRoomImage(roomNo: string, url: string | null) {
-    setRoomImages((m) => {
-      if (url === null) {
-        const next = { ...m };
-        delete next[roomNo];
-        return next;
-      }
-      return { ...m, [roomNo]: url };
-    });
+  function openCreate() {
+    setEditingId(null);
+    setFormOpen(true);
+  }
+  function openEdit(r: RoomDTO) {
+    setEditingId(r.id);
+    setFormOpen(true);
+  }
+
+  async function handleSubmit(draft: RoomDraft) {
+    if (!draft.propertyId) return alert("กรุณาเลือกอาคาร/โครงการ");
+    if (!draft.ownerId) return alert("กรุณาเลือกเจ้าของ");
+    if (!draft.roomNumber.trim()) return alert("กรุณากรอกเลขห้อง");
+    try {
+      if (editingId != null) await apiSend(`/api/rooms/${editingId}`, "PATCH", draft);
+      else await apiSend("/api/rooms", "POST", draft);
+      setFormOpen(false);
+      setEditingId(null);
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "บันทึกไม่สำเร็จ");
+    }
+  }
+
+  async function handleDelete(r: RoomDTO) {
+    if (!confirm(`ยืนยันลบห้อง "${r.no}"?`)) return;
+    try {
+      await apiSend(`/api/rooms/${r.id}`, "DELETE");
+      setSelected(null);
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "ลบไม่สำเร็จ");
+    }
+  }
+
+  async function handleImageChange(r: RoomDTO, url: string | null) {
+    try {
+      await apiSend(`/api/rooms/${r.id}`, "PATCH", { imageUrl: url });
+      await load();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "บันทึกรูปไม่สำเร็จ");
+    }
   }
 
   return (
@@ -67,10 +103,34 @@ export default function RoomsPage() {
             </span>
           </button>
         ))}
+        <button
+          onClick={openCreate}
+          style={{
+            marginLeft: "auto",
+            display: "flex",
+            alignItems: "center",
+            gap: 7,
+            padding: "9px 15px",
+            borderRadius: 11,
+            border: "1px solid rgba(var(--surface-rgb),0.28)",
+            color: "#04121A",
+            fontFamily: "inherit",
+            fontSize: 12.5,
+            fontWeight: 700,
+            cursor: "pointer",
+            background: "linear-gradient(135deg,#5EEAD4,#38BDF8)",
+            boxShadow: "0 6px 16px rgba(56,189,248,0.4)",
+          }}
+        >
+          <Icon name="plus" size={15} />
+          เพิ่มห้อง
+        </button>
       </div>
 
       {loading ? (
         <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>กำลังโหลด…</div>
+      ) : rooms.length === 0 ? (
+        <div style={{ padding: "40px 16px", textAlign: "center", color: "rgba(var(--text-rgb),0.5)" }}>ยังไม่มีห้อง — กด “เพิ่มห้อง” เพื่อเริ่มต้น</div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 16 }}>
           {rooms.map((rm) => (
@@ -101,13 +161,13 @@ export default function RoomsPage() {
                   padding: 12,
                 }}
               >
-                {roomImages[rm.no] ? (
+                {rm.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element -- reason: in-memory object URL, not next/image-optimizable
-                  <img src={roomImages[rm.no]} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={rm.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
                   <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(135deg,rgba(var(--surface-rgb),0.05) 0 8px,transparent 8px 16px)" }} />
                 )}
-                <span style={{ position: "relative", fontFamily: "monospace", fontSize: 10.5, color: "rgba(var(--text-rgb),0.5)" }}>{roomImages[rm.no] ? "" : "room photo"}</span>
+                <span style={{ position: "relative", fontFamily: "monospace", fontSize: 10.5, color: "rgba(var(--text-rgb),0.5)" }}>{rm.imageUrl ? "" : "room photo"}</span>
                 <span style={{ ...badge(rm.badge), position: "relative" }}>{rm.status}</span>
               </div>
               <div style={{ padding: "15px 16px 17px" }}>
@@ -137,10 +197,17 @@ export default function RoomsPage() {
 
       <RoomDrawer
         room={selectedRoom}
-        image={selectedRoom ? roomImages[selectedRoom.no] ?? null : null}
-        onImageChange={(url) => selectedRoom && setRoomImage(selectedRoom.no, url)}
+        image={selectedRoom?.imageUrl ?? null}
+        onImageChange={(url) => selectedRoom && handleImageChange(selectedRoom, url)}
         onClose={() => setSelected(null)}
+        onEdit={(r) => {
+          setSelected(null);
+          openEdit(r);
+        }}
+        onDelete={handleDelete}
       />
+
+      <RoomFormModal open={formOpen} editing={editing} rooms={rooms} onClose={() => setFormOpen(false)} onSubmit={handleSubmit} />
     </div>
   );
 }

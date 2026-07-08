@@ -84,7 +84,7 @@ export function Topbar() {
 
       <button
         data-quickadd
-        onClick={openIncome}
+        onClick={() => openIncome()}
         style={{
           display: "flex",
           alignItems: "center",

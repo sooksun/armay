@@ -14,4 +14,7 @@ export const incomeCreateSchema = z.object({
   proofFileUrl: z.string().nullable().optional(),
 });
 
+export const incomeUpdateSchema = incomeCreateSchema;
+
 export type IncomeCreateInput = z.infer<typeof incomeCreateSchema>;
+export type IncomeUpdateInput = z.infer<typeof incomeUpdateSchema>;

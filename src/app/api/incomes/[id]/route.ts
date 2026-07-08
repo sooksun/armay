@@ -1,7 +1,7 @@
 import { withAuth } from "@/lib/api/handler";
 import { ApiError } from "@/lib/api/response";
-import { getRentalDetail, updateRental, deleteRental } from "@/lib/services/rental.service";
-import { rentalUpdateSchema } from "@/lib/validation/rental.schema";
+import { getIncomeDetail, updateIncome, deleteIncome } from "@/lib/services/income.service";
+import { incomeUpdateSchema } from "@/lib/validation/income.schema";
 
 function idOf(params: Record<string, string>): number {
   const id = parseInt(params.id, 10);
@@ -9,14 +9,14 @@ function idOf(params: Record<string, string>): number {
   return id;
 }
 
-export const GET = withAuth("any", async (_req, { params }) => getRentalDetail(idOf(params)));
+export const GET = withAuth("any", async (_req, { params }) => getIncomeDetail(idOf(params)));
 
 export const PATCH = withAuth(["ADMIN", "STAFF"], async (req, { session, params }) => {
-  const input = rentalUpdateSchema.parse(await req.json());
-  return { id: await updateRental(idOf(params), input, session) };
+  const input = incomeUpdateSchema.parse(await req.json());
+  return { id: await updateIncome(idOf(params), input, session) };
 });
 
 export const DELETE = withAuth(["ADMIN"], async (_req, { session, params }) => {
-  await deleteRental(idOf(params), session);
+  await deleteIncome(idOf(params), session);
   return { ok: true };
 });

@@ -118,6 +118,19 @@ export type RoomDTO = {
   expense: string;
   rent: string;
   tenantLine: string;
+  // raw editable fields (for the create/edit form prefill)
+  propertyId: number;
+  ownerId: number;
+  floor: string;
+  roomType: string;
+  roomSize: string; // digits, "" when unset
+  rentValue: number;
+  depositValue: number;
+  cleaningValue: number;
+  commissionValue: number;
+  statusValue: "AVAILABLE" | "OCCUPIED" | "RESERVED" | "MAINTENANCE" | "INACTIVE";
+  note: string;
+  imageUrl: string | null;
 };
 
 // ---------- TRANSACTIONS (read models) ----------
@@ -138,6 +151,29 @@ export type IncomeDTO = {
 };
 export type IncomeSummaryDTO = { today: string; month: string; pending: string; noSlip: string; maybeDup: string };
 export type IncomeListDTO = { rows: IncomeDTO[]; summary: IncomeSummaryDTO };
+
+export type IncomeDetailDTO = {
+  id: number;
+  incomeCode: string;
+  contractId: number;
+  contractLabel: string; // "INC-… · tenant · room"
+  tenant: string;
+  room: string;
+  building: string;
+  incomeType: string; // enum value
+  incomeTypeLabel: string; // Thai label
+  amount: number;
+  incomeDate: string; // Thai BE date
+  paymentMethod: string; // enum value
+  paymentMethodLabel: string; // Thai label
+  receivingAccountId: number | null;
+  transactionReference: string;
+  proofFileUrl: string | null;
+  verificationStatus: "DRAFT" | "PENDING" | "VERIFIED" | "NEEDS_FIX" | "CANCELLED" | "PROBLEM";
+  statusLabel: string; // Thai label
+  badge: BadgeKind;
+  note: string;
+};
 
 export type ExpenseDTO = {
   id: number;
@@ -182,6 +218,10 @@ export type RentalDetailDTO = {
   building: string;
   owner: string;
   rentalType: string; // Thai label
+  // raw editable fields (for the edit form prefill)
+  tenantId: number;
+  roomId: number;
+  rentalTypeValue: "DAILY" | "MONTHLY" | "YEARLY";
   period: string;
   startDate: string;
   endDate: string;
@@ -213,6 +253,27 @@ export type PayoutDTO = {
 };
 export type PayoutSummaryDTO = { pending: string; paidMonth: string; ownersUnpaid: string; toReview: string };
 export type PayoutListDTO = { rows: PayoutDTO[]; summary: PayoutSummaryDTO };
+
+export type PayoutItemLineDTO = { label: string; amount: string; sourceType: string };
+export type PayoutDetailDTO = {
+  id: number;
+  payoutCode: string;
+  owner: string;
+  ownerBankAccount: string;
+  room: string;
+  payoutDate: string; // Thai BE date
+  gross: string;
+  deduction: string;
+  net: string;
+  paid: string;
+  paymentMethod: string; // Thai label or "—"
+  transactionReference: string;
+  status: string; // Thai payout-status label
+  badge: BadgeKind;
+  statusValue: "PENDING" | "PARTIAL" | "PAID" | "CANCELLED";
+  note: string;
+  items: PayoutItemLineDTO[];
+};
 
 export type PayoutExpenseLineDTO = { sourceId: number; label: string; amount: number };
 export type PayoutPreviewDTO = {

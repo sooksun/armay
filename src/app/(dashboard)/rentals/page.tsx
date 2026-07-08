@@ -6,7 +6,7 @@ import { RentalCreateForm } from "@/components/rentals/RentalCreateForm";
 import { RentalDrawer } from "@/components/rentals/RentalDrawer";
 import { badge } from "@/lib/theme";
 import { apiGet } from "@/lib/api-client";
-import type { RentalDTO } from "@/lib/api-types";
+import type { RentalDTO, RentalDetailDTO } from "@/lib/api-types";
 
 const th = (align: "left" | "right" = "left"): React.CSSProperties => ({
   textAlign: align,
@@ -19,9 +19,15 @@ const th = (align: "left" | "right" = "left"): React.CSSProperties => ({
 
 export default function RentalsPage() {
   const [createOpen, setCreateOpen] = useState(false);
+  const [editing, setEditing] = useState<RentalDetailDTO | null>(null);
   const [rows, setRows] = useState<RentalDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  function closePanel() {
+    setCreateOpen(false);
+    setEditing(null);
+  }
 
   const load = useCallback(async () => {
     try {
@@ -81,7 +87,10 @@ export default function RentalsPage() {
                 กรองข้อมูล
               </button>
               <button
-                onClick={() => setCreateOpen(true)}
+                onClick={() => {
+                  setEditing(null);
+                  setCreateOpen(true);
+                }}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -209,9 +218,9 @@ export default function RentalsPage() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 22px", borderBottom: "1px solid rgba(var(--surface-rgb),0.08)" }}>
-            <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 17 }}>สร้างรายการเช่าใหม่</div>
+            <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 17 }}>{editing ? "แก้ไขรายการเช่า" : "สร้างรายการเช่าใหม่"}</div>
             <button
-              onClick={() => setCreateOpen(false)}
+              onClick={closePanel}
               style={{
                 marginLeft: "auto",
                 padding: "8px 14px",
@@ -229,16 +238,26 @@ export default function RentalsPage() {
           </div>
 
           <RentalCreateForm
-            onClose={() => setCreateOpen(false)}
+            editing={editing}
+            onClose={closePanel}
             onCreated={() => {
-              setCreateOpen(false);
+              closePanel();
               void load();
             }}
           />
         </div>
       )}
 
-      <RentalDrawer rentalId={selectedId} onClose={() => setSelectedId(null)} />
+      <RentalDrawer
+        rentalId={selectedId}
+        onClose={() => setSelectedId(null)}
+        onEdit={(detail) => {
+          setSelectedId(null);
+          setEditing(detail);
+          setCreateOpen(true);
+        }}
+        onChanged={() => void load()}
+      />
     </div>
   );
 }

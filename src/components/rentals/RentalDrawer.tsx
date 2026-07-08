@@ -2,11 +2,22 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Drawer, StatBox, InfoRow, InfoSection } from "@/components/shared/Drawer";
+import { Icon } from "@/components/Icon";
 import { badge } from "@/lib/theme";
-import { apiGet } from "@/lib/api-client";
+import { apiGet, apiSend } from "@/lib/api-client";
 import type { RentalDetailDTO } from "@/lib/api-types";
 
-export function RentalDrawer({ rentalId, onClose }: { rentalId: number | null; onClose: () => void }) {
+export function RentalDrawer({
+  rentalId,
+  onClose,
+  onEdit,
+  onChanged,
+}: {
+  rentalId: number | null;
+  onClose: () => void;
+  onEdit: (detail: RentalDetailDTO) => void;
+  onChanged: () => void;
+}) {
   const [detail, setDetail] = useState<RentalDetailDTO | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -29,6 +40,18 @@ export function RentalDrawer({ rentalId, onClose }: { rentalId: number | null; o
   if (rentalId == null) return null;
 
   const dueIsZero = detail?.due === "฿0";
+
+  async function handleDelete() {
+    if (!detail) return;
+    if (!confirm(`ยืนยันลบรายการเช่า ${detail.code}?`)) return;
+    try {
+      await apiSend(`/api/rentals/${detail.id}`, "DELETE");
+      onChanged();
+      onClose();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "ลบไม่สำเร็จ");
+    }
+  }
 
   return (
     <Drawer
@@ -115,6 +138,49 @@ export function RentalDrawer({ rentalId, onClose }: { rentalId: number | null; o
               <div style={{ fontSize: 13, color: "rgba(var(--text-rgb),0.8)", lineHeight: 1.6 }}>{detail.note}</div>
             </InfoSection>
           ) : null}
+
+          <div style={{ display: "flex", gap: 10 }}>
+            <button
+              onClick={handleDelete}
+              style={{
+                flex: 1,
+                padding: 12,
+                borderRadius: 13,
+                border: "1px solid rgba(251,113,133,0.4)",
+                background: "rgba(251,113,133,0.08)",
+                color: "var(--neg)",
+                fontFamily: "inherit",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              ลบรายการเช่า
+            </button>
+            <button
+              onClick={() => onEdit(detail)}
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 7,
+                padding: 12,
+                borderRadius: 13,
+                border: "1px solid rgba(var(--surface-rgb),0.28)",
+                color: "#04121A",
+                fontFamily: "inherit",
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+                background: "linear-gradient(135deg,#A855F7,#38BDF8)",
+                boxShadow: "0 6px 16px rgba(168,85,247,0.4)",
+              }}
+            >
+              <Icon name="settings" size={15} />
+              แก้ไขรายการเช่า
+            </button>
+          </div>
         </>
       )}
     </Drawer>

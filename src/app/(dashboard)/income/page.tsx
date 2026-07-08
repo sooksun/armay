@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { MiniKpiCard } from "@/components/MiniKpiCard";
+import { IncomeDrawer } from "@/components/income/IncomeDrawer";
 import { badge } from "@/lib/theme";
 import { type MiniKpi } from "@/lib/mock";
 import { apiGet } from "@/lib/api-client";
@@ -37,6 +38,7 @@ export default function IncomePage() {
   const [rows, setRows] = useState<IncomeDTO[]>([]);
   const [kpis, setKpis] = useState<MiniKpi[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -102,7 +104,7 @@ export default function IncomePage() {
               Export
             </button>
             <button
-              onClick={openIncome}
+              onClick={() => openIncome()}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -193,6 +195,7 @@ export default function IncomePage() {
                   </td>
                   <td style={{ padding: "13px 16px", textAlign: "right" }}>
                     <button
+                      onClick={() => setSelectedId(r.id)}
                       style={{
                         padding: "6px 12px",
                         borderRadius: 9,
@@ -214,6 +217,16 @@ export default function IncomePage() {
           </table>
         </div>
       </div>
+
+      <IncomeDrawer
+        incomeId={selectedId}
+        onClose={() => setSelectedId(null)}
+        onEdit={(id) => {
+          setSelectedId(null);
+          openIncome(id);
+        }}
+        onChanged={() => void load()}
+      />
     </div>
   );
 }

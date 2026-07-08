@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { MiniKpiCard } from "@/components/MiniKpiCard";
 import { PayoutCreateForm } from "@/components/payout/PayoutCreateForm";
+import { PayoutDrawer } from "@/components/payout/PayoutDrawer";
 import { badge } from "@/lib/theme";
 import { type MiniKpi } from "@/lib/mock";
 import { apiGet } from "@/lib/api-client";
@@ -22,6 +23,7 @@ export default function PayoutPage() {
   const [kpis, setKpis] = useState<MiniKpi[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -180,6 +182,7 @@ export default function PayoutPage() {
                   </td>
                   <td style={{ padding: "13px 16px", textAlign: "right" }}>
                     <button
+                      onClick={() => setSelectedId(r.id)}
                       style={{
                         padding: "6px 12px",
                         borderRadius: 9,
@@ -201,6 +204,8 @@ export default function PayoutPage() {
           </table>
         </div>
       </div>
+
+      <PayoutDrawer payoutId={selectedId} onClose={() => setSelectedId(null)} onChanged={() => void load()} />
     </div>
   );
 }

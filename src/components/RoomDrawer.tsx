@@ -1,8 +1,8 @@
 "use client";
 
-import { badge } from "@/lib/theme";
+import { badge, fmtTHB } from "@/lib/theme";
+import { Icon } from "@/components/Icon";
 import { ImageUpload } from "@/components/shared/ImageUpload";
-import { ROOM_DRAWER_TABS } from "@/lib/mock";
 import type { RoomDTO } from "@/lib/api-types";
 
 function statBox(bg: string, border: string, color: string, label: string, value: string) {
@@ -19,28 +19,29 @@ export function RoomDrawer({
   onClose,
   image,
   onImageChange,
+  onEdit,
+  onDelete,
 }: {
   room: RoomDTO | null;
   onClose: () => void;
   image: string | null;
   onImageChange: (url: string | null) => void;
+  onEdit: (room: RoomDTO) => void;
+  onDelete: (room: RoomDTO) => void;
 }) {
   if (!room) return null;
 
   const net = (parseInt(room.income.replace(/\D/g, "")) || 0) - (parseInt(room.expense.replace(/\D/g, "")) || 0);
-  const floor = /\d/.test(room.no) ? room.no.replace(/\D/g, "").slice(0, -2) || "1" : "—";
   const info: { k: string; v: string }[] = [
+    { k: "รหัสห้อง", v: room.roomCode },
     { k: "เจ้าของ", v: room.owner },
-    { k: "ประเภทห้อง", v: "สตูดิโอ 28 ตร.ม." },
-    { k: "ค่าเช่าปกติ", v: room.rent + "/เดือน" },
-    { k: "เงินประกัน", v: "฿24,000" },
-    { k: "ชั้น", v: floor },
-  ];
-  const timeline: { title: string; time: string; color: string }[] = [
-    { title: "รับค่าเช่าเดือน ก.ค. " + room.income, time: "6 ก.ค. 2568 · 10:24", color: "#34D399" },
-    { title: "บันทึกค่าซ่อมก๊อกน้ำ " + room.expense, time: "3 ก.ค. 2568 · 15:10", color: "#FB7185" },
-    { title: "จ่ายเงินเจ้าของงวดที่แล้ว", time: "30 มิ.ย. 2568 · 09:00", color: "#38BDF8" },
-    { title: "ต่อสัญญาเช่า 12 เดือน", time: "1 มิ.ย. 2568 · 14:30", color: "#A855F7" },
+    { k: "ประเภทห้อง", v: room.roomType || "—" },
+    { k: "ขนาด", v: room.roomSize ? `${room.roomSize} ตร.ม.` : "—" },
+    { k: "ชั้น", v: room.floor || "—" },
+    { k: "ค่าเช่าปกติ", v: fmtTHB(room.rentValue) + "/เดือน" },
+    { k: "เงินประกัน", v: fmtTHB(room.depositValue) },
+    { k: "ค่าทำความสะอาด", v: fmtTHB(room.cleaningValue) },
+    { k: "ค่านายหน้า/เดือน", v: fmtTHB(room.commissionValue) },
   ];
 
   const closeBtn: React.CSSProperties = {
@@ -96,33 +97,6 @@ export function RoomDrawer({
           </button>
         </div>
 
-        <div style={{ display: "flex", gap: 6, padding: "12px 22px 0", overflowX: "auto" }}>
-          {ROOM_DRAWER_TABS.map((label, i) =>
-            i === 0 ? (
-              <span
-                key={label}
-                style={{
-                  padding: "8px 13px",
-                  borderRadius: "11px 11px 0 0",
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  whiteSpace: "nowrap",
-                  color: "var(--text)",
-                  background: "rgba(var(--surface-rgb),0.08)",
-                  border: "1px solid rgba(var(--surface-rgb),0.12)",
-                  borderBottom: "none",
-                }}
-              >
-                {label}
-              </span>
-            ) : (
-              <span key={label} style={{ padding: "8px 13px", fontSize: 12.5, whiteSpace: "nowrap", color: "rgba(var(--text-rgb),0.5)" }}>
-                {label}
-              </span>
-            )
-          )}
-        </div>
-
         <div style={{ flex: 1, overflowY: "auto", padding: "18px 22px 30px", display: "flex", flexDirection: "column", gap: 16 }}>
           <ImageUpload label="รูปห้อง" value={image} onChange={onImageChange} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -151,42 +125,43 @@ export function RoomDrawer({
             ))}
           </div>
 
-          <div style={{ padding: 16, borderRadius: 16, background: "rgba(var(--surface-rgb),0.04)", border: "1px solid rgba(var(--surface-rgb),0.09)" }}>
-            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 14 }}>Timeline เหตุการณ์ล่าสุด</div>
-            {timeline.map((ev, i) => (
-              <div key={i} style={{ display: "flex", gap: 12, paddingBottom: 14, position: "relative" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <span style={{ width: 11, height: 11, borderRadius: "50%", background: ev.color, boxShadow: `0 0 8px ${ev.color}`, marginTop: 3 }} />
-                  <span style={{ flex: 1, width: 1.5, background: "rgba(var(--surface-rgb),0.1)", marginTop: 3 }} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 600 }}>{ev.title}</div>
-                  <div style={{ fontSize: 11.5, color: "rgba(var(--text-rgb),0.5)", marginTop: 1 }}>{ev.time}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+          {room.note ? (
+            <div style={{ padding: 16, borderRadius: 16, background: "rgba(var(--surface-rgb),0.04)", border: "1px solid rgba(var(--surface-rgb),0.09)" }}>
+              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>หมายเหตุ</div>
+              <div style={{ fontSize: 12.5, color: "rgba(var(--text-rgb),0.75)", lineHeight: 1.6 }}>{room.note}</div>
+            </div>
+          ) : null}
 
           <div style={{ display: "flex", gap: 10 }}>
             <button
+              onClick={() => onDelete(room)}
               style={{
                 flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 7,
                 padding: 12,
                 borderRadius: 13,
-                border: "1px solid rgba(var(--surface-rgb),0.16)",
-                background: "rgba(var(--surface-rgb),0.05)",
-                color: "var(--text)",
+                border: "1px solid rgba(251,113,133,0.4)",
+                background: "rgba(251,113,133,0.08)",
+                color: "var(--neg)",
                 fontFamily: "inherit",
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: "pointer",
               }}
             >
-              แนบหลักฐาน
+              ลบห้อง
             </button>
             <button
+              onClick={() => onEdit(room)}
               style={{
                 flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 7,
                 padding: 12,
                 borderRadius: 13,
                 border: "1px solid rgba(var(--surface-rgb),0.28)",
@@ -199,7 +174,8 @@ export function RoomDrawer({
                 boxShadow: "0 6px 16px rgba(56,189,248,0.4)",
               }}
             >
-              บันทึกรับเงิน
+              <Icon name="settings" size={15} />
+              แก้ไขข้อมูลห้อง
             </button>
           </div>
         </div>

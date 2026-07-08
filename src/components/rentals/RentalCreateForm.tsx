@@ -5,7 +5,7 @@ import { FieldsGrid, SelectField, TextField, TextAreaField } from "@/components/
 import { fmtTHB, parseAmount } from "@/lib/theme";
 import { todayBEDate, parseThaiBEDate, formatBEDate } from "@/lib/date";
 import { apiGet, apiSend } from "@/lib/api-client";
-import type { TenantDTO, RoomDTO } from "@/lib/api-types";
+import type { TenantDTO, RoomDTO, RentalDetailDTO } from "@/lib/api-types";
 
 const RENTAL_TYPE_OPTIONS = [
   { value: "MONTHLY", label: "รายเดือน" },
@@ -59,8 +59,34 @@ function blankDraft(): RentalDraft {
 
 const num = (s: string) => Number(s || "0") || 0;
 
-export function RentalCreateForm({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
-  const [draft, setDraft] = useState<RentalDraft>(blankDraft);
+function draftFromDetail(d: RentalDetailDTO): RentalDraft {
+  return {
+    tenantId: String(d.tenantId),
+    roomId: String(d.roomId),
+    rentalType: d.rentalTypeValue,
+    startDate: d.startDate,
+    endDate: d.endDate,
+    rentAmount: String(parseAmount(d.rent)),
+    depositAmount: String(parseAmount(d.deposit)),
+    cleaningFee: String(parseAmount(d.cleaningFee)),
+    otherFee: String(parseAmount(d.otherFee)),
+    discountAmount: String(parseAmount(d.discount)),
+    bookingChannel: d.bookingChannel,
+    note: d.note,
+  };
+}
+
+export function RentalCreateForm({
+  editing = null,
+  onClose,
+  onCreated,
+}: {
+  editing?: RentalDetailDTO | null;
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const isEdit = editing != null;
+  const [draft, setDraft] = useState<RentalDraft>(() => (editing ? draftFromDetail(editing) : blankDraft()));
   const [tenants, setTenants] = useState<TenantDTO[]>([]);
   const [rooms, setRooms] = useState<RoomDTO[]>([]);
   const [saving, setSaving] = useState(false);
@@ -85,7 +111,7 @@ export function RentalCreateForm({ onClose, onCreated }: { onClose: () => void; 
 
   const set = (patch: Partial<RentalDraft>) => setDraft((d) => ({ ...d, ...patch }));
   const digits = (v: string) => v.replace(/\D/g, "");
-  const endTouched = useRef(false); // user edited end date manually -> stop auto-computing
+  const endTouched = useRef(isEdit); // user edited end date manually (or editing) -> stop auto-computing
   const lastAutoRent = useRef("");
 
   /** auto: picking a room fills the rent from the room's default price */
@@ -119,7 +145,7 @@ export function RentalCreateForm({ onClose, onCreated }: { onClose: () => void; 
     if (num(draft.rentAmount) <= 0) return alert("กรุณาระบุค่าเช่า");
     setSaving(true);
     try {
-      await apiSend("/api/rentals", "POST", {
+      await apiSend(isEdit ? `/api/rentals/${editing.id}` : "/api/rentals", isEdit ? "PATCH" : "POST", {
         tenantId: draft.tenantId,
         roomId: draft.roomId,
         rentalType: draft.rentalType,
@@ -220,7 +246,7 @@ export function RentalCreateForm({ onClose, onCreated }: { onClose: () => void; 
             boxShadow: "0 6px 16px rgba(56,189,248,0.4)",
           }}
         >
-          {saving ? "กำลังบันทึก…" : "บันทึกรายการเช่า"}
+          {saving ? "กำลังบันทึก…" : isEdit ? "บันทึกการแก้ไข" : "บันทึกรายการเช่า"}
         </button>
       </div>
     </div>

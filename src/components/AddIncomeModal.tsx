@@ -9,7 +9,7 @@ import { todayBEDate } from "@/lib/date";
 import { parseAmount } from "@/lib/theme";
 import { extractFromSlipFile } from "@/lib/slip/extract";
 import { apiGet, apiSend } from "@/lib/api-client";
-import type { RentalDTO, AccountDTO } from "@/lib/api-types";
+import type { RentalDTO, AccountDTO, IncomeDetailDTO } from "@/lib/api-types";
 import { useUI } from "@/lib/ui-context";
 
 const INCOME_TYPE_OPTIONS = Object.entries(INCOME_TYPE).map(([value, label]) => ({ value, label }));
@@ -38,7 +38,8 @@ function blankDraft(): IncomeDraft {
 }
 
 export function AddIncomeModal() {
-  const { incomeOpen, closeIncome } = useUI();
+  const { incomeOpen, editingIncomeId, closeIncome } = useUI();
+  const isEdit = editingIncomeId != null;
   const [draft, setDraft] = useState<IncomeDraft>(blankDraft);
   const [slip, setSlip] = useState<string | null>(null);
   const [contracts, setContracts] = useState<RentalDTO[]>([]);
@@ -47,14 +48,16 @@ export function AddIncomeModal() {
   const [slipStatus, setSlipStatus] = useState<string | null>(null);
   const lastAutoAmount = useRef(""); // remembers auto-filled amount so we never clobber user edits
 
-  const loadOptions = useCallback(async () => {
+  const loadOptions = useCallback(async (applyDefaultAccount: boolean) => {
     try {
       const [rent, acc] = await Promise.all([apiGet<RentalDTO[]>("/api/rentals"), apiGet<AccountDTO[]>("/api/payment-accounts")]);
       setContracts(rent);
       setAccounts(acc);
-      // auto: default receiving account = first "รับผู้เช่า" account
-      const preferred = acc.find((a) => a.accountType === ACCOUNT_TYPE.RECEIVE_TENANT) ?? acc[0];
-      if (preferred) setDraft((prev) => (prev.receivingAccountId ? prev : { ...prev, receivingAccountId: String(preferred.id) }));
+      if (applyDefaultAccount) {
+        // auto: default receiving account = first "รับผู้เช่า" account
+        const preferred = acc.find((a) => a.accountType === ACCOUNT_TYPE.RECEIVE_TENANT) ?? acc[0];
+        if (preferred) setDraft((prev) => (prev.receivingAccountId ? prev : { ...prev, receivingAccountId: String(preferred.id) }));
+      }
     } catch (e) {
       console.error(e);
     }
@@ -66,8 +69,29 @@ export function AddIncomeModal() {
     setSlip(null);
     setSlipStatus(null);
     lastAutoAmount.current = "";
-    void loadOptions();
-  }, [incomeOpen, loadOptions]);
+    if (editingIncomeId != null) {
+      void (async () => {
+        await loadOptions(false);
+        try {
+          const d = await apiGet<IncomeDetailDTO>(`/api/incomes/${editingIncomeId}`);
+          setDraft({
+            contractId: String(d.contractId),
+            incomeType: d.incomeType,
+            amount: String(d.amount),
+            incomeDate: d.incomeDate,
+            paymentMethod: d.paymentMethod,
+            receivingAccountId: d.receivingAccountId ? String(d.receivingAccountId) : "",
+            transactionReference: d.transactionReference,
+          });
+          setSlip(d.proofFileUrl);
+        } catch (e) {
+          console.error(e);
+        }
+      })();
+    } else {
+      void loadOptions(true);
+    }
+  }, [incomeOpen, editingIncomeId, loadOptions]);
 
   if (!incomeOpen) return null;
 
@@ -139,7 +163,7 @@ export function AddIncomeModal() {
     }
     setSaving(true);
     try {
-      await apiSend("/api/incomes", "POST", {
+      await apiSend(isEdit ? `/api/incomes/${editingIncomeId}` : "/api/incomes", isEdit ? "PATCH" : "POST", {
         contractId: draft.contractId,
         incomeDate: draft.incomeDate,
         incomeType: draft.incomeType,
@@ -203,7 +227,7 @@ export function AddIncomeModal() {
             <Icon name="income" size={18} />
           </span>
           <div>
-            <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 17 }}>บันทึกรับเงิน</div>
+            <div style={{ fontFamily: "Sora,sans-serif", fontWeight: 700, fontSize: 17 }}>{isEdit ? "แก้ไขรายการรับเงิน" : "บันทึกรับเงิน"}</div>
             <div style={{ fontSize: 12, color: "rgba(var(--text-rgb),0.5)" }}>แนบสลิปเพื่อยืนยันการโอน</div>
           </div>
           <button
@@ -347,7 +371,7 @@ export function AddIncomeModal() {
               boxShadow: "0 8px 20px rgba(56,189,248,0.42)",
             }}
           >
-            {saving ? "กำลังบันทึก…" : "ยืนยันการบันทึก"}
+            {saving ? "กำลังบันทึก…" : isEdit ? "บันทึกการแก้ไข" : "ยืนยันการบันทึก"}
           </button>
         </div>
       </div>
