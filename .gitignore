@@ -35,3 +35,7 @@ next-env.d.ts
 
 # git worktrees (local dev isolation, not part of the repo)
 /.worktrees/
+
+# local DB dumps / phpMyAdmin exports — schema lives in prisma/, data is a point-in-time
+# snapshot that may hold sensitive rows; never commit it (migrations under prisma/ stay tracked)
+/scripts/*.sql
