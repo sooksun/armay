@@ -4,6 +4,22 @@ import { useState } from "react";
 import { TextField } from "@/components/shared/FormModal";
 import { badge } from "@/lib/theme";
 import { PAYMENT_ACCOUNTS, EXPENSE_TYPE_OPTIONS } from "@/lib/mock";
+import { apiSend } from "@/lib/api-client";
+
+type DemoCounts = {
+  owners: number;
+  properties: number;
+  rooms: number;
+  tenants: number;
+  contracts: number;
+  incomes: number;
+  expenses: number;
+  payouts: number;
+};
+
+function countsSummary(c: DemoCounts): string {
+  return `เจ้าของ ${c.owners} · อาคาร ${c.properties} · ห้อง ${c.rooms} · ผู้เช่า ${c.tenants} · สัญญา ${c.contracts} · รายรับ ${c.incomes} · รายจ่าย ${c.expenses} · จ่ายเจ้าของ ${c.payouts}`;
+}
 
 const INCOME_TYPES = ["ค่าเช่า", "เงินประกัน", "ค่าทำความสะอาด", "ค่าน้ำ", "ค่าไฟ", "ค่าปรับ", "อื่นๆ"];
 
@@ -63,10 +79,39 @@ export default function SettingsPage() {
   const [company, setCompany] = useState({ name: "บจ. คริสตัล เลดเจอร์", phone: "088-123-4567", address: "88 ถ.สุขุมวิท กรุงเทพฯ" });
   const [thresholds, setThresholds] = useState({ vacantDays: "30", contractEndDays: "7", overdueDays: "15" });
   const [saved, setSaved] = useState(false);
+  const [dataBusy, setDataBusy] = useState<"" | "demo" | "reset">("");
+  const [dataMsg, setDataMsg] = useState<string | null>(null);
 
   function save() {
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
+  }
+
+  async function addDemo() {
+    setDataBusy("demo");
+    setDataMsg(null);
+    try {
+      const { counts } = await apiSend<{ counts: DemoCounts }>("/api/admin/demo", "POST");
+      setDataMsg(`เพิ่มข้อมูลตัวอย่างแล้ว — ${countsSummary(counts)}`);
+    } catch (e) {
+      setDataMsg(e instanceof Error ? e.message : "เพิ่มข้อมูลไม่สำเร็จ");
+    } finally {
+      setDataBusy("");
+    }
+  }
+
+  async function resetAll() {
+    if (!confirm("ยืนยันรีเซ็ตข้อมูลทั้งหมด? รายการเช่า/รายรับ/รายจ่าย/จ่ายเจ้าของ/ห้อง/เจ้าของ/ผู้เช่า จะถูกลบแล้วสร้างชุดตัวอย่างใหม่ (ผู้ใช้และบัญชีรับ–จ่ายจะไม่ถูกลบ) — การกระทำนี้ย้อนกลับไม่ได้")) return;
+    setDataBusy("reset");
+    setDataMsg(null);
+    try {
+      const { counts } = await apiSend<{ counts: DemoCounts }>("/api/admin/reset", "POST");
+      setDataMsg(`รีเซ็ตข้อมูลแล้ว — ${countsSummary(counts)}`);
+    } catch (e) {
+      setDataMsg(e instanceof Error ? e.message : "รีเซ็ตข้อมูลไม่สำเร็จ");
+    } finally {
+      setDataBusy("");
+    }
   }
 
   return (
@@ -128,6 +173,36 @@ export default function SettingsPage() {
             </div>
           ))}
         </div>
+      </Section>
+
+      <Section title="จัดการข้อมูลระบบ" subtitle="เครื่องมือสำหรับผู้ดูแลระบบ — ใช้เตรียมข้อมูลทดลองหรือล้างข้อมูลเริ่มใหม่">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+          <button onClick={addDemo} disabled={dataBusy !== ""} style={{ ...primaryBtn, cursor: dataBusy ? "wait" : "pointer", opacity: dataBusy && dataBusy !== "demo" ? 0.6 : 1 }}>
+            {dataBusy === "demo" ? "กำลังเพิ่ม…" : "เพิ่มข้อมูลตัวอย่าง"}
+          </button>
+          <button
+            onClick={resetAll}
+            disabled={dataBusy !== ""}
+            style={{
+              padding: "10px 20px",
+              borderRadius: 12,
+              border: "1px solid rgba(251,113,133,0.4)",
+              background: "rgba(251,113,133,0.1)",
+              color: "#FB7185",
+              fontFamily: "inherit",
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: dataBusy ? "wait" : "pointer",
+              opacity: dataBusy && dataBusy !== "reset" ? 0.6 : 1,
+            }}
+          >
+            {dataBusy === "reset" ? "กำลังรีเซ็ต…" : "รีเซ็ตข้อมูลทั้งหมด"}
+          </button>
+        </div>
+        <div style={{ fontSize: 12, color: "rgba(var(--text-rgb),0.5)", marginTop: 10 }}>
+          “เพิ่มข้อมูลตัวอย่าง” เพิ่มชุดข้อมูลใหม่โดยไม่ลบของเดิม · “รีเซ็ต” ลบข้อมูลธุรกรรมทั้งหมดแล้วสร้างชุดใหม่ (ผู้ใช้และบัญชีรับ–จ่ายไม่ถูกลบ)
+        </div>
+        {dataMsg ? <div style={{ fontSize: 12.5, color: dataMsg.includes("ไม่สำเร็จ") ? "#FB7185" : "#6EE7B7", marginTop: 10 }}>{dataMsg}</div> : null}
       </Section>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 12 }}>

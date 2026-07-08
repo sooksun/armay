@@ -13,6 +13,15 @@ export function Topbar() {
   const { openIncome } = useUI();
   const { theme, toggle } = useTheme();
 
+  async function logout() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      /* clear the session client-side regardless */
+    }
+    window.location.href = "/login";
+  }
+
   return (
     <header
       style={{
@@ -179,6 +188,25 @@ export function Topbar() {
             <div style={{ fontSize: 10.5, color: "rgba(var(--text-rgb),0.5)" }}>Admin</div>
           </div>
         </div>
+        <button
+          onClick={logout}
+          aria-label="ออกจากระบบ"
+          title="ออกจากระบบ"
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "1px solid rgba(251,113,133,0.3)",
+            background: "rgba(251,113,133,0.08)",
+            color: "#FB7185",
+            cursor: "pointer",
+          }}
+        >
+          <Icon name="logout" size={18} />
+        </button>
       </div>
     </header>
   );

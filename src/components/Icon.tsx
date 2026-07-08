@@ -33,7 +33,8 @@ export type IconName =
   | "chevDown"
   | "clock"
   | "sun"
-  | "moon";
+  | "moon"
+  | "logout";
 
 export function Icon({
   name,
@@ -119,6 +120,7 @@ export function Icon({
       P("M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M17.4 6.6l1.7-1.7M4.9 19.1l1.7-1.7"),
     ],
     moon: [P("M20.5 14.8A8.5 8.5 0 1 1 9.2 3.5a6.6 6.6 0 0 0 11.3 11.3z")],
+    logout: [P("M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"), P("M16 17l5-5-5-5"), L(21, 12, 9, 12)],
   };
 
   const els = sets[name] ?? sets.dashboard;
