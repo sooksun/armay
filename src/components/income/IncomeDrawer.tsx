@@ -20,6 +20,13 @@ export function IncomeDrawer({
 }) {
   const [detail, setDetail] = useState<IncomeDetailDTO | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    apiGet<{ user: { role: string } }>("/api/auth/me")
+      .then((r) => setIsAdmin(r.user.role === "ADMIN"))
+      .catch(() => {});
+  }, []);
 
   const load = useCallback(async (id: number) => {
     setLoading(true);
@@ -40,6 +47,19 @@ export function IncomeDrawer({
   if (incomeId == null) return null;
 
   const locked = detail?.verificationStatus === "VERIFIED";
+  const canApprove = isAdmin && !!detail && detail.verificationStatus !== "VERIFIED" && detail.verificationStatus !== "CANCELLED" && !!detail.proofFileUrl;
+
+  async function handleApprove() {
+    if (!detail) return;
+    if (!confirm(`อนุมัติ (ตรวจสอบแล้ว) รายการ ${detail.incomeCode}?`)) return;
+    try {
+      await apiSend(`/api/incomes/${detail.id}/approve`, "POST");
+      onChanged();
+      await load(detail.id);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "อนุมัติไม่สำเร็จ");
+    }
+  }
 
   async function handleDelete() {
     if (!detail) return;
@@ -97,6 +117,31 @@ export function IncomeDrawer({
             <InfoSection title="หมายเหตุ">
               <div style={{ fontSize: 13, color: "rgba(var(--text-rgb),0.8)", lineHeight: 1.6 }}>{detail.note}</div>
             </InfoSection>
+          ) : null}
+
+          {canApprove ? (
+            <button
+              onClick={handleApprove}
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 7,
+                padding: 12,
+                borderRadius: 13,
+                border: "1px solid rgba(52,211,153,0.4)",
+                background: "rgba(52,211,153,0.12)",
+                color: "var(--pos)",
+                fontFamily: "inherit",
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              <Icon name="audit" size={15} />
+              อนุมัติ (ทำเครื่องหมายตรวจสอบแล้ว)
+            </button>
           ) : null}
 
           {locked ? (

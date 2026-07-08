@@ -110,7 +110,7 @@ export async function createIncome(input: IncomeCreateInput, session: Session): 
       receivingAccountId: input.receivingAccountId ?? null,
       transactionReference: input.transactionReference || null,
       proofFileUrl: input.proofFileUrl || null,
-      verificationStatus: input.proofFileUrl ? "VERIFIED" : "PENDING",
+      verificationStatus: "PENDING", // awaits an explicit ADMIN approval — attaching a slip no longer self-verifies
       recordedBy: session.userId,
     },
   });
@@ -202,7 +202,7 @@ export async function updateIncome(id: number, input: IncomeUpdateInput, session
       receivingAccountId: input.receivingAccountId ?? null,
       transactionReference: input.transactionReference || null,
       proofFileUrl: input.proofFileUrl || null,
-      verificationStatus: input.proofFileUrl ? "VERIFIED" : "PENDING",
+      verificationStatus: "PENDING", // awaits an explicit ADMIN approval — attaching a slip no longer self-verifies
     },
   });
   await writeAudit({ userId: session.userId, action: "UPDATE", tableName: "income_transactions", recordId: id, oldValue: existing, newValue: input });
@@ -216,4 +216,19 @@ export async function deleteIncome(id: number, session: Session): Promise<boolea
   await prisma.incomeTransaction.delete({ where: { id } });
   await writeAudit({ userId: session.userId, action: "DELETE", tableName: "income_transactions", recordId: id });
   return true;
+}
+
+/** ADMIN-only verification. Requires attached evidence; VERIFIED then locks the row. */
+export async function approveIncome(id: number, session: Session): Promise<number> {
+  const existing = await prisma.incomeTransaction.findUnique({ where: { id } });
+  if (!existing) throw new ApiError("NOT_FOUND", "ไม่พบรายการรับเงินนี้", 404);
+  if (existing.verificationStatus === "VERIFIED") throw new ApiError("ALREADY_VERIFIED", "รายการนี้ตรวจสอบแล้ว", 409);
+  if (existing.verificationStatus === "CANCELLED") throw new ApiError("CANCELLED", "รายการที่ยกเลิกแล้วอนุมัติไม่ได้", 409);
+  if (!existing.proofFileUrl) throw new ApiError("NO_PROOF", "ต้องแนบหลักฐานการโอนก่อนจึงจะอนุมัติได้", 409);
+  await prisma.incomeTransaction.update({
+    where: { id },
+    data: { verificationStatus: "VERIFIED", approvedBy: session.userId, approvedAt: new Date() },
+  });
+  await writeAudit({ userId: session.userId, action: "APPROVE", tableName: "income_transactions", recordId: id, oldValue: existing });
+  return id;
 }

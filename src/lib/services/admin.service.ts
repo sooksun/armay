@@ -268,7 +268,8 @@ export async function resetData(session: Session, batches = 3): Promise<DemoCoun
       await tx.property.deleteMany();
       await tx.owner.deleteMany();
       await tx.codeSequence.deleteMany();
-      await tx.auditLog.deleteMany();
+      // NOTE: audit_log is intentionally preserved — it is the tamper-evidence trail
+      // (CLAUDE.md mandates an audit entry per mutation); a reset must not erase it.
       const counts = await runBatches(tx, session.userId, n);
       await writeAudit({ userId: session.userId, action: "DELETE", tableName: "reset_data", newValue: counts }, tx);
       return counts;
