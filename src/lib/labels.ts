@@ -112,6 +112,31 @@ export const EXPENSE_TYPE: LabelMap = {
   OTHER: "ค่าอื่นๆ",
 };
 
+export const SERVICE_STATUS: LabelMap = {
+  NEW: "งานใหม่",
+  PENDING: "รอดำเนินการ",
+  IN_PROGRESS: "กำลังดำเนินการ",
+  DONE: "เสร็จแล้ว",
+  REVIEW: "รอตรวจสอบ",
+  CLOSED: "ปิดงานแล้ว",
+};
+
+export const SERVICE_STATUS_ORDER = ["NEW", "PENDING", "IN_PROGRESS", "DONE", "REVIEW", "CLOSED"] as const;
+
+export const SERVICE_STATUS_COLOR: Record<string, string> = {
+  NEW: "#38BDF8",
+  PENDING: "#FBBF24",
+  IN_PROGRESS: "#A855F7",
+  DONE: "#34D399",
+  REVIEW: "#FB7185",
+  CLOSED: "#94A3B8",
+};
+
+export const SERVICE_TYPE_BADGE: Record<string, BadgeKind> = {
+  CLEANING: "purple",
+  REPAIR: "blue",
+};
+
 export const PAYMENT_METHOD: LabelMap = {
   CASH: "เงินสด",
   BANK_TRANSFER: "โอนธนาคาร",
